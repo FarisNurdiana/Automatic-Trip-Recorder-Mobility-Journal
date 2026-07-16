@@ -26,8 +26,7 @@ class SimulatedLocationTrackingService implements LocationTrackingService {
   Stream<RecordedLocation> get locationStream => _locations.stream;
 
   @override
-  Stream<TrackingNotificationAction> get notificationActions =>
-      _actions.stream;
+  Stream<TrackingNotificationAction> get notificationActions => _actions.stream;
 
   @override
   Future<bool> isLocationServiceEnabled() async => true;

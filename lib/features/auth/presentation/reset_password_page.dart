@@ -31,13 +31,15 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
           .read(authControllerProvider.notifier)
           .resetPassword(_email.text.trim());
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.authResetPasswordSent)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.authResetPasswordSent)));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -65,8 +67,8 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
                     decoration: InputDecoration(labelText: l10n.authEmail),
                     validator: (v) =>
                         v != null && v.contains('@') && v.contains('.')
-                            ? null
-                            : l10n.authEmailInvalid,
+                        ? null
+                        : l10n.authEmailInvalid,
                   ),
                   const SizedBox(height: 20),
                   FilledButton(

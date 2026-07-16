@@ -18,7 +18,8 @@ class GeoUtils {
     final dPhi = _rad(lat2 - lat1);
     final dLambda = _rad(lon2 - lon1);
 
-    final a = math.pow(math.sin(dPhi / 2), 2) +
+    final a =
+        math.pow(math.sin(dPhi / 2), 2) +
         math.cos(phi1) * math.cos(phi2) * math.pow(math.sin(dLambda / 2), 2);
     final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
     return earthRadiusMeters * c;

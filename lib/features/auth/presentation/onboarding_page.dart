@@ -114,10 +114,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               padding: const EdgeInsets.all(24),
               child: Row(
                 children: [
-                  TextButton(
-                    onPressed: _finish,
-                    child: Text(l10n.commonSkip),
-                  ),
+                  TextButton(onPressed: _finish, child: Text(l10n.commonSkip)),
                   const Spacer(),
                   Row(
                     children: [
@@ -138,9 +135,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   const Spacer(),
                   FilledButton(
                     onPressed: () => _next(steps.length),
-                    child: Text(_index >= steps.length - 1
-                        ? l10n.onboardingStart
-                        : l10n.commonNext),
+                    child: Text(
+                      _index >= steps.length - 1
+                          ? l10n.onboardingStart
+                          : l10n.commonNext,
+                    ),
                   ),
                 ],
               ),
@@ -173,12 +172,17 @@ class _IntroStep extends StatelessWidget {
         children: [
           Icon(icon, size: 80, color: theme.colorScheme.primary),
           const SizedBox(height: 24),
-          Text(title,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.headlineSmall),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall,
+          ),
           const SizedBox(height: 16),
-          Text(description,
-              textAlign: TextAlign.center, style: theme.textTheme.bodyLarge),
+          Text(
+            description,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge,
+          ),
         ],
       ),
     );
@@ -208,12 +212,17 @@ class _PermissionStepViewState extends State<_PermissionStepView> {
         children: [
           Icon(widget.step.icon, size: 80, color: theme.colorScheme.primary),
           const SizedBox(height: 24),
-          Text(widget.step.title,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.headlineSmall),
+          Text(
+            widget.step.title,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall,
+          ),
           const SizedBox(height: 16),
-          Text(widget.step.description,
-              textAlign: TextAlign.center, style: theme.textTheme.bodyLarge),
+          Text(
+            widget.step.description,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge,
+          ),
           const SizedBox(height: 24),
           if (_granted == true)
             Chip(

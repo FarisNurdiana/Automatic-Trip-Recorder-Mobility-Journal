@@ -62,20 +62,20 @@ class RecordedLocation {
   }
 
   Map<String, Object?> toMap() => {
-        'timestampMs': recordedAt.millisecondsSinceEpoch,
-        'latitude': latitude,
-        'longitude': longitude,
-        'altitude': altitude,
-        'horizontalAccuracy': horizontalAccuracy,
-        'verticalAccuracy': verticalAccuracy,
-        'speed': speed,
-        'speedAccuracy': speedAccuracy,
-        'heading': heading,
-        'headingAccuracy': headingAccuracy,
-        'source': source,
-        'isMocked': isMocked,
-        'batteryLevel': batteryLevel,
-      };
+    'timestampMs': recordedAt.millisecondsSinceEpoch,
+    'latitude': latitude,
+    'longitude': longitude,
+    'altitude': altitude,
+    'horizontalAccuracy': horizontalAccuracy,
+    'verticalAccuracy': verticalAccuracy,
+    'speed': speed,
+    'speedAccuracy': speedAccuracy,
+    'heading': heading,
+    'headingAccuracy': headingAccuracy,
+    'source': source,
+    'isMocked': isMocked,
+    'batteryLevel': batteryLevel,
+  };
 }
 
 /// Adaptive sampling profiles requested from the native tracker.

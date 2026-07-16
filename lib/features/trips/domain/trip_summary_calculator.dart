@@ -76,9 +76,11 @@ abstract interface class TripSummaryCalculator {
 /// overall average speed = total distance / elapsed time
 /// moving average speed  = total distance / moving time
 class DefaultTripSummaryCalculator implements TripSummaryCalculator {
-  DefaultTripSummaryCalculator({TripDetectionConfig? config, GpsPointFilter? filter})
-      : config = config ?? defaultTripDetectionConfig,
-        filter = filter ?? GpsPointFilter(config: config);
+  DefaultTripSummaryCalculator({
+    TripDetectionConfig? config,
+    GpsPointFilter? filter,
+  }) : config = config ?? defaultTripDetectionConfig,
+       filter = filter ?? GpsPointFilter(config: config);
 
   final TripDetectionConfig config;
   final GpsPointFilter filter;
@@ -114,8 +116,9 @@ class DefaultTripSummaryCalculator implements TripSummaryCalculator {
     var movingMs = 0;
     var maxSpeed = 0.0;
     for (var i = 1; i < points.length; i++) {
-      final dtMs =
-          points[i].recordedAt.difference(points[i - 1].recordedAt).inMilliseconds;
+      final dtMs = points[i].recordedAt
+          .difference(points[i - 1].recordedAt)
+          .inMilliseconds;
       if (smoothed[i] > config.stopSpeedThresholdKmh) movingMs += dtMs;
       if (smoothed[i] > maxSpeed) maxSpeed = smoothed[i];
     }
@@ -163,8 +166,8 @@ class DefaultTripSummaryCalculator implements TripSummaryCalculator {
           points[i].latitude,
           points[i].longitude,
         );
-        final dt = points[i]
-                .recordedAt
+        final dt =
+            points[i].recordedAt
                 .difference(points[i - 1].recordedAt)
                 .inMilliseconds /
             1000.0;
@@ -197,8 +200,8 @@ class DefaultTripSummaryCalculator implements TripSummaryCalculator {
       if (isStopped) {
         clusterStart ??= i;
       }
-      final closesCluster = (!isStopped || i == points.length - 1) &&
-          clusterStart != null;
+      final closesCluster =
+          (!isStopped || i == points.length - 1) && clusterStart != null;
       if (closesCluster) {
         final endIndex = isStopped ? i : i - 1;
         final start = points[clusterStart];
@@ -211,12 +214,14 @@ class DefaultTripSummaryCalculator implements TripSummaryCalculator {
             lat += points[j].latitude;
             lon += points[j].longitude;
           }
-          stops.add(TripStop(
-            latitude: lat / n,
-            longitude: lon / n,
-            startedAt: start.recordedAt,
-            endedAt: end.recordedAt,
-          ));
+          stops.add(
+            TripStop(
+              latitude: lat / n,
+              longitude: lon / n,
+              startedAt: start.recordedAt,
+              endedAt: end.recordedAt,
+            ),
+          );
         }
         clusterStart = null;
       }

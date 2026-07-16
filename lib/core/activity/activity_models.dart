@@ -42,13 +42,13 @@ class DetectedActivity {
   }
 
   Map<String, Object?> toMap() => {
-        'timestampMs': recordedAt.millisecondsSinceEpoch,
-        'activityType': type.name,
-        'transition': transition.name,
-        'confidence': confidence,
-        'platformSource': platformSource,
-        'rawValue': rawValue,
-      };
+    'timestampMs': recordedAt.millisecondsSinceEpoch,
+    'activityType': type.name,
+    'transition': transition.name,
+    'confidence': confidence,
+    'platformSource': platformSource,
+    'rawValue': rawValue,
+  };
 
   @override
   String toString() =>

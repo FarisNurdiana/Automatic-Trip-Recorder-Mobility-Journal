@@ -55,8 +55,11 @@ class AppLogger {
     final log = Logger('global');
     FlutterError.onError = (details) {
       FlutterError.presentError(details);
-      log.severe('FlutterError: ${details.exceptionAsString()}',
-          details.exception, details.stack);
+      log.severe(
+        'FlutterError: ${details.exceptionAsString()}',
+        details.exception,
+        details.stack,
+      );
     };
     PlatformDispatcher.instance.onError = (error, stack) {
       log.severe('Uncaught: $error', error, stack);

@@ -50,7 +50,7 @@ class SimulatedActivityStep extends SimulationStep {
 /// A pure wait — models temporary GPS signal loss.
 class SimulatedSignalLossStep extends SimulationStep {
   const SimulatedSignalLossStep({required double afterSeconds})
-      : super(afterSeconds);
+    : super(afterSeconds);
 }
 
 /// Playback event delivered to listeners with its virtual timestamp.
@@ -88,25 +88,31 @@ class TripSimulator {
       final after = ((step['afterSeconds'] ?? 0) as num).toDouble();
       switch (step['type'] as String) {
         case 'point':
-          steps.add(SimulatedPointStep(
-            afterSeconds: after,
-            latitude: (step['lat'] as num).toDouble(),
-            longitude: (step['lon'] as num).toDouble(),
-            speedKmh: (step['speedKmh'] as num?)?.toDouble(),
-            accuracy: ((step['accuracy'] ?? 8) as num).toDouble(),
-            heading: (step['heading'] as num?)?.toDouble(),
-            altitude: (step['altitude'] as num?)?.toDouble(),
-            isMocked: (step['isMocked'] as bool?) ?? false,
-          ));
+          steps.add(
+            SimulatedPointStep(
+              afterSeconds: after,
+              latitude: (step['lat'] as num).toDouble(),
+              longitude: (step['lon'] as num).toDouble(),
+              speedKmh: (step['speedKmh'] as num?)?.toDouble(),
+              accuracy: ((step['accuracy'] ?? 8) as num).toDouble(),
+              heading: (step['heading'] as num?)?.toDouble(),
+              altitude: (step['altitude'] as num?)?.toDouble(),
+              isMocked: (step['isMocked'] as bool?) ?? false,
+            ),
+          );
         case 'activity':
-          steps.add(SimulatedActivityStep(
-            afterSeconds: after,
-            activity:
-                DetectedActivityType.fromName(step['activity'] as String?),
-            transition:
-                ActivityTransition.fromName(step['transition'] as String?),
-            confidence: ((step['confidence'] ?? 0.9) as num).toDouble(),
-          ));
+          steps.add(
+            SimulatedActivityStep(
+              afterSeconds: after,
+              activity: DetectedActivityType.fromName(
+                step['activity'] as String?,
+              ),
+              transition: ActivityTransition.fromName(
+                step['transition'] as String?,
+              ),
+              confidence: ((step['confidence'] ?? 0.9) as num).toDouble(),
+            ),
+          );
         case 'signalLoss':
           steps.add(SimulatedSignalLossStep(afterSeconds: after));
         default:
@@ -131,32 +137,38 @@ class TripSimulator {
         Duration(milliseconds: (step.afterSeconds * 1000).round()),
       );
       if (!instant && step.afterSeconds > 0) {
-        await Future<void>.delayed(Duration(
-          milliseconds: (step.afterSeconds * 1000 / timeFactor).round(),
-        ));
+        await Future<void>.delayed(
+          Duration(
+            milliseconds: (step.afterSeconds * 1000 / timeFactor).round(),
+          ),
+        );
       }
       switch (step) {
         case SimulatedPointStep p:
-          yield SimulationLocationEvent(RecordedLocation(
-            recordedAt: virtualTime,
-            latitude: p.latitude,
-            longitude: p.longitude,
-            altitude: p.altitude,
-            horizontalAccuracy: p.accuracy,
-            speed: p.speedKmh == null ? null : p.speedKmh! / 3.6,
-            heading: p.heading,
-            source: 'simulator',
-            isMocked: p.isMocked,
-          ));
+          yield SimulationLocationEvent(
+            RecordedLocation(
+              recordedAt: virtualTime,
+              latitude: p.latitude,
+              longitude: p.longitude,
+              altitude: p.altitude,
+              horizontalAccuracy: p.accuracy,
+              speed: p.speedKmh == null ? null : p.speedKmh! / 3.6,
+              heading: p.heading,
+              source: 'simulator',
+              isMocked: p.isMocked,
+            ),
+          );
         case SimulatedActivityStep a:
-          yield SimulationActivityEvent(DetectedActivity(
-            recordedAt: virtualTime,
-            type: a.activity,
-            transition: a.transition,
-            confidence: a.confidence,
-            platformSource: 'simulator',
-            rawValue: 'simulated',
-          ));
+          yield SimulationActivityEvent(
+            DetectedActivity(
+              recordedAt: virtualTime,
+              type: a.activity,
+              transition: a.transition,
+              confidence: a.confidence,
+              platformSource: 'simulator',
+              rawValue: 'simulated',
+            ),
+          );
         case SimulatedSignalLossStep _:
           // Nothing emitted: the gap itself is the simulation.
           break;

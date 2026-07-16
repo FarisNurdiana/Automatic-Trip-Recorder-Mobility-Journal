@@ -38,16 +38,15 @@ class SettingsState {
     bool clearLocale = false,
     bool? onboardingCompleted,
     bool? localMode,
-  }) =>
-      SettingsState(
-        autoDetectionEnabled: autoDetectionEnabled ?? this.autoDetectionEnabled,
-        sensorConfig: sensorConfig ?? this.sensorConfig,
-        mountPosition: mountPosition ?? this.mountPosition,
-        themeMode: themeMode ?? this.themeMode,
-        locale: clearLocale ? null : (locale ?? this.locale),
-        onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
-        localMode: localMode ?? this.localMode,
-      );
+  }) => SettingsState(
+    autoDetectionEnabled: autoDetectionEnabled ?? this.autoDetectionEnabled,
+    sensorConfig: sensorConfig ?? this.sensorConfig,
+    mountPosition: mountPosition ?? this.mountPosition,
+    themeMode: themeMode ?? this.themeMode,
+    locale: clearLocale ? null : (locale ?? this.locale),
+    onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+    localMode: localMode ?? this.localMode,
+  );
 }
 
 class SettingsController extends StateNotifier<SettingsState> {
@@ -64,8 +63,9 @@ class SettingsController extends StateNotifier<SettingsState> {
         rawSamplingHz: prefs.getInt('sensorRawHz') ?? 20,
         storedSamplingHz: prefs.getInt('sensorStoredHz') ?? 5,
       ),
-      mountPosition:
-          PhoneMountPosition.fromName(prefs.getString('mountPosition')),
+      mountPosition: PhoneMountPosition.fromName(
+        prefs.getString('mountPosition'),
+      ),
       themeMode: switch (prefs.getString('themeMode')) {
         'light' => ThemeMode.light,
         'dark' => ThemeMode.dark,
@@ -84,8 +84,9 @@ class SettingsController extends StateNotifier<SettingsState> {
 
   Future<void> setSensorLogging(bool value) async {
     await _prefs.setBool('sensorLogging', value);
-    state =
-        state.copyWith(sensorConfig: state.sensorConfig.copyWith(enabled: value));
+    state = state.copyWith(
+      sensorConfig: state.sensorConfig.copyWith(enabled: value),
+    );
   }
 
   Future<void> setMountPosition(PhoneMountPosition value) async {

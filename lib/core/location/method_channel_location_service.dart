@@ -16,11 +16,11 @@ class MethodChannelLocationTrackingService implements LocationTrackingService {
     MethodChannel? channel,
     EventChannel? locationEvents,
     EventChannel? actionEvents,
-  })  : _channel = channel ?? const MethodChannel('triplog/location'),
-        _locationEvents =
-            locationEvents ?? const EventChannel('triplog/location_stream'),
-        _actionEvents =
-            actionEvents ?? const EventChannel('triplog/notification_actions');
+  }) : _channel = channel ?? const MethodChannel('triplog/location'),
+       _locationEvents =
+           locationEvents ?? const EventChannel('triplog/location_stream'),
+       _actionEvents =
+           actionEvents ?? const EventChannel('triplog/notification_actions');
 
   final MethodChannel _channel;
   final EventChannel _locationEvents;
@@ -31,24 +31,26 @@ class MethodChannelLocationTrackingService implements LocationTrackingService {
   Stream<TrackingNotificationAction>? _actions;
 
   @override
-  Stream<RecordedLocation> get locationStream =>
-      _locations ??= _locationEvents
-          .receiveBroadcastStream()
-          .map((event) => RecordedLocation.fromMap(event as Map))
-          .handleError((Object e) {
+  Stream<RecordedLocation> get locationStream => _locations ??= _locationEvents
+      .receiveBroadcastStream()
+      .map((event) => RecordedLocation.fromMap(event as Map))
+      .handleError((Object e) {
         _log.warning('location stream error', e);
         throw e;
-      }).asBroadcastStream();
+      })
+      .asBroadcastStream();
 
   @override
   Stream<TrackingNotificationAction> get notificationActions =>
       _actions ??= _actionEvents
           .receiveBroadcastStream()
-          .map((event) => switch (event as String) {
-                'pause' => TrackingNotificationAction.pause,
-                'resume' => TrackingNotificationAction.resume,
-                _ => TrackingNotificationAction.stop,
-              })
+          .map(
+            (event) => switch (event as String) {
+              'pause' => TrackingNotificationAction.pause,
+              'resume' => TrackingNotificationAction.resume,
+              _ => TrackingNotificationAction.stop,
+            },
+          )
           .asBroadcastStream();
 
   @override

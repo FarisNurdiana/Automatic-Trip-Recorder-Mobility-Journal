@@ -32,20 +32,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     setState(() => _busy = true);
     final l10n = AppLocalizations.of(context);
     try {
-      await ref.read(authControllerProvider.notifier).signUp(
+      await ref
+          .read(authControllerProvider.notifier)
+          .signUp(
             _email.text.trim(),
             _password.text,
             _name.text.trim().isEmpty ? null : _name.text.trim(),
           );
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.authRegisterSuccess)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.authRegisterSuccess)));
         context.go('/');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -70,8 +74,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   children: [
                     TextFormField(
                       controller: _name,
-                      decoration:
-                          InputDecoration(labelText: l10n.authDisplayName),
+                      decoration: InputDecoration(
+                        labelText: l10n.authDisplayName,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -80,15 +85,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       decoration: InputDecoration(labelText: l10n.authEmail),
                       validator: (v) =>
                           v != null && v.contains('@') && v.contains('.')
-                              ? null
-                              : l10n.authEmailInvalid,
+                          ? null
+                          : l10n.authEmailInvalid,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _password,
                       obscureText: true,
-                      decoration:
-                          InputDecoration(labelText: l10n.authPassword),
+                      decoration: InputDecoration(labelText: l10n.authPassword),
                       validator: (v) => (v ?? '').length >= 8
                           ? null
                           : l10n.authPasswordTooShort,

@@ -45,8 +45,9 @@ class SupabaseTripDataSource implements RemoteTripDataSource {
       'detected_vehicle_type': trip.detectedVehicleType,
       'confirmed_vehicle_type': trip.confirmedVehicleType,
       'vehicle_confidence': trip.vehicleConfidence,
-      'vehicle_confirmed_at':
-          trip.vehicleConfirmedAt?.toUtc().toIso8601String(),
+      'vehicle_confirmed_at': trip.vehicleConfirmedAt
+          ?.toUtc()
+          .toIso8601String(),
       'vehicle_prediction_changed': trip.vehiclePredictionChanged,
       'stop_count': trip.stopCount,
       'summary_algorithm_version': trip.summaryAlgorithmVersion,

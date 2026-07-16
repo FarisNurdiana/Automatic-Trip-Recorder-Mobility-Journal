@@ -16,13 +16,13 @@ class SettingsPage extends ConsumerWidget {
     final controller = ref.read(settingsControllerProvider.notifier);
 
     String mountLabel(PhoneMountPosition p) => switch (p) {
-          PhoneMountPosition.dashboardHolder => l10n.mountDashboard,
-          PhoneMountPosition.handlebarHolder => l10n.mountHandlebar,
-          PhoneMountPosition.pocket => l10n.mountPocket,
-          PhoneMountPosition.bag => l10n.mountBag,
-          PhoneMountPosition.cupHolder => l10n.mountCupHolder,
-          PhoneMountPosition.unknown => l10n.mountUnknown,
-        };
+      PhoneMountPosition.dashboardHolder => l10n.mountDashboard,
+      PhoneMountPosition.handlebarHolder => l10n.mountHandlebar,
+      PhoneMountPosition.pocket => l10n.mountPocket,
+      PhoneMountPosition.bag => l10n.mountBag,
+      PhoneMountPosition.cupHolder => l10n.mountCupHolder,
+      PhoneMountPosition.unknown => l10n.mountUnknown,
+    };
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
@@ -37,7 +37,8 @@ class SettingsPage extends ConsumerWidget {
           SwitchListTile(
             title: Text(l10n.settingsSensorLogging),
             subtitle: Text(
-                '${l10n.settingsSensorLoggingDesc}\n⚠ ${l10n.settingsSensorLoggingWarning}'),
+              '${l10n.settingsSensorLoggingDesc}\n⚠ ${l10n.settingsSensorLoggingWarning}',
+            ),
             value: settings.sensorConfig.enabled,
             onChanged: controller.setSensorLogging,
           ),
@@ -65,11 +66,17 @@ class SettingsPage extends ConsumerWidget {
               },
               items: [
                 DropdownMenuItem(
-                    value: ThemeMode.system, child: Text(l10n.themeSystem)),
+                  value: ThemeMode.system,
+                  child: Text(l10n.themeSystem),
+                ),
                 DropdownMenuItem(
-                    value: ThemeMode.light, child: Text(l10n.themeLight)),
+                  value: ThemeMode.light,
+                  child: Text(l10n.themeLight),
+                ),
                 DropdownMenuItem(
-                    value: ThemeMode.dark, child: Text(l10n.themeDark)),
+                  value: ThemeMode.dark,
+                  child: Text(l10n.themeDark),
+                ),
               ],
             ),
           ),

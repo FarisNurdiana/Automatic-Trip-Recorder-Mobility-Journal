@@ -92,8 +92,10 @@ class SupabaseAuthRepository implements AuthRepository {
     required String password,
   }) async {
     try {
-      final response = await _client.auth
-          .signInWithPassword(email: email, password: password);
+      final response = await _client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
       final user = _map(response.user);
       if (user == null) {
         throw const AuthException('Sign in returned no user');
@@ -138,15 +140,13 @@ class UnavailableAuthRepository implements AuthRepository {
     required String email,
     required String password,
     String? displayName,
-  }) async =>
-      throw const AuthException('Supabase is not configured');
+  }) async => throw const AuthException('Supabase is not configured');
 
   @override
   Future<AppUser> signIn({
     required String email,
     required String password,
-  }) async =>
-      throw const AuthException('Supabase is not configured');
+  }) async => throw const AuthException('Supabase is not configured');
 
   @override
   Future<void> signOut() async {}

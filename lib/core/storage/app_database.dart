@@ -151,20 +151,20 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) async {
-          await m.createAll();
-          await _createIndexes();
-        },
-        onUpgrade: (m, from, to) async {
-          // Versioned, additive migrations. Example for a future version 2:
-          // if (from < 2) {
-          //   await m.addColumn(trips, trips.someNewColumn);
-          // }
-        },
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-      );
+    onCreate: (m) async {
+      await m.createAll();
+      await _createIndexes();
+    },
+    onUpgrade: (m, from, to) async {
+      // Versioned, additive migrations. Example for a future version 2:
+      // if (from < 2) {
+      //   await m.addColumn(trips, trips.someNewColumn);
+      // }
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
 
   Future<void> _createIndexes() async {
     await customStatement(

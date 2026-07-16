@@ -45,8 +45,9 @@ class SensorsPlusCollectionService implements SensorCollectionService {
   Future<void> start(SensorSamplingConfig config) async {
     await stop();
     _config = config;
-    final interval =
-        Duration(microseconds: (1000000 / config.rawSamplingHz).round());
+    final interval = Duration(
+      microseconds: (1000000 / config.rawSamplingHz).round(),
+    );
 
     _accelSub = accelerometerEventStream(samplingPeriod: interval).listen(
       (e) => _accelBuffer.add([e.x, e.y, e.z]),
@@ -61,8 +62,9 @@ class SensorsPlusCollectionService implements SensorCollectionService {
       onError: (Object e) => _log.warning('magnetometer unavailable', e),
     );
 
-    final window =
-        Duration(milliseconds: (1000 / config.storedSamplingHz).round());
+    final window = Duration(
+      milliseconds: (1000 / config.storedSamplingHz).round(),
+    );
     _windowTimer = Timer.periodic(window, (_) => _flushWindow());
   }
 
@@ -75,21 +77,23 @@ class SensorsPlusCollectionService implements SensorCollectionService {
     _magBuffer.clear();
     if (accel == null && gyro == null && mag == null) return;
 
-    _samples.add(CollectedSensorSample(
-      recordedAt: DateTime.now().toUtc(),
-      accelerometerX: accel?[0],
-      accelerometerY: accel?[1],
-      accelerometerZ: accel?[2],
-      gyroscopeX: gyro?[0],
-      gyroscopeY: gyro?[1],
-      gyroscopeZ: gyro?[2],
-      magnetometerX: mag?[0],
-      magnetometerY: mag?[1],
-      magnetometerZ: mag?[2],
-      samplingRateHz: _config?.storedSamplingHz.toDouble(),
-      speed: _lastSpeed,
-      activityState: _activityState,
-    ));
+    _samples.add(
+      CollectedSensorSample(
+        recordedAt: DateTime.now().toUtc(),
+        accelerometerX: accel?[0],
+        accelerometerY: accel?[1],
+        accelerometerZ: accel?[2],
+        gyroscopeX: gyro?[0],
+        gyroscopeY: gyro?[1],
+        gyroscopeZ: gyro?[2],
+        magnetometerX: mag?[0],
+        magnetometerY: mag?[1],
+        magnetometerZ: mag?[2],
+        samplingRateHz: _config?.storedSamplingHz.toDouble(),
+        speed: _lastSpeed,
+        activityState: _activityState,
+      ),
+    );
   }
 
   static List<double>? _average(List<List<double>> buffer) {

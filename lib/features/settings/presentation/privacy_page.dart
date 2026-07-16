@@ -43,8 +43,9 @@ class PrivacyPage extends ConsumerWidget {
     final settingsController = ref.read(settingsControllerProvider.notifier);
     final auth = ref.watch(authControllerProvider);
 
-    void toast(String message) => ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    void toast(String message) => ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.privacyTitle)),
@@ -65,8 +66,11 @@ class PrivacyPage extends ConsumerWidget {
             leading: const Icon(Icons.delete_outline),
             title: Text(l10n.privacyDeleteAllLocal),
             onTap: () async {
-              if (await _confirm(context, l10n.privacyDeleteAllLocal,
-                  l10n.privacyDeleteAllLocalConfirm)) {
+              if (await _confirm(
+                context,
+                l10n.privacyDeleteAllLocal,
+                l10n.privacyDeleteAllLocalConfirm,
+              )) {
                 await ref.read(tripRepositoryProvider).deleteAllLocalData();
                 toast(l10n.privacyDataDeleted);
               }
@@ -77,8 +81,11 @@ class PrivacyPage extends ConsumerWidget {
               leading: const Icon(Icons.cloud_off_outlined),
               title: Text(l10n.privacyDeleteAllCloud),
               onTap: () async {
-                if (await _confirm(context, l10n.privacyDeleteAllCloud,
-                    l10n.privacyDeleteAllCloudConfirm)) {
+                if (await _confirm(
+                  context,
+                  l10n.privacyDeleteAllCloud,
+                  l10n.privacyDeleteAllCloudConfirm,
+                )) {
                   final remote = ref.read(remoteTripDataSourceProvider);
                   final userId = auth.user?.id;
                   if (remote != null && userId != null) {
@@ -106,8 +113,7 @@ class PrivacyPage extends ConsumerWidget {
                 if (hasUnsynced) warning = l10n.authLogoutUnsyncedWarning;
               }
               if (!context.mounted) return;
-              final message =
-                  warning.isEmpty ? l10n.authLogout : warning;
+              final message = warning.isEmpty ? l10n.authLogout : warning;
               if (await _confirm(context, l10n.authLogout, message)) {
                 await ref.read(authControllerProvider.notifier).signOut();
                 if (context.mounted) context.go('/login');

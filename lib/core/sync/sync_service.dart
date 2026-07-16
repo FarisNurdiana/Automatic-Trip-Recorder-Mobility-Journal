@@ -26,13 +26,12 @@ class SyncState {
     int? pendingTrips,
     DateTime? lastSyncedAt,
     String? lastError,
-  }) =>
-      SyncState(
-        status: status ?? this.status,
-        pendingTrips: pendingTrips ?? this.pendingTrips,
-        lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
-        lastError: lastError,
-      );
+  }) => SyncState(
+    status: status ?? this.status,
+    pendingTrips: pendingTrips ?? this.pendingTrips,
+    lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+    lastError: lastError,
+  );
 }
 
 /// Offline-first synchronization contract.
@@ -68,7 +67,7 @@ class DefaultSyncService implements SyncService {
     this.maxRetries = 4,
     this.baseBackoff = const Duration(seconds: 2),
     Future<void> Function(Duration)? delay,
-  })  : _delay = delay ?? Future<void>.delayed {
+  }) : _delay = delay ?? Future<void>.delayed {
     _connectivity = connectivity;
   }
 
@@ -100,8 +99,7 @@ class DefaultSyncService implements SyncService {
 
   @override
   void startAutoSync(String Function() userIdProvider) {
-    _connectivitySub ??=
-        _connectivity?.onConnectivityChanged.listen((results) {
+    _connectivitySub ??= _connectivity?.onConnectivityChanged.listen((results) {
       final online = results.any((r) => r != ConnectivityResult.none);
       final userId = userIdProvider();
       if (online && userId.isNotEmpty) {
@@ -115,22 +113,21 @@ class DefaultSyncService implements SyncService {
     if (_syncing || userId.isEmpty) return;
     _syncing = true;
     try {
-      final pending = await local.tripsWithSyncStatus(
-        userId,
-        [SyncStatus.pending, SyncStatus.failed],
-      );
+      final pending = await local.tripsWithSyncStatus(userId, [
+        SyncStatus.pending,
+        SyncStatus.failed,
+      ]);
       if (pending.isEmpty) {
-        _emit(_state.copyWith(
-          status: SyncStatus.synced,
-          pendingTrips: 0,
-        ));
+        _emit(_state.copyWith(status: SyncStatus.synced, pendingTrips: 0));
         return;
       }
-      _emit(SyncState(
-        status: SyncStatus.syncing,
-        pendingTrips: pending.length,
-        lastSyncedAt: _state.lastSyncedAt,
-      ));
+      _emit(
+        SyncState(
+          status: SyncStatus.syncing,
+          pendingTrips: pending.length,
+          lastSyncedAt: _state.lastSyncedAt,
+        ),
+      );
 
       var failures = 0;
       var remaining = pending.length;
@@ -141,18 +138,19 @@ class DefaultSyncService implements SyncService {
         } else {
           failures++;
         }
-        _emit(_state.copyWith(
-          status: SyncStatus.syncing,
-          pendingTrips: remaining,
-        ));
+        _emit(
+          _state.copyWith(status: SyncStatus.syncing, pendingTrips: remaining),
+        );
       }
 
-      _emit(SyncState(
-        status: failures > 0 ? SyncStatus.failed : SyncStatus.synced,
-        pendingTrips: remaining,
-        lastSyncedAt: failures > 0 ? _state.lastSyncedAt : DateTime.now(),
-        lastError: failures > 0 ? '$failures trip(s) failed to sync' : null,
-      ));
+      _emit(
+        SyncState(
+          status: failures > 0 ? SyncStatus.failed : SyncStatus.synced,
+          pendingTrips: remaining,
+          lastSyncedAt: failures > 0 ? _state.lastSyncedAt : DateTime.now(),
+          lastError: failures > 0 ? '$failures trip(s) failed to sync' : null,
+        ),
+      );
     } finally {
       _syncing = false;
     }
@@ -196,8 +194,9 @@ class DefaultSyncService implements SyncService {
     // 3. Activity events tied to this trip.
     final events = await local.activityEventsForTrip(tripId);
     await remote.upsertActivityEvents(userId, events);
-    await local
-        .setActivityEventsSyncStatus([for (final e in events) e.id], SyncStatus.synced);
+    await local.setActivityEventsSyncStatus([
+      for (final e in events) e.id,
+    ], SyncStatus.synced);
 
     // 4. Sensor samples in batches.
     final samples = await local.sensorSamplesForTrip(tripId);

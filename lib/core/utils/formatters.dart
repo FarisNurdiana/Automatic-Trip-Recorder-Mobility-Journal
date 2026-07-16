@@ -15,8 +15,10 @@ class Formatters {
   }
 
   static String speedKmh(double kmh, {String locale = 'id'}) {
-    final f =
-        NumberFormat.decimalPatternDigits(locale: locale, decimalDigits: 1);
+    final f = NumberFormat.decimalPatternDigits(
+      locale: locale,
+      decimalDigits: 1,
+    );
     final unit = locale == 'id' ? 'km/jam' : 'km/h';
     return '${f.format(kmh)} $unit';
   }

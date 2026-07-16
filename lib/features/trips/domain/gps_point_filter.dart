@@ -25,7 +25,7 @@ class GpsFilterResult {
 ///  * flags mock locations when the platform reports them.
 class GpsPointFilter {
   GpsPointFilter({TripDetectionConfig? config})
-      : config = config ?? defaultTripDetectionConfig;
+    : config = config ?? defaultTripDetectionConfig;
 
   final TripDetectionConfig config;
 
@@ -62,8 +62,10 @@ class GpsPointFilter {
         );
         final dt =
             point.recordedAt.difference(prev.recordedAt).inMilliseconds /
-                1000.0;
-        final impliedKmh = dt > 0 ? GeoUtils.msToKmh(meters / dt) : double.infinity;
+            1000.0;
+        final impliedKmh = dt > 0
+            ? GeoUtils.msToKmh(meters / dt)
+            : double.infinity;
         if (impliedKmh > config.maxRealisticSpeedKmh) {
           rejected++;
           continue;

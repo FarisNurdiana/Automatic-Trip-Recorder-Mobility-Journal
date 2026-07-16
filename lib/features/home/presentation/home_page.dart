@@ -67,15 +67,15 @@ class HomePage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.homeDetectionStatus,
-                        style: Theme.of(context).textTheme.labelMedium),
+                    Text(
+                      l10n.homeDetectionStatus,
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
                         Icon(
-                          isActive
-                              ? Icons.radio_button_checked
-                              : Icons.radar,
+                          isActive ? Icons.radio_button_checked : Icons.radar,
                           color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: 12),
@@ -140,16 +140,17 @@ class HomePage extends ConsumerWidget {
             const SizedBox(height: 12),
 
             // --- last trip ---
-            Text(l10n.homeLastTrip,
-                style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.homeLastTrip,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             trips.when(
               loading: () => const LoadingView(),
               error: (e, _) => ErrorView(message: l10n.commonError),
               data: (list) {
                 final finished = list
-                    .where((t) =>
-                        t.status == TripRecordingState.finished.name)
+                    .where((t) => t.status == TripRecordingState.finished.name)
                     .toList();
                 if (finished.isEmpty) {
                   return EmptyStateView(
@@ -161,8 +162,9 @@ class HomePage extends ConsumerWidget {
                 return Card(
                   child: ListTile(
                     leading: const Icon(Icons.directions_car_outlined),
-                    title: Text(Formatters.dateTime(t.startedAt,
-                        locale: locale)),
+                    title: Text(
+                      Formatters.dateTime(t.startedAt, locale: locale),
+                    ),
                     subtitle: Text(
                       '${Formatters.distanceKm(t.distanceMeters, locale: locale)} • '
                       '${Formatters.duration(Duration(seconds: t.elapsedDurationSeconds), locale: locale)}',
@@ -191,9 +193,11 @@ class HomePage extends ConsumerWidget {
                 ),
                 title: Text(l10n.homePermissions),
                 subtitle: permissions.maybeWhen(
-                  data: (p) => Text(p.allCoreGranted
-                      ? l10n.homePermissionsComplete
-                      : l10n.homePermissionsIncomplete),
+                  data: (p) => Text(
+                    p.allCoreGranted
+                        ? l10n.homePermissionsComplete
+                        : l10n.homePermissionsIncomplete,
+                  ),
                   orElse: () => Text(l10n.commonLoading),
                 ),
                 trailing: const Icon(Icons.chevron_right),

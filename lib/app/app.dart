@@ -84,7 +84,8 @@ class _ConnectivityWrapperState extends State<_ConnectivityWrapper> {
   Widget build(BuildContext context) {
     if (!_offline) return widget.child ?? const SizedBox.shrink();
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
-    final message = l10n?.commonOfflineBanner ??
+    final message =
+        l10n?.commonOfflineBanner ??
         'Offline — data disimpan lokal dan akan disinkronkan nanti';
     final scheme = Theme.of(context).colorScheme;
     return Column(

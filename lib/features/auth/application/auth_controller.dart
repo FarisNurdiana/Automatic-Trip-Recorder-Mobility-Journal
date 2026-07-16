@@ -19,11 +19,10 @@ class AuthState {
     AppUser? user,
     bool clearUser = false,
     bool? initializing,
-  }) =>
-      AuthState(
-        user: clearUser ? null : (user ?? this.user),
-        initializing: initializing ?? this.initializing,
-      );
+  }) => AuthState(
+    user: clearUser ? null : (user ?? this.user),
+    initializing: initializing ?? this.initializing,
+  );
 }
 
 class AuthController extends StateNotifier<AuthState> {
@@ -70,7 +69,11 @@ class AuthController extends StateNotifier<AuthState> {
     state = AuthState(user: user, initializing: false);
   }
 
-  Future<void> signUp(String email, String password, String? displayName) async {
+  Future<void> signUp(
+    String email,
+    String password,
+    String? displayName,
+  ) async {
     final user = await repository.signUp(
       email: email,
       password: password,

@@ -71,8 +71,10 @@ class PolylineSimplifier {
     if (dx == 0 && dy == 0) {
       return math.sqrt(math.pow(x - x1, 2) + math.pow(y - y1, 2)).toDouble();
     }
-    final t =
-        (((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy)).clamp(0.0, 1.0);
+    final t = (((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy)).clamp(
+      0.0,
+      1.0,
+    );
     final px = x1 + t * dx;
     final py = y1 + t * dy;
     return math.sqrt(math.pow(x - px, 2) + math.pow(y - py, 2)).toDouble();

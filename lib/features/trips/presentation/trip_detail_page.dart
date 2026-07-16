@@ -33,8 +33,10 @@ class TripDetailData {
   final List<TripStop> stops;
 }
 
-final tripDetailProvider =
-    FutureProvider.family<TripDetailData?, String>((ref, tripId) async {
+final tripDetailProvider = FutureProvider.family<TripDetailData?, String>((
+  ref,
+  tripId,
+) async {
   final repo = ref.watch(tripRepositoryProvider);
   final trip = await repo.getTrip(tripId);
   if (trip == null) return null;
@@ -138,8 +140,9 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
   ) {
     final trip = data.trip;
     final points = data.displayPoints;
-    final vehicle =
-        VehicleType.fromName(trip.confirmedVehicleType ?? trip.detectedVehicleType);
+    final vehicle = VehicleType.fromName(
+      trip.confirmedVehicleType ?? trip.detectedVehicleType,
+    );
 
     return ListView(
       children: [
@@ -159,8 +162,9 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
                                 padding: const EdgeInsets.all(40),
                               )
                             : null,
-                        initialCenter:
-                            points.isNotEmpty ? points.first : const LatLng(0, 0),
+                        initialCenter: points.isNotEmpty
+                            ? points.first
+                            : const LatLng(0, 0),
                         initialZoom: 14,
                       ),
                       children: [
@@ -169,36 +173,49 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
                               'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                           userAgentPackageName: 'com.triplog.triplog',
                         ),
-                        PolylineLayer(polylines: [
-                          Polyline(
-                            points: points,
-                            strokeWidth: 4,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ]),
-                        MarkerLayer(markers: [
-                          if (points.isNotEmpty)
-                            Marker(
-                              point: points.first,
-                              child: const Icon(Icons.trip_origin,
-                                  color: Colors.green),
+                        PolylineLayer(
+                          polylines: [
+                            Polyline(
+                              points: points,
+                              strokeWidth: 4,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
-                          if (points.length > 1)
-                            Marker(
-                              point: points.last,
-                              child:
-                                  const Icon(Icons.flag, color: Colors.red),
-                            ),
-                          for (final stop in data.stops)
-                            Marker(
-                              point: LatLng(stop.latitude, stop.longitude),
-                              child: const Icon(Icons.local_parking,
-                                  size: 20, color: Colors.orange),
-                            ),
-                        ]),
-                        RichAttributionWidget(attributions: [
-                          TextSourceAttribution('OpenStreetMap contributors'),
-                        ]),
+                          ],
+                        ),
+                        MarkerLayer(
+                          markers: [
+                            if (points.isNotEmpty)
+                              Marker(
+                                point: points.first,
+                                child: const Icon(
+                                  Icons.trip_origin,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            if (points.length > 1)
+                              Marker(
+                                point: points.last,
+                                child: const Icon(
+                                  Icons.flag,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            for (final stop in data.stops)
+                              Marker(
+                                point: LatLng(stop.latitude, stop.longitude),
+                                child: const Icon(
+                                  Icons.local_parking,
+                                  size: 20,
+                                  color: Colors.orange,
+                                ),
+                              ),
+                          ],
+                        ),
+                        RichAttributionWidget(
+                          attributions: [
+                            TextSourceAttribution('OpenStreetMap contributors'),
+                          ],
+                        ),
                       ],
                     ),
                     Positioned(
@@ -221,97 +238,118 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(children: [
-                Expanded(
-                  child: StatTile(
-                    label: l10n.tripDistance,
-                    icon: Icons.straighten,
-                    value: Formatters.distanceKm(trip.distanceMeters,
-                        locale: locale),
+              Row(
+                children: [
+                  Expanded(
+                    child: StatTile(
+                      label: l10n.tripDistance,
+                      icon: Icons.straighten,
+                      value: Formatters.distanceKm(
+                        trip.distanceMeters,
+                        locale: locale,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: StatTile(
-                    label: l10n.tripDuration,
-                    icon: Icons.schedule,
-                    value: Formatters.duration(
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: StatTile(
+                      label: l10n.tripDuration,
+                      icon: Icons.schedule,
+                      value: Formatters.duration(
                         Duration(seconds: trip.elapsedDurationSeconds),
-                        locale: locale),
+                        locale: locale,
+                      ),
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
               const SizedBox(height: 8),
-              Row(children: [
-                Expanded(
-                  child: StatTile(
-                    label: l10n.tripMovingTime,
-                    icon: Icons.play_arrow,
-                    value: Formatters.duration(
+              Row(
+                children: [
+                  Expanded(
+                    child: StatTile(
+                      label: l10n.tripMovingTime,
+                      icon: Icons.play_arrow,
+                      value: Formatters.duration(
                         Duration(seconds: trip.movingDurationSeconds),
-                        locale: locale),
+                        locale: locale,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: StatTile(
-                    label: l10n.tripStoppedTime,
-                    icon: Icons.pause,
-                    value: Formatters.duration(
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: StatTile(
+                      label: l10n.tripStoppedTime,
+                      icon: Icons.pause,
+                      value: Formatters.duration(
                         Duration(seconds: trip.stoppedDurationSeconds),
-                        locale: locale),
+                        locale: locale,
+                      ),
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
               const SizedBox(height: 8),
-              Row(children: [
-                Expanded(
-                  child: StatTile(
-                    label: l10n.tripAvgSpeed,
-                    icon: Icons.speed,
-                    value: Formatters.speedKmh(trip.averageSpeedKmh,
-                        locale: locale),
+              Row(
+                children: [
+                  Expanded(
+                    child: StatTile(
+                      label: l10n.tripAvgSpeed,
+                      icon: Icons.speed,
+                      value: Formatters.speedKmh(
+                        trip.averageSpeedKmh,
+                        locale: locale,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: StatTile(
-                    label: l10n.tripMovingAvgSpeed,
-                    icon: Icons.shutter_speed,
-                    value: Formatters.speedKmh(trip.movingAverageSpeedKmh,
-                        locale: locale),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: StatTile(
+                      label: l10n.tripMovingAvgSpeed,
+                      icon: Icons.shutter_speed,
+                      value: Formatters.speedKmh(
+                        trip.movingAverageSpeedKmh,
+                        locale: locale,
+                      ),
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
               const SizedBox(height: 8),
-              Row(children: [
-                Expanded(
-                  child: StatTile(
-                    label: l10n.tripMaxSpeed,
-                    icon: Icons.rocket_launch_outlined,
-                    value: Formatters.speedKmh(trip.maximumSpeedKmh,
-                        locale: locale),
+              Row(
+                children: [
+                  Expanded(
+                    child: StatTile(
+                      label: l10n.tripMaxSpeed,
+                      icon: Icons.rocket_launch_outlined,
+                      value: Formatters.speedKmh(
+                        trip.maximumSpeedKmh,
+                        locale: locale,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: StatTile(
-                    label: l10n.tripPoints,
-                    icon: Icons.timeline,
-                    value: '${data.rawPoints.length}',
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: StatTile(
+                      label: l10n.tripPoints,
+                      icon: Icons.timeline,
+                      value: '${data.rawPoints.length}',
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
               const SizedBox(height: 12),
               Card(
                 child: ListTile(
                   leading: const Icon(Icons.schedule),
                   title: Text(
-                      '${l10n.tripDeparture}: ${Formatters.dateTime(trip.startedAt, locale: locale)}'),
+                    '${l10n.tripDeparture}: ${Formatters.dateTime(trip.startedAt, locale: locale)}',
+                  ),
                   subtitle: trip.endedAt == null
                       ? null
                       : Text(
-                          '${l10n.tripArrival}: ${Formatters.dateTime(trip.endedAt!, locale: locale)}'),
+                          '${l10n.tripArrival}: ${Formatters.dateTime(trip.endedAt!, locale: locale)}',
+                        ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -321,8 +359,11 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
                   title: Text(_vehicleLabel(l10n, vehicle)),
                   subtitle: trip.vehicleConfidence == null
                       ? null
-                      : Text(l10n.vehicleConfidence(
-                          (trip.vehicleConfidence! * 100).toStringAsFixed(0))),
+                      : Text(
+                          l10n.vehicleConfidence(
+                            (trip.vehicleConfidence! * 100).toStringAsFixed(0),
+                          ),
+                        ),
                   trailing: TextButton(
                     onPressed: () =>
                         context.push('/trips/${trip.id}/confirm-vehicle'),
@@ -334,19 +375,25 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
               // --- stops list ---
               if (data.stops.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                Text('${l10n.tripStops} (${data.stops.length})',
-                    style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  '${l10n.tripStops} (${data.stops.length})',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 const SizedBox(height: 8),
                 for (final stop in data.stops)
                   Card(
                     child: ListTile(
                       dense: true,
-                      leading: const Icon(Icons.local_parking,
-                          color: Colors.orange),
+                      leading: const Icon(
+                        Icons.local_parking,
+                        color: Colors.orange,
+                      ),
                       title: Text(
-                          '${Formatters.time(stop.startedAt, locale: locale)} - ${Formatters.time(stop.endedAt, locale: locale)}'),
-                      subtitle: Text(Formatters.duration(stop.duration,
-                          locale: locale)),
+                        '${Formatters.time(stop.startedAt, locale: locale)} - ${Formatters.time(stop.endedAt, locale: locale)}',
+                      ),
+                      subtitle: Text(
+                        Formatters.duration(stop.duration, locale: locale),
+                      ),
                     ),
                   ),
               ],
@@ -354,8 +401,10 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
               // --- speed chart ---
               if (data.rawPoints.length >= 5) ...[
                 const SizedBox(height: 16),
-                Text(l10n.tripSpeedChart,
-                    style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  l10n.tripSpeedChart,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 const SizedBox(height: 8),
                 SizedBox(
                   height: 180,
@@ -408,24 +457,30 @@ class _SpeedChart extends StatelessWidget {
         LineChartData(
           lineTouchData: const LineTouchData(enabled: false),
           titlesData: FlTitlesData(
-            topTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 36,
-                getTitlesWidget: (v, _) => Text('${v.toInt()}',
-                    style: Theme.of(context).textTheme.labelSmall),
+                getTitlesWidget: (v, _) => Text(
+                  '${v.toInt()}',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
               ),
             ),
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 24,
-                getTitlesWidget: (v, _) => Text('${v.toInt()}m',
-                    style: Theme.of(context).textTheme.labelSmall),
+                getTitlesWidget: (v, _) => Text(
+                  '${v.toInt()}m',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
               ),
             ),
           ),

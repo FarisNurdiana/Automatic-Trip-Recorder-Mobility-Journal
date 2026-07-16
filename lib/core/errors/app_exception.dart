@@ -8,7 +8,8 @@ sealed class AppException implements Exception {
   final Object? cause;
 
   @override
-  String toString() => '$runtimeType: $message${cause == null ? '' : ' ($cause)'}';
+  String toString() =>
+      '$runtimeType: $message${cause == null ? '' : ' ($cause)'}';
 }
 
 class PermissionDeniedException extends AppException {

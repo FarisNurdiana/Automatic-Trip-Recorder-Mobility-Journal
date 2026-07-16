@@ -27,12 +27,14 @@ import '../features/trips/domain/trip_summary_calculator.dart';
 
 final envProvider = Provider<Env>((ref) => throw UnimplementedError());
 
-final sharedPreferencesProvider =
-    Provider<SharedPreferences>((ref) => throw UnimplementedError());
+final sharedPreferencesProvider = Provider<SharedPreferences>(
+  (ref) => throw UnimplementedError(),
+);
 
 /// Device/app metadata captured once at startup.
-final deviceMetadataProvider =
-    Provider<TripDeviceMetadata>((ref) => const TripDeviceMetadata());
+final deviceMetadataProvider = Provider<TripDeviceMetadata>(
+  (ref) => const TripDeviceMetadata(),
+);
 
 // --- storage ---
 
@@ -72,26 +74,27 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
       : SupabaseAuthRepository(client);
 });
 
-final authControllerProvider =
-    StateNotifierProvider<AuthController, AuthState>((ref) {
-  return AuthController(
-    repository: ref.watch(authRepositoryProvider),
-    localModeEnabled: () => ref.read(settingsControllerProvider).localMode,
-    onLocalModeChanged: (value) => ref
-        .read(settingsControllerProvider.notifier)
-        .setLocalMode(value),
-  );
-});
+final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
+  (ref) {
+    return AuthController(
+      repository: ref.watch(authRepositoryProvider),
+      localModeEnabled: () => ref.read(settingsControllerProvider).localMode,
+      onLocalModeChanged: (value) =>
+          ref.read(settingsControllerProvider.notifier).setLocalMode(value),
+    );
+  },
+);
 
 // --- settings & permissions ---
 
 final settingsControllerProvider =
     StateNotifierProvider<SettingsController, SettingsState>(
-  (ref) => SettingsController(ref.watch(sharedPreferencesProvider)),
-);
+      (ref) => SettingsController(ref.watch(sharedPreferencesProvider)),
+    );
 
-final permissionsServiceProvider =
-    Provider<PermissionsService>((ref) => PermissionsService());
+final permissionsServiceProvider = Provider<PermissionsService>(
+  (ref) => PermissionsService(),
+);
 
 final permissionsSnapshotProvider = FutureProvider<PermissionsSnapshot>(
   (ref) => ref.watch(permissionsServiceProvider).snapshot(),
@@ -103,8 +106,7 @@ final locationTrackingServiceProvider = Provider<LocationTrackingService>(
   (ref) => MethodChannelLocationTrackingService(),
 );
 
-final activityRecognitionServiceProvider =
-    Provider<ActivityRecognitionService>(
+final activityRecognitionServiceProvider = Provider<ActivityRecognitionService>(
   (ref) => MethodChannelActivityRecognitionService(),
 );
 
@@ -120,24 +122,24 @@ final tripStateMachineProvider = Provider<TripStateMachine>(
 
 final tripRecordingControllerProvider =
     StateNotifierProvider<TripRecordingController, RecordingUiState>((ref) {
-  final controller = TripRecordingController(
-    stateMachine: ref.watch(tripStateMachineProvider),
-    locationService: ref.watch(locationTrackingServiceProvider),
-    activityService: ref.watch(activityRecognitionServiceProvider),
-    sensorService: ref.watch(sensorCollectionServiceProvider),
-    repository: ref.watch(tripRepositoryProvider),
-    userIdProvider: () => ref.read(authControllerProvider).user?.id ?? '',
-    metadataProvider: () => ref.read(deviceMetadataProvider),
-    mountPositionProvider: () =>
-        ref.read(settingsControllerProvider).mountPosition,
-    autoDetectionEnabledProvider: () =>
-        ref.read(settingsControllerProvider).autoDetectionEnabled,
-    sensorConfigProvider: () =>
-        ref.read(settingsControllerProvider).sensorConfig,
-  );
-  controller.init();
-  return controller;
-});
+      final controller = TripRecordingController(
+        stateMachine: ref.watch(tripStateMachineProvider),
+        locationService: ref.watch(locationTrackingServiceProvider),
+        activityService: ref.watch(activityRecognitionServiceProvider),
+        sensorService: ref.watch(sensorCollectionServiceProvider),
+        repository: ref.watch(tripRepositoryProvider),
+        userIdProvider: () => ref.read(authControllerProvider).user?.id ?? '',
+        metadataProvider: () => ref.read(deviceMetadataProvider),
+        mountPositionProvider: () =>
+            ref.read(settingsControllerProvider).mountPosition,
+        autoDetectionEnabledProvider: () =>
+            ref.read(settingsControllerProvider).autoDetectionEnabled,
+        sensorConfigProvider: () =>
+            ref.read(settingsControllerProvider).sensorConfig,
+      );
+      controller.init();
+      return controller;
+    });
 
 // --- sync ---
 

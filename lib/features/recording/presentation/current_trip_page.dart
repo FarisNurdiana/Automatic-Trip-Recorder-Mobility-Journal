@@ -56,8 +56,10 @@ class CurrentTripPage extends ConsumerWidget {
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(height: 8),
-                    Text(statusLabel,
-                        style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      statusLabel,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     if (state.recoveredTrip) ...[
                       const SizedBox(height: 4),
                       Text(
@@ -77,8 +79,10 @@ class CurrentTripPage extends ConsumerWidget {
                   child: StatTile(
                     label: l10n.tripDistance,
                     icon: Icons.straighten,
-                    value: Formatters.distanceKm(state.liveDistanceMeters,
-                        locale: locale),
+                    value: Formatters.distanceKm(
+                      state.liveDistanceMeters,
+                      locale: locale,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -86,8 +90,10 @@ class CurrentTripPage extends ConsumerWidget {
                   child: StatTile(
                     label: l10n.tripDuration,
                     icon: Icons.schedule,
-                    value:
-                        Formatters.duration(state.liveElapsed, locale: locale),
+                    value: Formatters.duration(
+                      state.liveElapsed,
+                      locale: locale,
+                    ),
                   ),
                 ),
               ],
@@ -98,8 +104,7 @@ class CurrentTripPage extends ConsumerWidget {
               icon: Icons.speed,
               value: state.currentSpeedKmh == null
                   ? '—'
-                  : Formatters.speedKmh(state.currentSpeedKmh!,
-                      locale: locale),
+                  : Formatters.speedKmh(state.currentSpeedKmh!, locale: locale),
             ),
             const Spacer(),
             if (!hasActive)
@@ -119,8 +124,9 @@ class CurrentTripPage extends ConsumerWidget {
                             label: Text(l10n.tripResume),
                           )
                         : FilledButton.tonalIcon(
-                            onPressed:
-                                isRecording ? () => controller.pause() : null,
+                            onPressed: isRecording
+                                ? () => controller.pause()
+                                : null,
                             icon: const Icon(Icons.pause),
                             label: Text(l10n.tripPause),
                           ),

@@ -35,8 +35,11 @@ class VehicleConfirmationPage extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(Icons.directions_car_filled_outlined,
-                    size: 64, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  Icons.directions_car_filled_outlined,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   l10n.vehicleConfirmMessage,
@@ -50,13 +53,14 @@ class VehicleConfirmationPage extends ConsumerWidget {
                       padding: const EdgeInsets.all(12),
                       child: Column(
                         children: [
-                          Text(l10n.vehiclePrediction(
-                              _label(l10n, detected))),
+                          Text(l10n.vehiclePrediction(_label(l10n, detected))),
                           if (trip.vehicleConfidence != null)
                             Text(
-                              l10n.vehicleConfidence((trip.vehicleConfidence! *
-                                      100)
-                                  .toStringAsFixed(0)),
+                              l10n.vehicleConfidence(
+                                (trip.vehicleConfidence! * 100).toStringAsFixed(
+                                  0,
+                                ),
+                              ),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                         ],
@@ -65,8 +69,10 @@ class VehicleConfirmationPage extends ConsumerWidget {
                   ),
                 ],
                 const SizedBox(height: 24),
-                Text(l10n.vehicleConfirmQuestion,
-                    style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  l10n.vehicleConfirmQuestion,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
@@ -85,7 +91,9 @@ class VehicleConfirmationPage extends ConsumerWidget {
                         icon: _icon(type),
                         selected: trip.confirmedVehicleType == type.name,
                         onTap: () async {
-                          await ref.read(tripRepositoryProvider).confirmVehicle(
+                          await ref
+                              .read(tripRepositoryProvider)
+                              .confirmVehicle(
                                 tripId: tripId,
                                 confirmed: type,
                                 confirmedAt: DateTime.now().toUtc(),
@@ -112,23 +120,23 @@ class VehicleConfirmationPage extends ConsumerWidget {
   }
 
   String _label(AppLocalizations l10n, VehicleType type) => switch (type) {
-        VehicleType.car => l10n.vehicleCar,
-        VehicleType.motorcycle => l10n.vehicleMotorcycle,
-        VehicleType.bus => l10n.vehicleBus,
-        VehicleType.truck => l10n.vehicleTruck,
-        VehicleType.train => l10n.vehicleTrain,
-        VehicleType.other => l10n.vehicleOther,
-        VehicleType.unknown => l10n.vehicleUnknown,
-      };
+    VehicleType.car => l10n.vehicleCar,
+    VehicleType.motorcycle => l10n.vehicleMotorcycle,
+    VehicleType.bus => l10n.vehicleBus,
+    VehicleType.truck => l10n.vehicleTruck,
+    VehicleType.train => l10n.vehicleTrain,
+    VehicleType.other => l10n.vehicleOther,
+    VehicleType.unknown => l10n.vehicleUnknown,
+  };
 
   IconData _icon(VehicleType type) => switch (type) {
-        VehicleType.car => Icons.directions_car,
-        VehicleType.motorcycle => Icons.two_wheeler,
-        VehicleType.bus => Icons.directions_bus,
-        VehicleType.truck => Icons.local_shipping,
-        VehicleType.train => Icons.train,
-        _ => Icons.more_horiz,
-      };
+    VehicleType.car => Icons.directions_car,
+    VehicleType.motorcycle => Icons.two_wheeler,
+    VehicleType.bus => Icons.directions_bus,
+    VehicleType.truck => Icons.local_shipping,
+    VehicleType.train => Icons.train,
+    _ => Icons.more_horiz,
+  };
 }
 
 class _VehicleChoice extends StatelessWidget {

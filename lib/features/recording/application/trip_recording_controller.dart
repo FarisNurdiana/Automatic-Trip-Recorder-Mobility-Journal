@@ -70,8 +70,9 @@ class RecordingUiState {
       liveElapsed: liveElapsed ?? this.liveElapsed,
       currentSpeedKmh: currentSpeedKmh ?? this.currentSpeedKmh,
       lastActivity: lastActivity ?? this.lastActivity,
-      finishedTripId:
-          clearFinishedTrip ? null : (finishedTripId ?? this.finishedTripId),
+      finishedTripId: clearFinishedTrip
+          ? null
+          : (finishedTripId ?? this.finishedTripId),
       recoveredTrip: recoveredTrip ?? this.recoveredTrip,
       errorKey: clearError ? null : (errorKey ?? this.errorKey),
     );
@@ -96,8 +97,8 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     this.sensorConfigProvider,
     DateTime Function()? clock,
     this.tickInterval = const Duration(seconds: 5),
-  })  : _clock = clock ?? (() => DateTime.now().toUtc()),
-        super(const RecordingUiState());
+  }) : _clock = clock ?? (() => DateTime.now().toUtc()),
+       super(const RecordingUiState());
 
   final TripStateMachine stateMachine;
   final LocationTrackingService locationService;
@@ -127,7 +128,8 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
   LocationSamplingProfile? _currentProfile;
   final _pendingSensorSamples = <CollectedSensorSample>[];
 
-  bool get _autoDetectionEnabled => autoDetectionEnabledProvider?.call() ?? true;
+  bool get _autoDetectionEnabled =>
+      autoDetectionEnabledProvider?.call() ?? true;
 
   /// Call once after construction: recovers interrupted trips and starts
   /// listening to activity recognition.
@@ -208,7 +210,8 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     if (trip != null &&
         (state.machineState == TripRecordingState.recording ||
             state.machineState == TripRecordingState.temporarilyStopped)) {
-      final accuracyOk = location.horizontalAccuracy == null ||
+      final accuracyOk =
+          location.horizontalAccuracy == null ||
           location.horizontalAccuracy! <= config.maxHorizontalAccuracyMeters;
       if (accuracyOk) {
         try {
@@ -225,12 +228,14 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
             location.longitude,
           );
           // Ignore GPS jitter segments implying unrealistic speed.
-          final dt = location.recordedAt
+          final dt =
+              location.recordedAt
                   .difference(_lastStoredPoint!.recordedAt)
                   .inMilliseconds /
               1000.0;
-          final impliedKmh =
-              dt > 0 ? GeoUtils.msToKmh(segment / dt) : double.infinity;
+          final impliedKmh = dt > 0
+              ? GeoUtils.msToKmh(segment / dt)
+              : double.infinity;
           if (impliedKmh <= config.maxRealisticSpeedKmh) {
             state = state.copyWith(
               liveDistanceMeters: state.liveDistanceMeters + segment,
@@ -509,9 +514,11 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     if (_pendingSensorSamples.isEmpty) return;
     final batch = List.of(_pendingSensorSamples);
     _pendingSensorSamples.clear();
-    unawaited(repository
-        .addSensorSamples(tripId, batch)
-        .catchError((Object e) => _log.warning('sensor flush failed', e)));
+    unawaited(
+      repository
+          .addSensorSamples(tripId, batch)
+          .catchError((Object e) => _log.warning('sensor flush failed', e)),
+    );
   }
 
   Future<void> _stopSensors(String tripId) async {

@@ -39,7 +39,8 @@ class TripHistoryPage extends ConsumerWidget {
             itemBuilder: (context, index) {
               final t = finished[index];
               final vehicle = VehicleType.fromName(
-                  t.confirmedVehicleType ?? t.detectedVehicleType);
+                t.confirmedVehicleType ?? t.detectedVehicleType,
+              );
               final syncStatus = SyncStatus.fromName(t.syncStatus);
               return Card(
                 child: ListTile(
@@ -51,8 +52,7 @@ class TripHistoryPage extends ConsumerWidget {
                     VehicleType.train => Icons.train,
                     _ => Icons.route,
                   }),
-                  title:
-                      Text(Formatters.dateTime(t.startedAt, locale: locale)),
+                  title: Text(Formatters.dateTime(t.startedAt, locale: locale)),
                   subtitle: Text(
                     '${Formatters.distanceKm(t.distanceMeters, locale: locale)} • '
                     '${Formatters.duration(Duration(seconds: t.elapsedDurationSeconds), locale: locale)} • '

@@ -53,7 +53,7 @@ abstract interface class TripStateMachine {
 /// unit-testable. Thresholds come from [TripDetectionConfig].
 class DefaultTripStateMachine implements TripStateMachine {
   DefaultTripStateMachine({TripDetectionConfig? config})
-      : config = config ?? defaultTripDetectionConfig;
+    : config = config ?? defaultTripDetectionConfig;
 
   final TripDetectionConfig config;
 
@@ -89,12 +89,7 @@ class DefaultTripStateMachine implements TripStateMachine {
     DateTime at,
     String reason,
   ) {
-    final t = TripStateTransition(
-      from: _state,
-      to: to,
-      at: at,
-      reason: reason,
-    );
+    final t = TripStateTransition(from: _state, to: to, at: at, reason: reason);
     _state = to;
     return [t];
   }
@@ -110,9 +105,11 @@ class DefaultTripStateMachine implements TripStateMachine {
 
     switch (_state) {
       case TripRecordingState.idle:
-        final confident = activity.confidence == null ||
+        final confident =
+            activity.confidence == null ||
             activity.confidence! >= config.minActivityConfidence;
-        final isVehicleEnter = activity.type == DetectedActivityType.vehicle &&
+        final isVehicleEnter =
+            activity.type == DetectedActivityType.vehicle &&
             activity.transition != ActivityTransition.exit;
         if (isVehicleEnter && confident) {
           _enterPossibleTrip(now);
@@ -128,8 +125,11 @@ class DefaultTripStateMachine implements TripStateMachine {
             activity.type != DetectedActivityType.unknown &&
             activity.transition == ActivityTransition.enter) {
           _resetPossible();
-          return _go(TripRecordingState.idle, now,
-              'activity:${activity.type.name} cancels candidate');
+          return _go(
+            TripRecordingState.idle,
+            now,
+            'activity:${activity.type.name} cancels candidate',
+          );
         }
       case TripRecordingState.temporarilyStopped:
         // Track how long the user has been out of a vehicle.
@@ -212,8 +212,10 @@ class DefaultTripStateMachine implements TripStateMachine {
       _sustainedSpeedSince ??= now;
       if (now.difference(_sustainedSpeedSince!) >=
           config.possibleTripMinSpeedDuration) {
-        return _startRecording(now,
-            'speed>=${config.possibleTripMinSpeedKmh}km/h sustained');
+        return _startRecording(
+          now,
+          'speed>=${config.possibleTripMinSpeedKmh}km/h sustained',
+        );
       }
     } else if (speedKmh != null) {
       _sustainedSpeedSince = null;
@@ -234,7 +236,9 @@ class DefaultTripStateMachine implements TripStateMachine {
         _consistentMovingPoints++;
         if (_consistentMovingPoints >= config.possibleTripMinConsistentPoints) {
           return _startRecording(
-              now, '$_consistentMovingPoints consistent moving points');
+            now,
+            '$_consistentMovingPoints consistent moving points',
+          );
         }
       } else {
         _consistentMovingPoints = 0;
@@ -269,8 +273,11 @@ class DefaultTripStateMachine implements TripStateMachine {
         _stopCandidateSince ??= now;
         if (now.difference(_stopCandidateSince!) >= config.stopMinDuration) {
           _nonVehicleSince = null;
-          return _go(TripRecordingState.temporarilyStopped, now,
-              'low speed & stable for >=${config.stopMinDuration.inSeconds}s');
+          return _go(
+            TripRecordingState.temporarilyStopped,
+            now,
+            'low speed & stable for >=${config.stopMinDuration.inSeconds}s',
+          );
         }
       } else {
         // Drifted out of the stable radius: restart the stop window.
@@ -293,12 +300,12 @@ class DefaultTripStateMachine implements TripStateMachine {
     final movedFromStop = _stopAnchor == null
         ? false
         : GeoUtils.haversineMeters(
-              _stopAnchor!.latitude,
-              _stopAnchor!.longitude,
-              location.latitude,
-              location.longitude,
-            ) >
-            config.stopLocationJitterMeters * 2;
+                _stopAnchor!.latitude,
+                _stopAnchor!.longitude,
+                location.latitude,
+                location.longitude,
+              ) >
+              config.stopLocationJitterMeters * 2;
     if (speedKmh > config.possibleTripMinSpeedKmh || movedFromStop) {
       _stopAnchor = null;
       _stopCandidateSince = null;
@@ -323,7 +330,8 @@ class DefaultTripStateMachine implements TripStateMachine {
         }
       case TripRecordingState.temporarilyStopped:
         if (_manuallyPaused) return const [];
-        final activityNotVehicle = _lastActivity != null &&
+        final activityNotVehicle =
+            _lastActivity != null &&
             _lastActivity!.type != DetectedActivityType.vehicle &&
             _lastActivity!.type != DetectedActivityType.unknown;
         if (activityNotVehicle && _nonVehicleSince == null) {
@@ -331,8 +339,11 @@ class DefaultTripStateMachine implements TripStateMachine {
         }
         if (_nonVehicleSince != null &&
             now.difference(_nonVehicleSince!) >= config.finishAfterStopped) {
-          return _go(TripRecordingState.finishing, now,
-              'non-vehicle & stable for >=${config.finishAfterStopped.inMinutes}min');
+          return _go(
+            TripRecordingState.finishing,
+            now,
+            'non-vehicle & stable for >=${config.finishAfterStopped.inMinutes}min',
+          );
         }
       case TripRecordingState.idle:
       case TripRecordingState.recording:

@@ -23,7 +23,10 @@ abstract interface class LocalTripDataSource {
   Future<List<SensorSample>> sensorSamplesForTrip(String tripId);
   Future<List<ActivityEvent>> activityEventsForTrip(String tripId);
 
-  Future<List<Trip>> tripsWithSyncStatus(String userId, List<SyncStatus> statuses);
+  Future<List<Trip>> tripsWithSyncStatus(
+    String userId,
+    List<SyncStatus> statuses,
+  );
   Future<void> setTripSyncStatus(String tripId, SyncStatus status);
   Future<void> setPointsSyncStatus(String tripId, SyncStatus status);
   Future<void> setSensorSamplesSyncStatus(String tripId, SyncStatus status);
@@ -53,16 +56,18 @@ class DriftTripDataSource implements LocalTripDataSource {
       (db.select(db.trips)..where((t) => t.id.equals(id))).getSingleOrNull();
 
   @override
-  Stream<List<Trip>> watchTripsForUser(String userId) => (db.select(db.trips)
-        ..where((t) => t.userId.equals(userId))
-        ..orderBy([(t) => OrderingTerm.desc(t.startedAt)]))
-      .watch();
+  Stream<List<Trip>> watchTripsForUser(String userId) =>
+      (db.select(db.trips)
+            ..where((t) => t.userId.equals(userId))
+            ..orderBy([(t) => OrderingTerm.desc(t.startedAt)]))
+          .watch();
 
   @override
-  Future<List<Trip>> tripsForUser(String userId) => (db.select(db.trips)
-        ..where((t) => t.userId.equals(userId))
-        ..orderBy([(t) => OrderingTerm.desc(t.startedAt)]))
-      .get();
+  Future<List<Trip>> tripsForUser(String userId) =>
+      (db.select(db.trips)
+            ..where((t) => t.userId.equals(userId))
+            ..orderBy([(t) => OrderingTerm.desc(t.startedAt)]))
+          .get();
 
   @override
   Future<List<Trip>> activeTrips() => db.activeTrips();
@@ -71,10 +76,12 @@ class DriftTripDataSource implements LocalTripDataSource {
   Future<void> deleteTrip(String id) async {
     await db.transaction(() async {
       await (db.delete(db.tripPoints)..where((p) => p.tripId.equals(id))).go();
-      await (db.delete(db.sensorSamples)..where((s) => s.tripId.equals(id)))
-          .go();
-      await (db.delete(db.activityEvents)..where((e) => e.tripId.equals(id)))
-          .go();
+      await (db.delete(
+        db.sensorSamples,
+      )..where((s) => s.tripId.equals(id))).go();
+      await (db.delete(
+        db.activityEvents,
+      )..where((e) => e.tripId.equals(id))).go();
       await (db.delete(db.trips)..where((t) => t.id.equals(id))).go();
     });
   }
@@ -137,22 +144,25 @@ class DriftTripDataSource implements LocalTripDataSource {
     String userId,
     List<SyncStatus> statuses,
   ) =>
-      (db.select(db.trips)
-            ..where((t) =>
+      (db.select(db.trips)..where(
+            (t) =>
                 t.userId.equals(userId) &
                 t.syncStatus.isIn(statuses.map((s) => s.name).toList()) &
-                t.status.equals(_finishedStatus)))
+                t.status.equals(_finishedStatus),
+          ))
           .get();
 
   @override
   Future<void> setTripSyncStatus(String tripId, SyncStatus status) =>
-      (db.update(db.trips)..where((t) => t.id.equals(tripId)))
-          .write(TripsCompanion(syncStatus: Value(status.name)));
+      (db.update(db.trips)..where((t) => t.id.equals(tripId))).write(
+        TripsCompanion(syncStatus: Value(status.name)),
+      );
 
   @override
   Future<void> setPointsSyncStatus(String tripId, SyncStatus status) =>
-      (db.update(db.tripPoints)..where((p) => p.tripId.equals(tripId)))
-          .write(TripPointsCompanion(syncStatus: Value(status.name)));
+      (db.update(db.tripPoints)..where((p) => p.tripId.equals(tripId))).write(
+        TripPointsCompanion(syncStatus: Value(status.name)),
+      );
 
   @override
   Future<void> setSensorSamplesSyncStatus(String tripId, SyncStatus status) =>
@@ -163,16 +173,17 @@ class DriftTripDataSource implements LocalTripDataSource {
   Future<void> setActivityEventsSyncStatus(
     List<String> ids,
     SyncStatus status,
-  ) =>
-      (db.update(db.activityEvents)..where((e) => e.id.isIn(ids)))
-          .write(ActivityEventsCompanion(syncStatus: Value(status.name)));
+  ) => (db.update(db.activityEvents)..where((e) => e.id.isIn(ids))).write(
+    ActivityEventsCompanion(syncStatus: Value(status.name)),
+  );
 
   @override
   Future<bool> hasUnsyncedData(String userId) async {
-    final pending = await tripsWithSyncStatus(
-      userId,
-      [SyncStatus.pending, SyncStatus.failed, SyncStatus.syncing],
-    );
+    final pending = await tripsWithSyncStatus(userId, [
+      SyncStatus.pending,
+      SyncStatus.failed,
+      SyncStatus.syncing,
+    ]);
     return pending.isNotEmpty;
   }
 

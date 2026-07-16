@@ -29,8 +29,8 @@ class ProfilePage extends ConsumerWidget {
                 (user?.displayName?.isNotEmpty == true
                         ? user!.displayName![0]
                         : (user?.email.isNotEmpty == true
-                            ? user!.email[0]
-                            : '?'))
+                              ? user!.email[0]
+                              : '?'))
                     .toUpperCase(),
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
@@ -56,18 +56,19 @@ class ProfilePage extends ConsumerWidget {
                 ListTile(
                   leading: const Icon(Icons.straighten),
                   title: Text(l10n.homeTotalDistance),
-                  trailing: Text(totals.maybeWhen(
-                    data: (t) => Formatters.distanceKm(t.$2, locale: locale),
-                    orElse: () => '—',
-                  )),
+                  trailing: Text(
+                    totals.maybeWhen(
+                      data: (t) => Formatters.distanceKm(t.$2, locale: locale),
+                      orElse: () => '—',
+                    ),
+                  ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.map_outlined),
                   title: Text(l10n.homeTripCount),
-                  trailing: Text(totals.maybeWhen(
-                    data: (t) => '${t.$1}',
-                    orElse: () => '—',
-                  )),
+                  trailing: Text(
+                    totals.maybeWhen(data: (t) => '${t.$1}', orElse: () => '—'),
+                  ),
                 ),
               ],
             ),

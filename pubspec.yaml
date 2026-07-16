@@ -18,6 +18,11 @@ dependencies:
 
   # Local database (offline-first)
   drift: ^2.28.0
+  # sqlite3 3.x switches to native-assets hooks that download binaries at
+  # build time; the 2.x line keeps the classic behavior (bundled binaries via
+  # sqlite3_flutter_libs on mobile, system libsqlite3 in tests/desktop),
+  # which also works in restricted-network CI environments.
+  sqlite3: ^2.9.0
   sqlite3_flutter_libs: ^0.5.34
   path_provider: ^2.1.5
   path: ^1.9.0

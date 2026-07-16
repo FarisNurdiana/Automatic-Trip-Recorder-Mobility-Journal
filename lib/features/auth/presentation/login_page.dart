@@ -35,8 +35,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (mounted) context.go('/');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -64,9 +65,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(Icons.route,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.primary),
+                    Icon(
+                      Icons.route,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       l10n.appTitle,
@@ -80,14 +83,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           padding: const EdgeInsets.all(16),
                           child: Column(
                             children: [
-                              Text(l10n.errorEnvMissing,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium),
+                              Text(
+                                l10n.errorEnvMissing,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
                               const SizedBox(height: 8),
-                              Text(l10n.errorEnvMissingDesc,
-                                  style:
-                                      Theme.of(context).textTheme.bodySmall),
+                              Text(
+                                l10n.errorEnvMissingDesc,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
                             ],
                           ),
                         ),
@@ -98,20 +102,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         controller: _email,
                         keyboardType: TextInputType.emailAddress,
                         autofillHints: const [AutofillHints.email],
-                        decoration:
-                            InputDecoration(labelText: l10n.authEmail),
+                        decoration: InputDecoration(labelText: l10n.authEmail),
                         validator: (v) =>
                             v != null && v.contains('@') && v.contains('.')
-                                ? null
-                                : l10n.authEmailInvalid,
+                            ? null
+                            : l10n.authEmailInvalid,
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: _password,
                         obscureText: true,
                         autofillHints: const [AutofillHints.password],
-                        decoration:
-                            InputDecoration(labelText: l10n.authPassword),
+                        decoration: InputDecoration(
+                          labelText: l10n.authPassword,
+                        ),
                         validator: (v) => (v ?? '').length >= 8
                             ? null
                             : l10n.authPasswordTooShort,
@@ -123,8 +127,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : Text(l10n.authLoginButton),
                       ),

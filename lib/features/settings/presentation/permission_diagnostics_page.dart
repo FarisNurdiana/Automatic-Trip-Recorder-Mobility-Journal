@@ -15,8 +15,7 @@ class PermissionDiagnosticsPage extends ConsumerWidget {
     final snapshot = ref.watch(permissionsSnapshotProvider);
     final service = ref.read(permissionsServiceProvider);
 
-    Future<void> refresh() async =>
-        ref.invalidate(permissionsSnapshotProvider);
+    Future<void> refresh() async => ref.invalidate(permissionsSnapshotProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsPermissions)),
@@ -143,8 +142,7 @@ class _PermissionRow extends StatelessWidget {
           color: granted ? Colors.green : scheme.error,
         ),
         title: Text(title),
-        subtitle: Text(
-            '$description\n${granted ? grantedLabel : deniedLabel}'),
+        subtitle: Text('$description\n${granted ? grantedLabel : deniedLabel}'),
         isThreeLine: true,
         trailing: granted
             ? null

@@ -15,8 +15,8 @@ class MethodChannelActivityRecognitionService
   MethodChannelActivityRecognitionService({
     MethodChannel? channel,
     EventChannel? events,
-  })  : _channel = channel ?? const MethodChannel('triplog/activity'),
-        _events = events ?? const EventChannel('triplog/activity_stream');
+  }) : _channel = channel ?? const MethodChannel('triplog/activity'),
+       _events = events ?? const EventChannel('triplog/activity_stream');
 
   final MethodChannel _channel;
   final EventChannel _events;
@@ -25,11 +25,10 @@ class MethodChannelActivityRecognitionService
   Stream<DetectedActivity>? _stream;
 
   @override
-  Stream<DetectedActivity> get activityStream =>
-      _stream ??= _events
-          .receiveBroadcastStream()
-          .map((event) => DetectedActivity.fromMap(event as Map))
-          .asBroadcastStream();
+  Stream<DetectedActivity> get activityStream => _stream ??= _events
+      .receiveBroadcastStream()
+      .map((event) => DetectedActivity.fromMap(event as Map))
+      .asBroadcastStream();
 
   @override
   Future<bool> isAvailable() async {

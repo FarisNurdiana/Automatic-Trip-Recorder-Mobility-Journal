@@ -77,11 +77,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/login', builder: (_, _) => const LoginPage()),
       GoRoute(path: '/register', builder: (_, _) => const RegisterPage()),
       GoRoute(
-          path: '/reset-password',
-          builder: (_, _) => const ResetPasswordPage()),
+        path: '/reset-password',
+        builder: (_, _) => const ResetPasswordPage(),
+      ),
       GoRoute(path: '/', builder: (_, _) => const HomePage()),
       GoRoute(
-          path: '/current-trip', builder: (_, _) => const CurrentTripPage()),
+        path: '/current-trip',
+        builder: (_, _) => const CurrentTripPage(),
+      ),
       GoRoute(path: '/trips', builder: (_, _) => const TripHistoryPage()),
       GoRoute(
         path: '/trips/:id',
@@ -96,10 +99,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/profile', builder: (_, _) => const ProfilePage()),
       GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
       GoRoute(
-          path: '/settings/permissions',
-          builder: (_, _) => const PermissionDiagnosticsPage()),
+        path: '/settings/permissions',
+        builder: (_, _) => const PermissionDiagnosticsPage(),
+      ),
       GoRoute(
-          path: '/settings/privacy', builder: (_, _) => const PrivacyPage()),
+        path: '/settings/privacy',
+        builder: (_, _) => const PrivacyPage(),
+      ),
     ],
   );
 });

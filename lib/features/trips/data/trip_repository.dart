@@ -64,7 +64,10 @@ abstract interface class TripRepository {
   Future<Trip?> findRecoverableTrip();
 
   Future<void> recordActivityEvent(DetectedActivity activity, {String? tripId});
-  Future<void> addSensorSamples(String tripId, List<CollectedSensorSample> samples);
+  Future<void> addSensorSamples(
+    String tripId,
+    List<CollectedSensorSample> samples,
+  );
 }
 
 class DefaultTripRepository implements TripRepository {
@@ -115,8 +118,8 @@ class DefaultTripRepository implements TripRepository {
 
   @override
   Future<void> appendPoint(String tripId, RecordedLocation location) async {
-    final seq = _sequenceCounters[tripId] ??
-        await local.pointCountForTrip(tripId);
+    final seq =
+        _sequenceCounters[tripId] ?? await local.pointCountForTrip(tripId);
     _sequenceCounters[tripId] = seq + 1;
     await local.insertPoints([
       TripPointsCompanion.insert(
@@ -164,25 +167,29 @@ class DefaultTripRepository implements TripRepository {
       await setTripStatus(tripId, TripRecordingState.cancelled);
       return null;
     }
-    await local.upsertTrip(trip.toCompanion(false).copyWith(
-          status: Value(TripRecordingState.finished.name),
-          endedAt: Value(endedAt),
-          startLatitude: Value(summary.startLatitude),
-          startLongitude: Value(summary.startLongitude),
-          endLatitude: Value(summary.endLatitude),
-          endLongitude: Value(summary.endLongitude),
-          distanceMeters: Value(summary.distanceMeters),
-          elapsedDurationSeconds: Value(summary.elapsed.inSeconds),
-          movingDurationSeconds: Value(summary.moving.inSeconds),
-          stoppedDurationSeconds: Value(summary.stopped.inSeconds),
-          averageSpeedKmh: Value(summary.averageSpeedKmh),
-          movingAverageSpeedKmh: Value(summary.movingAverageSpeedKmh),
-          maximumSpeedKmh: Value(summary.maximumSpeedKmh),
-          stopCount: Value(summary.stops.length),
-          summaryAlgorithmVersion: Value(summary.algorithmVersion),
-          syncStatus: const Value('pending'),
-          updatedAt: Value(DateTime.now().toUtc()),
-        ));
+    await local.upsertTrip(
+      trip
+          .toCompanion(false)
+          .copyWith(
+            status: Value(TripRecordingState.finished.name),
+            endedAt: Value(endedAt),
+            startLatitude: Value(summary.startLatitude),
+            startLongitude: Value(summary.startLongitude),
+            endLatitude: Value(summary.endLatitude),
+            endLongitude: Value(summary.endLongitude),
+            distanceMeters: Value(summary.distanceMeters),
+            elapsedDurationSeconds: Value(summary.elapsed.inSeconds),
+            movingDurationSeconds: Value(summary.moving.inSeconds),
+            stoppedDurationSeconds: Value(summary.stopped.inSeconds),
+            averageSpeedKmh: Value(summary.averageSpeedKmh),
+            movingAverageSpeedKmh: Value(summary.movingAverageSpeedKmh),
+            maximumSpeedKmh: Value(summary.maximumSpeedKmh),
+            stopCount: Value(summary.stops.length),
+            summaryAlgorithmVersion: Value(summary.algorithmVersion),
+            syncStatus: const Value('pending'),
+            updatedAt: Value(DateTime.now().toUtc()),
+          ),
+    );
     _sequenceCounters.remove(tripId);
     return summary;
   }
@@ -202,14 +209,18 @@ class DefaultTripRepository implements TripRepository {
     final trip = await local.getTrip(tripId);
     if (trip == null) return;
     final changed = trip.detectedVehicleType != confirmed.name;
-    await local.upsertTrip(trip.toCompanion(false).copyWith(
-          confirmedVehicleType: Value(confirmed.name),
-          vehicleConfirmedAt: Value(confirmedAt),
-          vehiclePredictionChanged: Value(changed),
-          // Confirmation must reach the cloud even if the trip already synced.
-          syncStatus: const Value('pending'),
-          updatedAt: Value(DateTime.now().toUtc()),
-        ));
+    await local.upsertTrip(
+      trip
+          .toCompanion(false)
+          .copyWith(
+            confirmedVehicleType: Value(confirmed.name),
+            vehicleConfirmedAt: Value(confirmedAt),
+            vehiclePredictionChanged: Value(changed),
+            // Confirmation must reach the cloud even if the trip already synced.
+            syncStatus: const Value('pending'),
+            updatedAt: Value(DateTime.now().toUtc()),
+          ),
+    );
   }
 
   @override
@@ -264,42 +275,42 @@ class DefaultTripRepository implements TripRepository {
   Future<void> recordActivityEvent(
     DetectedActivity activity, {
     String? tripId,
-  }) =>
-      local.insertActivityEvent(ActivityEventsCompanion.insert(
-        id: _uuid.v4(),
-        tripId: Value(tripId),
-        recordedAt: activity.recordedAt,
-        activityType: activity.type.name,
-        transitionType: Value(activity.transition.name),
-        confidence: Value(activity.confidence),
-        platformSource: activity.platformSource,
-        rawPayload: Value(activity.rawValue),
-      ));
+  }) => local.insertActivityEvent(
+    ActivityEventsCompanion.insert(
+      id: _uuid.v4(),
+      tripId: Value(tripId),
+      recordedAt: activity.recordedAt,
+      activityType: activity.type.name,
+      transitionType: Value(activity.transition.name),
+      confidence: Value(activity.confidence),
+      platformSource: activity.platformSource,
+      rawPayload: Value(activity.rawValue),
+    ),
+  );
 
   @override
   Future<void> addSensorSamples(
     String tripId,
     List<CollectedSensorSample> samples,
-  ) =>
-      local.insertSensorSamples([
-        for (final s in samples)
-          SensorSamplesCompanion.insert(
-            id: _uuid.v4(),
-            tripId: tripId,
-            recordedAt: s.recordedAt,
-            accelerometerX: Value(s.accelerometerX),
-            accelerometerY: Value(s.accelerometerY),
-            accelerometerZ: Value(s.accelerometerZ),
-            gyroscopeX: Value(s.gyroscopeX),
-            gyroscopeY: Value(s.gyroscopeY),
-            gyroscopeZ: Value(s.gyroscopeZ),
-            magnetometerX: Value(s.magnetometerX),
-            magnetometerY: Value(s.magnetometerY),
-            magnetometerZ: Value(s.magnetometerZ),
-            deviceOrientation: Value(s.deviceOrientation),
-            samplingRate: Value(s.samplingRateHz),
-            speed: Value(s.speed),
-            activityState: Value(s.activityState),
-          ),
-      ]);
+  ) => local.insertSensorSamples([
+    for (final s in samples)
+      SensorSamplesCompanion.insert(
+        id: _uuid.v4(),
+        tripId: tripId,
+        recordedAt: s.recordedAt,
+        accelerometerX: Value(s.accelerometerX),
+        accelerometerY: Value(s.accelerometerY),
+        accelerometerZ: Value(s.accelerometerZ),
+        gyroscopeX: Value(s.gyroscopeX),
+        gyroscopeY: Value(s.gyroscopeY),
+        gyroscopeZ: Value(s.gyroscopeZ),
+        magnetometerX: Value(s.magnetometerX),
+        magnetometerY: Value(s.magnetometerY),
+        magnetometerZ: Value(s.magnetometerZ),
+        deviceOrientation: Value(s.deviceOrientation),
+        samplingRate: Value(s.samplingRateHz),
+        speed: Value(s.speed),
+        activityState: Value(s.activityState),
+      ),
+  ]);
 }
