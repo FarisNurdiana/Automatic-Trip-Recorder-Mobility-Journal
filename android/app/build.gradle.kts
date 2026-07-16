@@ -15,11 +15,10 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.triplog.triplog"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // Foreground service types + notification runtime permission need
+        // modern APIs; 26 is the floor that still covers ~95% of devices.
+        minSdk = maxOf(26, flutter.minSdkVersion)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -42,4 +41,9 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Fused Location Provider + Activity Recognition Transition API.
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 }
