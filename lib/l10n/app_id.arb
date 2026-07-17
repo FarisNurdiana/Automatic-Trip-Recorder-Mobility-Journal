@@ -89,6 +89,9 @@
   "tripFitRoute": "Tampilkan seluruh rute",
   "tripStart": "Mulai",
   "tripEnd": "Selesai",
+  "tripExportGpx": "Ekspor GPX",
+  "tripExportGpxDesc": "Bagikan rute sebagai file GPX (dapat diimpor ke Strava, Google Earth, dll.)",
+  "tripExportFailed": "Ekspor gagal. Perjalanan tidak memiliki titik rute.",
 
   "historyTitle": "Riwayat perjalanan",
   "historyEmpty": "Belum ada perjalanan. Mulai perjalanan pertama Anda dari beranda.",

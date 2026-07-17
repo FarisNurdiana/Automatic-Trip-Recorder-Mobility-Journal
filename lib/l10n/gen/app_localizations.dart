@@ -602,6 +602,24 @@ abstract class AppLocalizations {
   /// **'Selesai'**
   String get tripEnd;
 
+  /// No description provided for @tripExportGpx.
+  ///
+  /// In id, this message translates to:
+  /// **'Ekspor GPX'**
+  String get tripExportGpx;
+
+  /// No description provided for @tripExportGpxDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Bagikan rute sebagai file GPX (dapat diimpor ke Strava, Google Earth, dll.)'**
+  String get tripExportGpxDesc;
+
+  /// No description provided for @tripExportFailed.
+  ///
+  /// In id, this message translates to:
+  /// **'Ekspor gagal. Perjalanan tidak memiliki titik rute.'**
+  String get tripExportFailed;
+
   /// No description provided for @historyTitle.
   ///
   /// In id, this message translates to:

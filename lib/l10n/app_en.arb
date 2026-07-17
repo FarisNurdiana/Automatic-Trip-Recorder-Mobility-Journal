@@ -89,6 +89,9 @@
   "tripFitRoute": "Fit whole route",
   "tripStart": "Start",
   "tripEnd": "End",
+  "tripExportGpx": "Export GPX",
+  "tripExportGpxDesc": "Share the route as a GPX file (importable into Strava, Google Earth, etc.)",
+  "tripExportFailed": "Export failed. This trip has no route points.",
 
   "historyTitle": "Trip history",
   "historyEmpty": "No trips yet. Start your first trip from the home screen.",

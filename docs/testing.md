@@ -22,6 +22,7 @@ membutuhkan `libsqlite3` sistem (Ubuntu: `apt install libsqlite3-dev`).
 | Repository | `test/features/trips/trip_repository_test.dart` | lifecycle trip, urutan sequence, konfirmasi kendaraan (ground truth), **pemulihan trip setelah restart**, hapus data |
 | Sinkronisasi | `test/core/sync_service_test.dart` | upload + batch, **pencegahan duplikasi (idempoten)**, retry exponential backoff, kegagalan tidak menghapus data lokal |
 | Simulator | `test/core/trip_simulator_test.dart` | parsing skrip, playback bertahap, enter/exit vehicle, signal loss, pipeline penuh (jump terfilter, ringkasan masuk akal) |
+| Ekspor GPX | `test/features/trips/gpx_exporter_test.dart` | struktur GPX 1.1, trkpt per titik, timestamp UTC ISO-8601, escaping XML, durasi dapat direkonstruksi |
 | Controller | `test/features/recording/trip_recording_controller_test.dart` | alur manual penuh, deteksi otomatis, aksi notifikasi, recovery |
 
 ## Trip Simulator

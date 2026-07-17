@@ -267,6 +267,17 @@ class AppLocalizationsId extends AppLocalizations {
   String get tripEnd => 'Selesai';
 
   @override
+  String get tripExportGpx => 'Ekspor GPX';
+
+  @override
+  String get tripExportGpxDesc =>
+      'Bagikan rute sebagai file GPX (dapat diimpor ke Strava, Google Earth, dll.)';
+
+  @override
+  String get tripExportFailed =>
+      'Ekspor gagal. Perjalanan tidak memiliki titik rute.';
+
+  @override
   String get historyTitle => 'Riwayat perjalanan';
 
   @override

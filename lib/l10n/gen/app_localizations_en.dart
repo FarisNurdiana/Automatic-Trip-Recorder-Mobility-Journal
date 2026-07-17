@@ -266,6 +266,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripEnd => 'End';
 
   @override
+  String get tripExportGpx => 'Export GPX';
+
+  @override
+  String get tripExportGpxDesc =>
+      'Share the route as a GPX file (importable into Strava, Google Earth, etc.)';
+
+  @override
+  String get tripExportFailed =>
+      'Export failed. This trip has no route points.';
+
+  @override
   String get historyTitle => 'Trip history';
 
   @override

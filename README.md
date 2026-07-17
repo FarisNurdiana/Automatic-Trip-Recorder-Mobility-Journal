@@ -27,7 +27,14 @@ lengkap dengan peta rute, statistik, dan konfirmasi jenis kendaraan.
 - ✅ Perekaman dataset sensor (accelerometer/gyroscope/magnetometer) dengan
   buffering + downsampling, opsional dan hemat baterai
 - ✅ Pemulihan perjalanan setelah aplikasi ditutup paksa
+- ✅ **Ekspor GPX** dari detail perjalanan (share sheet) — dapat diimpor ke
+  Strava, Google Earth, komoot, dll., lengkap dengan timestamp sehingga durasi
+  dan jarak ikut terbawa
 - ✅ Bahasa Indonesia (default) + English, tema terang/gelap
+
+> **Prioritas platform:** pengujian difokuskan ke **Android** terlebih dahulu
+> (APK debug diverifikasi otomatis oleh CI). Kode iOS lengkap tetapi belum
+> diverifikasi — lihat `docs/ios-setup.md`.
 
 ## Struktur Proyek
 

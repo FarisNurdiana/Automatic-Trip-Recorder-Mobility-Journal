@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../app/providers.dart';
 import '../../../core/constants/enums.dart';
@@ -14,6 +19,7 @@ import '../../../core/utils/polyline_simplifier.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../shared/widgets/status_widgets.dart';
 import '../domain/gps_point_filter.dart';
+import '../domain/gpx_exporter.dart';
 import '../domain/trip_summary_calculator.dart';
 
 /// Everything the detail page needs, loaded once.
@@ -89,6 +95,13 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
         title: Text(l10n.tripCurrentTitle),
         actions: [
           IconButton(
+            icon: const Icon(Icons.ios_share),
+            tooltip: l10n.tripExportGpx,
+            onPressed: detail.valueOrNull == null
+                ? null
+                : () => _exportGpx(context, detail.valueOrNull!),
+          ),
+          IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _confirmDelete(context),
           ),
@@ -105,6 +118,47 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
         },
       ),
     );
+  }
+
+  /// Exports the (filtered) track as a GPX file and opens the system share
+  /// sheet, so the trip can be shown off or imported into Strava and friends.
+  Future<void> _exportGpx(BuildContext context, TripDetailData data) async {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).languageCode;
+    final messenger = ScaffoldMessenger.of(context);
+    if (data.rawPoints.length < 2) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.tripExportFailed)));
+      return;
+    }
+    final trip = data.trip;
+    final name =
+        'TripLog ${Formatters.dateTime(trip.startedAt, locale: locale)}';
+    final description =
+        '${Formatters.distanceKm(trip.distanceMeters, locale: locale)} • '
+        '${Formatters.duration(Duration(seconds: trip.elapsedDurationSeconds), locale: locale)} • '
+        '${Formatters.speedKmh(trip.averageSpeedKmh, locale: locale)}';
+    final gpx = const GpxExporter().build(
+      name: name,
+      description: description,
+      points: data.rawPoints,
+    );
+    try {
+      final dir = await getTemporaryDirectory();
+      final stamp = trip.startedAt
+          .toIso8601String()
+          .replaceAll(':', '-')
+          .split('.')
+          .first;
+      final file = File(p.join(dir.path, 'triplog_$stamp.gpx'));
+      await file.writeAsString(gpx);
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'application/gpx+xml')],
+        subject: name,
+        text: description,
+      );
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.commonError)));
+    }
   }
 
   Future<void> _confirmDelete(BuildContext context) async {
