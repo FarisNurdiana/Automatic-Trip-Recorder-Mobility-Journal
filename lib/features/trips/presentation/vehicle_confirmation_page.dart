@@ -203,10 +203,7 @@ class _VehicleConfirmationPageState
             icon: Icon(vehicleIcon(type)),
             style: OutlinedButton.styleFrom(
               alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             ),
             onPressed: () => _confirm(type),
             label: Text(vehicleLabel(l10n, type)),

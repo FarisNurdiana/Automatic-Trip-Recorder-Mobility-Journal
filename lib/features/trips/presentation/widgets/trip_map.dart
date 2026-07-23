@@ -108,7 +108,9 @@ class TripMap extends StatelessWidget {
                     padding: const EdgeInsets.all(48),
                   )
                 : null,
-            initialCenter: points.isNotEmpty ? points.first : const LatLng(0, 0),
+            initialCenter: points.isNotEmpty
+                ? points.first
+                : const LatLng(0, 0),
             initialZoom: 14,
             interactionOptions: InteractionOptions(
               flags: interactive ? InteractiveFlag.all : InteractiveFlag.none,
@@ -184,7 +186,9 @@ class TripMap extends StatelessWidget {
               ],
             ),
             const RichAttributionWidget(
-              attributions: [TextSourceAttribution('OpenStreetMap contributors')],
+              attributions: [
+                TextSourceAttribution('OpenStreetMap contributors'),
+              ],
             ),
           ],
         ),

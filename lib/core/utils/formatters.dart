@@ -36,8 +36,14 @@ class Formatters {
   static String time(DateTime t, {String locale = 'id'}) =>
       DateFormat.Hm(locale).format(t.toLocal());
 
-  static String dateTime(DateTime t, {String locale = 'id'}) =>
-      DateFormat.yMMMd(locale).add_Hm().format(t.toLocal());
+  /// Format lokal Indonesia: "23 Juli 2026, 07.49" (bulan penuh, koma,
+  /// jam dengan titik). English keeps the conventional "Jul 23, 2026 07:49".
+  static String dateTime(DateTime t, {String locale = 'id'}) {
+    if (locale == 'id') {
+      return DateFormat('d MMMM y, HH.mm', 'id').format(t.toLocal());
+    }
+    return DateFormat.yMMMd(locale).add_Hm().format(t.toLocal());
+  }
 
   static String date(DateTime t, {String locale = 'id'}) =>
       DateFormat.yMMMMd(locale).format(t.toLocal());

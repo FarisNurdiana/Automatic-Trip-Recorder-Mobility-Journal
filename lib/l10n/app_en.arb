@@ -283,5 +283,21 @@
   "shareShowMaxSpeed": "Show maximum speed",
   "sharePrivacyMode": "Privacy mode",
   "sharePrivacyModeDesc": "Trims ~300 m from the start and end of the route so home locations stay hidden.",
-  "shareContinue": "Continue"
+  "shareContinue": "Continue",
+  "signsTitle": "Traffic signs",
+  "signsSubtitle": "A short educational reference for Indonesian traffic signs. Not a substitute for official rules or a navigation aid.",
+  "signsSearchHint": "Search signs... (e.g. parkir, kecepatan, dilarang)",
+  "signsAll": "All",
+  "signsCatWarning": "Warning",
+  "signsCatProhibition": "Prohibition",
+  "signsCatMandatory": "Mandatory",
+  "signsCatGuide": "Guide",
+  "signsCatTemporary": "Temporary",
+  "signsCatMarking": "Road markings",
+  "signsMeaning": "Meaning",
+  "signsAction": "What to do",
+  "signsSafetyNote": "Safety note",
+  "signsEmpty": "No signs match your search.",
+  "signsFavorites": "Favorites",
+  "signsSourceNote": "Sources: Law No. 22/2009 & Ministerial Regulation PM 13/2014 (see docs)."
 }

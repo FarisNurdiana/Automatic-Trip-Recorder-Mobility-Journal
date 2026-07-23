@@ -1,11 +1,12 @@
-# TripLog — Automatic Trip Recorder / Mobility Journal
+# Ruteku — Catat Perjalanan Otomatis
 
-TripLog adalah aplikasi Flutter (Android & iOS) yang mendeteksi ketika Anda
-sedang menggunakan kendaraan, merekam rute perjalanan dari titik A ke titik B
-di latar belakang, lalu menghasilkan ringkasan perjalanan secara otomatis —
-lengkap dengan peta rute, statistik, dan konfirmasi jenis kendaraan.
+Ruteku (sebelumnya TripLog) adalah aplikasi Flutter (Android & iOS) yang
+mendeteksi ketika Anda sedang menggunakan kendaraan, merekam rute perjalanan
+dari titik A ke titik B di latar belakang, lalu menghasilkan ringkasan
+perjalanan secara otomatis — lengkap dengan peta rute, statistik, klasifikasi
+titik berhenti, dan konfirmasi jenis kendaraan.
 
-> TripLog **bukan** clone Strava: fokusnya adalah pencatatan perjalanan
+> Ruteku **bukan** clone Strava: fokusnya adalah pencatatan perjalanan
 > kendaraan otomatis (mobility journal), bukan aktivitas olahraga.
 
 ## Fitur MVP
@@ -27,9 +28,17 @@ lengkap dengan peta rute, statistik, dan konfirmasi jenis kendaraan.
 - ✅ Perekaman dataset sensor (accelerometer/gyroscope/magnetometer) dengan
   buffering + downsampling, opsional dan hemat baterai
 - ✅ Pemulihan perjalanan setelah aplikasi ditutup paksa
-- ✅ **Ekspor GPX** dari detail perjalanan (share sheet) — dapat diimpor ke
-  Strava, Google Earth, komoot, dll., lengkap dengan timestamp sehingga durasi
-  dan jarak ikut terbawa
+- ✅ **Bagikan perjalanan**: gambar PNG (peta + statistik + watermark, dengan
+  pilihan privasi & pemotongan rute), GPX (impor ke Strava/Google Earth),
+  GeoJSON, dan salin ringkasan
+- ✅ Peta layar penuh "Peta perjalanan" dengan marker berhenti yang dapat
+  ditekan, label berhenti (istirahat/parkir/BBM/tujuan...), panah arah,
+  dark mode, dan kontrol zoom/fit/recenter
+- ✅ Lifecycle berhenti bertingkat: berhenti singkat tanpa gangguan, 30 menit
+  memunculkan pertanyaan tujuan/istirahat, 5 jam menjadi kandidat tujuan
+  dengan auto-finish yang bisa dikoreksi pengguna
+- ✅ Modul edukasi **Rambu lalu lintas Indonesia** (pencarian, kategori,
+  favorit) bersumber UU 22/2009 & Permenhub PM 13/2014
 - ✅ Bahasa Indonesia (default) + English, tema terang/gelap
 
 > **Prioritas platform:** pengujian difokuskan ke **Android** terlebih dahulu

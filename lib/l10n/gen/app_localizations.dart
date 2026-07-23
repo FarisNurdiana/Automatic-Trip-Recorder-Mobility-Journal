@@ -1507,6 +1507,102 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Lanjut'**
   String get shareContinue;
+
+  /// No description provided for @signsTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Rambu lalu lintas'**
+  String get signsTitle;
+
+  /// No description provided for @signsSubtitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Referensi edukasi singkat rambu yang berlaku di Indonesia. Bukan pengganti aturan resmi atau alat navigasi.'**
+  String get signsSubtitle;
+
+  /// No description provided for @signsSearchHint.
+  ///
+  /// In id, this message translates to:
+  /// **'Cari rambu... (mis. parkir, kecepatan, dilarang)'**
+  String get signsSearchHint;
+
+  /// No description provided for @signsAll.
+  ///
+  /// In id, this message translates to:
+  /// **'Semua'**
+  String get signsAll;
+
+  /// No description provided for @signsCatWarning.
+  ///
+  /// In id, this message translates to:
+  /// **'Peringatan'**
+  String get signsCatWarning;
+
+  /// No description provided for @signsCatProhibition.
+  ///
+  /// In id, this message translates to:
+  /// **'Larangan'**
+  String get signsCatProhibition;
+
+  /// No description provided for @signsCatMandatory.
+  ///
+  /// In id, this message translates to:
+  /// **'Perintah'**
+  String get signsCatMandatory;
+
+  /// No description provided for @signsCatGuide.
+  ///
+  /// In id, this message translates to:
+  /// **'Petunjuk'**
+  String get signsCatGuide;
+
+  /// No description provided for @signsCatTemporary.
+  ///
+  /// In id, this message translates to:
+  /// **'Sementara'**
+  String get signsCatTemporary;
+
+  /// No description provided for @signsCatMarking.
+  ///
+  /// In id, this message translates to:
+  /// **'Marka jalan'**
+  String get signsCatMarking;
+
+  /// No description provided for @signsMeaning.
+  ///
+  /// In id, this message translates to:
+  /// **'Arti'**
+  String get signsMeaning;
+
+  /// No description provided for @signsAction.
+  ///
+  /// In id, this message translates to:
+  /// **'Tindakan'**
+  String get signsAction;
+
+  /// No description provided for @signsSafetyNote.
+  ///
+  /// In id, this message translates to:
+  /// **'Catatan keselamatan'**
+  String get signsSafetyNote;
+
+  /// No description provided for @signsEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'Tidak ada rambu yang cocok dengan pencarian.'**
+  String get signsEmpty;
+
+  /// No description provided for @signsFavorites.
+  ///
+  /// In id, this message translates to:
+  /// **'Favorit'**
+  String get signsFavorites;
+
+  /// No description provided for @signsSourceNote.
+  ///
+  /// In id, this message translates to:
+  /// **'Sumber: UU No. 22/2009 & Permenhub PM 13/2014 (lihat dokumentasi).'**
+  String get signsSourceNote;
 }
 
 class _AppLocalizationsDelegate

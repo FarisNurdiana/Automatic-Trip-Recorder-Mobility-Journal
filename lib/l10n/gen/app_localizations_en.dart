@@ -759,4 +759,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareContinue => 'Continue';
+
+  @override
+  String get signsTitle => 'Traffic signs';
+
+  @override
+  String get signsSubtitle =>
+      'A short educational reference for Indonesian traffic signs. Not a substitute for official rules or a navigation aid.';
+
+  @override
+  String get signsSearchHint =>
+      'Search signs... (e.g. parkir, kecepatan, dilarang)';
+
+  @override
+  String get signsAll => 'All';
+
+  @override
+  String get signsCatWarning => 'Warning';
+
+  @override
+  String get signsCatProhibition => 'Prohibition';
+
+  @override
+  String get signsCatMandatory => 'Mandatory';
+
+  @override
+  String get signsCatGuide => 'Guide';
+
+  @override
+  String get signsCatTemporary => 'Temporary';
+
+  @override
+  String get signsCatMarking => 'Road markings';
+
+  @override
+  String get signsMeaning => 'Meaning';
+
+  @override
+  String get signsAction => 'What to do';
+
+  @override
+  String get signsSafetyNote => 'Safety note';
+
+  @override
+  String get signsEmpty => 'No signs match your search.';
+
+  @override
+  String get signsFavorites => 'Favorites';
+
+  @override
+  String get signsSourceNote =>
+      'Sources: Law No. 22/2009 & Ministerial Regulation PM 13/2014 (see docs).';
 }

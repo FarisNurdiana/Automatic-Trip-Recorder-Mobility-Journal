@@ -174,12 +174,7 @@ class DefaultTripStateMachine implements TripStateMachine {
     DateTime at,
     String reason,
   ) {
-    final t = TripStateTransition(
-      from: _state,
-      to: to,
-      at: at,
-      reason: reason,
-    );
+    final t = TripStateTransition(from: _state, to: to, at: at, reason: reason);
     _state = to;
     _diagnose(t.toString());
     return [t];

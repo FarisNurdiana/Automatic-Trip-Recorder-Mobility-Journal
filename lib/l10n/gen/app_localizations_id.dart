@@ -762,4 +762,55 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get shareContinue => 'Lanjut';
+
+  @override
+  String get signsTitle => 'Rambu lalu lintas';
+
+  @override
+  String get signsSubtitle =>
+      'Referensi edukasi singkat rambu yang berlaku di Indonesia. Bukan pengganti aturan resmi atau alat navigasi.';
+
+  @override
+  String get signsSearchHint =>
+      'Cari rambu... (mis. parkir, kecepatan, dilarang)';
+
+  @override
+  String get signsAll => 'Semua';
+
+  @override
+  String get signsCatWarning => 'Peringatan';
+
+  @override
+  String get signsCatProhibition => 'Larangan';
+
+  @override
+  String get signsCatMandatory => 'Perintah';
+
+  @override
+  String get signsCatGuide => 'Petunjuk';
+
+  @override
+  String get signsCatTemporary => 'Sementara';
+
+  @override
+  String get signsCatMarking => 'Marka jalan';
+
+  @override
+  String get signsMeaning => 'Arti';
+
+  @override
+  String get signsAction => 'Tindakan';
+
+  @override
+  String get signsSafetyNote => 'Catatan keselamatan';
+
+  @override
+  String get signsEmpty => 'Tidak ada rambu yang cocok dengan pencarian.';
+
+  @override
+  String get signsFavorites => 'Favorit';
+
+  @override
+  String get signsSourceNote =>
+      'Sumber: UU No. 22/2009 & Permenhub PM 13/2014 (lihat dokumentasi).';
 }

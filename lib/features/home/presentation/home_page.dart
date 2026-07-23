@@ -239,6 +239,12 @@ class HomePage extends ConsumerWidget {
               icon: const Icon(Icons.history),
               label: Text(l10n.historyTitle),
             ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => context.push('/signs'),
+              icon: const Icon(Icons.signpost_outlined),
+              label: Text(l10n.signsTitle),
+            ),
           ],
         ),
       ),

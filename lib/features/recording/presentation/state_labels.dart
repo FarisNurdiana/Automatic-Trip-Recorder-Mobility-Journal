@@ -10,8 +10,7 @@ String tripStateLabel(AppLocalizations l10n, TripRecordingState state) =>
       TripRecordingState.shortStop => l10n.stateShortStop,
       TripRecordingState.temporarilyStopped => l10n.stateTemporarilyStopped,
       TripRecordingState.restStopCandidate => l10n.stateRestStopCandidate,
-      TripRecordingState.destinationCandidate =>
-        l10n.stateDestinationCandidate,
+      TripRecordingState.destinationCandidate => l10n.stateDestinationCandidate,
       TripRecordingState.finishing => l10n.stateFinishing,
       TripRecordingState.finished => l10n.stateFinished,
       TripRecordingState.cancelled => l10n.stateCancelled,

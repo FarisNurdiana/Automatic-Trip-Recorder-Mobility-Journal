@@ -159,10 +159,13 @@ class TripStops extends Table {
   TextColumn get address => text().nullable()();
 
   /// [StopType] name; `unconfirmed` until the user labels it.
-  TextColumn get stopType => text().withDefault(const Constant('unconfirmed'))();
+  TextColumn get stopType =>
+      text().withDefault(const Constant('unconfirmed'))();
   TextColumn get stopNote => text().nullable()();
-  BoolColumn get isDestination => boolean().withDefault(const Constant(false))();
-  BoolColumn get confirmedByUser => boolean().withDefault(const Constant(false))();
+  BoolColumn get isDestination =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get confirmedByUser =>
+      boolean().withDefault(const Constant(false))();
   DateTimeColumn get notificationSentAt => dateTime().nullable()();
   TextColumn get syncStatus => text().withDefault(const Constant('pending'))();
   DateTimeColumn get createdAt => dateTime()();

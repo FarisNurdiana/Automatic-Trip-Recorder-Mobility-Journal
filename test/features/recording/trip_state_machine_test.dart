@@ -263,9 +263,7 @@ void main() {
           transition: ActivityTransition.enter,
         ),
       );
-      final transitions = machine.onTick(
-        t0.add(const Duration(minutes: 18)),
-      );
+      final transitions = machine.onTick(t0.add(const Duration(minutes: 18)));
       expect(transitions.single.to, TripRecordingState.finishing);
     });
 
@@ -278,9 +276,7 @@ void main() {
           transition: ActivityTransition.sample,
         ),
       );
-      final transitions = machine.onTick(
-        t0.add(const Duration(minutes: 12)),
-      );
+      final transitions = machine.onTick(t0.add(const Duration(minutes: 12)));
       expect(transitions, isEmpty);
     });
   });

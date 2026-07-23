@@ -28,7 +28,8 @@ class CurrentTripPage extends ConsumerWidget {
     final isRecording =
         state.machineState == TripRecordingState.recording ||
         state.machineState == TripRecordingState.shortStop;
-    final isPaused = state.machineState.isStoppedLike &&
+    final isPaused =
+        state.machineState.isStoppedLike &&
         state.machineState != TripRecordingState.shortStop;
     final hasActive = state.machineState.isActiveTrip;
 
@@ -115,10 +116,7 @@ class CurrentTripPage extends ConsumerWidget {
                   child: StatTile(
                     label: l10n.gpsQuality,
                     icon: Icons.gps_fixed,
-                    value: _gpsQualityLabel(
-                      l10n,
-                      state.currentAccuracyMeters,
-                    ),
+                    value: _gpsQualityLabel(l10n, state.currentAccuracyMeters),
                   ),
                 ),
               ],

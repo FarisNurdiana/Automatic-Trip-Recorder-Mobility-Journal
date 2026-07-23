@@ -410,10 +410,7 @@ class TripShareCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Row(
               children: [
-                Icon(
-                  Icons.route,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                Icon(Icons.route, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   'Ruteku',

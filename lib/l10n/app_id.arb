@@ -283,5 +283,21 @@
   "shareShowMaxSpeed": "Tampilkan kecepatan maksimum",
   "sharePrivacyMode": "Mode privasi",
   "sharePrivacyModeDesc": "Memotong ±300 m di awal dan akhir rute agar lokasi rumah tidak terlihat.",
-  "shareContinue": "Lanjut"
+  "shareContinue": "Lanjut",
+  "signsTitle": "Rambu lalu lintas",
+  "signsSubtitle": "Referensi edukasi singkat rambu yang berlaku di Indonesia. Bukan pengganti aturan resmi atau alat navigasi.",
+  "signsSearchHint": "Cari rambu... (mis. parkir, kecepatan, dilarang)",
+  "signsAll": "Semua",
+  "signsCatWarning": "Peringatan",
+  "signsCatProhibition": "Larangan",
+  "signsCatMandatory": "Perintah",
+  "signsCatGuide": "Petunjuk",
+  "signsCatTemporary": "Sementara",
+  "signsCatMarking": "Marka jalan",
+  "signsMeaning": "Arti",
+  "signsAction": "Tindakan",
+  "signsSafetyNote": "Catatan keselamatan",
+  "signsEmpty": "Tidak ada rambu yang cocok dengan pencarian.",
+  "signsFavorites": "Favorit",
+  "signsSourceNote": "Sumber: UU No. 22/2009 & Permenhub PM 13/2014 (lihat dokumentasi)."
 }

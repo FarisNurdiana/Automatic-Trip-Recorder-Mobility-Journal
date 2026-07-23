@@ -108,23 +108,19 @@ class _TripMapPageState extends ConsumerState<TripMapPage> {
                       ])
                         ChoiceChip(
                           label: Text(stopTypeLabel(l10n, type)),
-                          selected:
-                              stop.confirmedByUser && currentType == type,
+                          selected: stop.confirmedByUser && currentType == type,
                           onSelected: (_) async {
                             await ref
                                 .read(tripRepositoryProvider)
                                 .labelStop(
                                   stopId: stop.id,
                                   type: type,
-                                  isDestination:
-                                      type == StopType.destination
+                                  isDestination: type == StopType.destination
                                       ? true
                                       : null,
                                 );
                             setSheetState(() => currentType = type);
-                            ref.invalidate(
-                              tripDetailProvider(widget.tripId),
-                            );
+                            ref.invalidate(tripDetailProvider(widget.tripId));
                             if (ctx.mounted) Navigator.pop(ctx);
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
