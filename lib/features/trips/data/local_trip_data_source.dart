@@ -37,6 +37,12 @@ abstract interface class LocalTripDataSource {
 
   /// Aggregate totals for the dashboard: (tripCount, totalDistanceMeters).
   Future<(int, double)> totalsForUser(String userId);
+
+  // --- trip stops ---
+  Future<void> upsertStop(TripStopsCompanion stop);
+  Future<List<TripStop>> stopsForTrip(String tripId);
+  Future<TripStop?> getStop(String id);
+  Future<void> setStopsSyncStatus(String tripId, SyncStatus status);
 }
 
 /// Drift-backed implementation.
@@ -82,6 +88,7 @@ class DriftTripDataSource implements LocalTripDataSource {
       await (db.delete(
         db.activityEvents,
       )..where((e) => e.tripId.equals(id))).go();
+      await (db.delete(db.tripStops)..where((s) => s.tripId.equals(id))).go();
       await (db.delete(db.trips)..where((t) => t.id.equals(id))).go();
     });
   }
@@ -92,6 +99,7 @@ class DriftTripDataSource implements LocalTripDataSource {
       await db.delete(db.tripPoints).go();
       await db.delete(db.sensorSamples).go();
       await db.delete(db.activityEvents).go();
+      await db.delete(db.tripStops).go();
       await db.delete(db.trips).go();
     });
   }
@@ -190,6 +198,28 @@ class DriftTripDataSource implements LocalTripDataSource {
   @override
   Future<void> upsertUser(UsersCompanion user) =>
       db.into(db.users).insertOnConflictUpdate(user);
+
+  @override
+  Future<void> upsertStop(TripStopsCompanion stop) =>
+      db.into(db.tripStops).insertOnConflictUpdate(stop);
+
+  @override
+  Future<List<TripStop>> stopsForTrip(String tripId) =>
+      (db.select(db.tripStops)
+            ..where((s) => s.tripId.equals(tripId))
+            ..orderBy([(s) => OrderingTerm.asc(s.arrivalTime)]))
+          .get();
+
+  @override
+  Future<TripStop?> getStop(String id) => (db.select(
+    db.tripStops,
+  )..where((s) => s.id.equals(id))).getSingleOrNull();
+
+  @override
+  Future<void> setStopsSyncStatus(String tripId, SyncStatus status) =>
+      (db.update(db.tripStops)..where((s) => s.tripId.equals(tripId))).write(
+        TripStopsCompanion(syncStatus: Value(status.name)),
+      );
 
   @override
   Future<(int, double)> totalsForUser(String userId) async {

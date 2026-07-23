@@ -82,4 +82,12 @@ class RecordedLocation {
 enum LocationSamplingProfile { moving, slow, stopped }
 
 /// Actions coming back from the persistent notification (Android).
-enum TrackingNotificationAction { pause, resume, stop }
+/// arrived/resting/continueTrip answer the stationary-stop question.
+enum TrackingNotificationAction {
+  pause,
+  resume,
+  stop,
+  arrived,
+  resting,
+  continueTrip,
+}

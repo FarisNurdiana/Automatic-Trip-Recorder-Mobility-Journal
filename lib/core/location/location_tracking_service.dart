@@ -23,11 +23,13 @@ abstract interface class LocationTrackingService {
   Future<void> setProfile(LocationSamplingProfile profile);
 
   /// Updates the persistent notification content (Android only, no-op on
-  /// other platforms). [paused] switches the action button set.
+  /// other platforms). [paused] switches the action button set;
+  /// [question] switches the actions to the arrived/resting/continue answers.
   Future<void> updateNotification({
     required String title,
     required String body,
     bool paused = false,
+    bool question = false,
   });
 
   /// Stops tracking and removes the foreground service/notification.

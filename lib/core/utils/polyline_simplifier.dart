@@ -14,6 +14,28 @@ class SimplePoint {
 class PolylineSimplifier {
   PolylineSimplifier._();
 
+  /// Simple moving-average smoothing for DISPLAY only (window must be odd).
+  /// Endpoints are preserved so the route still starts/ends exactly where
+  /// the raw data does.
+  static List<SimplePoint> smooth(List<SimplePoint> points, {int window = 3}) {
+    if (points.length < window || window < 3) return List.of(points);
+    final half = window ~/ 2;
+    final out = <SimplePoint>[points.first];
+    for (var i = 1; i < points.length - 1; i++) {
+      final from = (i - half).clamp(0, points.length - 1);
+      final to = (i + half).clamp(0, points.length - 1);
+      var lat = 0.0, lon = 0.0;
+      for (var j = from; j <= to; j++) {
+        lat += points[j].latitude;
+        lon += points[j].longitude;
+      }
+      final n = to - from + 1;
+      out.add(SimplePoint(lat / n, lon / n));
+    }
+    out.add(points.last);
+    return out;
+  }
+
   /// [toleranceDegrees] ~0.0001 is roughly 11 m at the equator.
   static List<SimplePoint> simplify(
     List<SimplePoint> points, {

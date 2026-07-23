@@ -38,11 +38,15 @@ class TripTrackingService : Service() {
         const val ACTION_NOTIF_PAUSE = "com.triplog.NOTIF_PAUSE"
         const val ACTION_NOTIF_RESUME = "com.triplog.NOTIF_RESUME"
         const val ACTION_NOTIF_STOP = "com.triplog.NOTIF_STOP"
+        const val ACTION_NOTIF_ARRIVED = "com.triplog.NOTIF_ARRIVED"
+        const val ACTION_NOTIF_RESTING = "com.triplog.NOTIF_RESTING"
+        const val ACTION_NOTIF_CONTINUE = "com.triplog.NOTIF_CONTINUE"
 
         const val EXTRA_PROFILE = "profile"
         const val EXTRA_TITLE = "title"
         const val EXTRA_BODY = "body"
         const val EXTRA_PAUSED = "paused"
+        const val EXTRA_QUESTION = "question"
 
         private const val CHANNEL_ID = "triplog_tracking"
         private const val NOTIFICATION_ID = 100
@@ -57,6 +61,7 @@ class TripTrackingService : Service() {
     private var lastTitle = "Perjalanan sedang direkam"
     private var lastBody = ""
     private var lastPaused = false
+    private var lastQuestion = false
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
@@ -114,6 +119,7 @@ class TripTrackingService : Service() {
                 lastTitle = intent.getStringExtra(EXTRA_TITLE) ?: lastTitle
                 lastBody = intent.getStringExtra(EXTRA_BODY) ?: lastBody
                 lastPaused = intent.getBooleanExtra(EXTRA_PAUSED, lastPaused)
+                lastQuestion = intent.getBooleanExtra(EXTRA_QUESTION, false)
                 if (isRunning) {
                     val manager = getSystemService(NotificationManager::class.java)
                     manager.notify(NOTIFICATION_ID, buildNotification())
@@ -122,6 +128,9 @@ class TripTrackingService : Service() {
             ACTION_NOTIF_PAUSE -> EventStreams.emitAction("pause")
             ACTION_NOTIF_RESUME -> EventStreams.emitAction("resume")
             ACTION_NOTIF_STOP -> EventStreams.emitAction("stop")
+            ACTION_NOTIF_ARRIVED -> EventStreams.emitAction("arrived")
+            ACTION_NOTIF_RESTING -> EventStreams.emitAction("resting")
+            ACTION_NOTIF_CONTINUE -> EventStreams.emitAction("continue")
             ACTION_STOP -> {
                 stopTracking()
                 return START_NOT_STICKY
@@ -193,12 +202,19 @@ class TripTrackingService : Service() {
             .setOnlyAlertOnce(true)
             .setContentIntent(contentIntent)
             .setCategory(NotificationCompat.CATEGORY_NAVIGATION)
-        if (lastPaused) {
-            builder.addAction(0, "Lanjutkan", servicePendingIntent(ACTION_NOTIF_RESUME, 1))
+        if (lastQuestion) {
+            // Stationary-stop question: answer directly from the notification.
+            builder.addAction(0, "Sudah sampai", servicePendingIntent(ACTION_NOTIF_ARRIVED, 4))
+            builder.addAction(0, "Istirahat", servicePendingIntent(ACTION_NOTIF_RESTING, 5))
+            builder.addAction(0, "Lanjutkan", servicePendingIntent(ACTION_NOTIF_CONTINUE, 6))
         } else {
-            builder.addAction(0, "Pause", servicePendingIntent(ACTION_NOTIF_PAUSE, 2))
+            if (lastPaused) {
+                builder.addAction(0, "Lanjutkan", servicePendingIntent(ACTION_NOTIF_RESUME, 1))
+            } else {
+                builder.addAction(0, "Pause", servicePendingIntent(ACTION_NOTIF_PAUSE, 2))
+            }
+            builder.addAction(0, "Stop", servicePendingIntent(ACTION_NOTIF_STOP, 3))
         }
-        builder.addAction(0, "Stop", servicePendingIntent(ACTION_NOTIF_STOP, 3))
         return builder.build()
     }
 

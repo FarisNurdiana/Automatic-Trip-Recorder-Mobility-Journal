@@ -13,6 +13,7 @@ class SimulatedLocationTrackingService implements LocationTrackingService {
   LocationSamplingProfile? profile;
   String? lastNotificationTitle;
   String? lastNotificationBody;
+  bool lastNotificationQuestion = false;
 
   /// Push a fix into the stream (used by simulator playback and tests).
   void emit(RecordedLocation location) {
@@ -47,7 +48,9 @@ class SimulatedLocationTrackingService implements LocationTrackingService {
     required String title,
     required String body,
     bool paused = false,
+    bool question = false,
   }) async {
+    lastNotificationQuestion = question;
     lastNotificationTitle = title;
     lastNotificationBody = body;
   }

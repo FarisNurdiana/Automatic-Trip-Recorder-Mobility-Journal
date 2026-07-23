@@ -7,6 +7,9 @@ import '../../../core/constants/enums.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../shared/widgets/status_widgets.dart';
+import '../application/trip_recording_controller.dart';
+import '../domain/trip_state_machine.dart';
+import 'state_labels.dart';
 
 /// Live view of the ongoing trip with manual controls
 /// (pause / resume / finish / cancel).
@@ -20,19 +23,13 @@ class CurrentTripPage extends ConsumerWidget {
     final state = ref.watch(tripRecordingControllerProvider);
     final controller = ref.read(tripRecordingControllerProvider.notifier);
 
-    final statusLabel = switch (state.machineState) {
-      TripRecordingState.idle => l10n.stateIdle,
-      TripRecordingState.possibleTrip => l10n.statePossibleTrip,
-      TripRecordingState.recording => l10n.stateRecording,
-      TripRecordingState.temporarilyStopped => l10n.stateTemporarilyStopped,
-      TripRecordingState.finishing => l10n.stateFinishing,
-      TripRecordingState.finished => l10n.stateFinished,
-      TripRecordingState.cancelled => l10n.stateCancelled,
-    };
+    final statusLabel = tripStateLabel(l10n, state.machineState);
 
-    final isRecording = state.machineState == TripRecordingState.recording;
-    final isPaused =
-        state.machineState == TripRecordingState.temporarilyStopped;
+    final isRecording =
+        state.machineState == TripRecordingState.recording ||
+        state.machineState == TripRecordingState.shortStop;
+    final isPaused = state.machineState.isStoppedLike &&
+        state.machineState != TripRecordingState.shortStop;
     final hasActive = state.machineState.isActiveTrip;
 
     return Scaffold(
@@ -99,13 +96,40 @@ class CurrentTripPage extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 12),
-            StatTile(
-              label: l10n.tripSpeed,
-              icon: Icons.speed,
-              value: state.currentSpeedKmh == null
-                  ? '—'
-                  : Formatters.speedKmh(state.currentSpeedKmh!, locale: locale),
+            Row(
+              children: [
+                Expanded(
+                  child: StatTile(
+                    label: l10n.tripSpeed,
+                    icon: Icons.speed,
+                    value: state.currentSpeedKmh == null
+                        ? '—'
+                        : Formatters.speedKmh(
+                            state.currentSpeedKmh!,
+                            locale: locale,
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: StatTile(
+                    label: l10n.gpsQuality,
+                    icon: Icons.gps_fixed,
+                    value: _gpsQualityLabel(
+                      l10n,
+                      state.currentAccuracyMeters,
+                    ),
+                  ),
+                ),
+              ],
             ),
+            if (state.stopQuestion != null) ...[
+              const SizedBox(height: 12),
+              _StopQuestionCard(
+                kind: state.stopQuestion!,
+                onAnswer: controller.answerStopQuestion,
+              ),
+            ],
             const Spacer(),
             if (!hasActive)
               FilledButton.icon(
@@ -168,6 +192,75 @@ class CurrentTripPage extends ConsumerWidget {
                 },
                 icon: const Icon(Icons.delete_outline),
                 label: Text(l10n.tripCancel),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _gpsQualityLabel(AppLocalizations l10n, double? accuracy) {
+    if (accuracy == null) return '—';
+    if (accuracy <= 15) return '${l10n.gpsGood} (±${accuracy.round()} m)';
+    if (accuracy <= 40) return '${l10n.gpsFair} (±${accuracy.round()} m)';
+    return '${l10n.gpsPoor} (±${accuracy.round()} m)';
+  }
+}
+
+/// In-app version of the stationary-stop question (mirrors the notification
+/// actions, for when the app is open).
+class _StopQuestionCard extends StatelessWidget {
+  const _StopQuestionCard({required this.kind, required this.onAnswer});
+
+  final StopQuestionKind kind;
+  final Future<void> Function(StopQuestionAnswer) onAnswer;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final destination = kind == StopQuestionKind.destination;
+    return Card(
+      color: Theme.of(context).colorScheme.tertiaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              destination ? l10n.stopQuestion5hTitle : l10n.stopQuestion30Title,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              destination ? l10n.stopQuestion5hBody : l10n.stopQuestion30Body,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+            if (destination) ...[
+              FilledButton(
+                onPressed: () => onAnswer(StopQuestionAnswer.arrived),
+                child: Text(l10n.finishTripAction),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: () => onAnswer(StopQuestionAnswer.continueTrip),
+                child: Text(l10n.keepTripAction),
+              ),
+            ] else ...[
+              FilledButton(
+                onPressed: () => onAnswer(StopQuestionAnswer.arrived),
+                child: Text(l10n.answerArrived),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: () => onAnswer(StopQuestionAnswer.resting),
+                child: Text(l10n.answerResting),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: () => onAnswer(StopQuestionAnswer.continueTrip),
+                child: Text(l10n.answerContinue),
               ),
             ],
           ],

@@ -30,7 +30,7 @@ class TripLogApp extends ConsumerWidget {
     });
 
     return MaterialApp.router(
-      title: 'TripLog',
+      title: 'Ruteku',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),

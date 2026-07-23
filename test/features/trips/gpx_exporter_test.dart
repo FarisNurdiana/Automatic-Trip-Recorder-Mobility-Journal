@@ -22,7 +22,7 @@ void main() {
       expect(gpx, startsWith('<?xml version="1.0" encoding="UTF-8"?>'));
       expect(gpx, contains('<gpx version="1.1"'));
       expect(gpx, contains('xmlns="http://www.topografix.com/GPX/1/1"'));
-      expect(gpx, contains('creator="TripLog"'));
+      expect(gpx, contains('creator="Ruteku"'));
     });
 
     test('contains one trkpt per point with lat/lon/time', () {

@@ -32,11 +32,21 @@ enum ActivityTransition {
 }
 
 /// Explicit trip recording state machine states.
+///
+/// Stop-related states are graded by duration so a red light, a rest stop,
+/// and an actual arrival are treated differently:
+///  * [shortStop] — < ~5 minutes (red light/congestion), no questions asked;
+///  * [temporarilyStopped] — medium stop (5–30 min) or manual pause;
+///  * [restStopCandidate] — ~30 min stationary, user asked rest/arrived;
+///  * [destinationCandidate] — hours stationary, trip likely finished.
 enum TripRecordingState {
   idle,
   possibleTrip,
   recording,
+  shortStop,
   temporarilyStopped,
+  restStopCandidate,
+  destinationCandidate,
   finishing,
   finished,
   cancelled;
@@ -46,7 +56,19 @@ enum TripRecordingState {
 
   /// States in which a trip row exists and points are being collected.
   bool get isActiveTrip =>
-      this == recording || this == temporarilyStopped || this == finishing;
+      this == recording ||
+      this == shortStop ||
+      this == temporarilyStopped ||
+      this == restStopCandidate ||
+      this == destinationCandidate ||
+      this == finishing;
+
+  /// Stopped-flavored states (vehicle not moving).
+  bool get isStoppedLike =>
+      this == shortStop ||
+      this == temporarilyStopped ||
+      this == restStopCandidate ||
+      this == destinationCandidate;
 }
 
 /// Vehicle types the user can confirm after a trip.
@@ -56,11 +78,29 @@ enum VehicleType {
   bus,
   truck,
   train,
+  bicycle,
   other,
   unknown;
 
   static VehicleType fromName(String? name) =>
       VehicleType.values.asNameMap()[name] ?? VehicleType.unknown;
+}
+
+/// User-assigned label for a stop within a trip. Optional ground truth for
+/// understanding trip structure (rest vs parking vs destination).
+enum StopType {
+  rest,
+  parking,
+  food,
+  fuel,
+  visit,
+  traffic,
+  destination,
+  other,
+  unconfirmed;
+
+  static StopType fromName(String? name) =>
+      StopType.values.asNameMap()[name] ?? StopType.unconfirmed;
 }
 
 /// Sync lifecycle of a local row.

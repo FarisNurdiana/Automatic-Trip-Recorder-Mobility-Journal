@@ -48,6 +48,9 @@ class MethodChannelLocationTrackingService implements LocationTrackingService {
             (event) => switch (event as String) {
               'pause' => TrackingNotificationAction.pause,
               'resume' => TrackingNotificationAction.resume,
+              'arrived' => TrackingNotificationAction.arrived,
+              'resting' => TrackingNotificationAction.resting,
+              'continue' => TrackingNotificationAction.continueTrip,
               _ => TrackingNotificationAction.stop,
             },
           )
@@ -79,12 +82,14 @@ class MethodChannelLocationTrackingService implements LocationTrackingService {
     required String title,
     required String body,
     bool paused = false,
+    bool question = false,
   }) async {
     try {
       await _channel.invokeMethod('updateNotification', {
         'title': title,
         'body': body,
         'paused': paused,
+        'question': question,
       });
     } on PlatformException {
       // Notification updates are best-effort (no-op on iOS).

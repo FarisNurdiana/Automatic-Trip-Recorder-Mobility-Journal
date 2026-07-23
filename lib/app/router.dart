@@ -17,6 +17,7 @@ import '../features/settings/presentation/privacy_page.dart';
 import '../features/settings/presentation/settings_page.dart';
 import '../features/trips/presentation/trip_detail_page.dart';
 import '../features/trips/presentation/trip_history_page.dart';
+import '../features/trips/presentation/trip_map_page.dart';
 import '../features/trips/presentation/vehicle_confirmation_page.dart';
 import 'providers.dart';
 
@@ -90,6 +91,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/trips/:id',
         builder: (_, state) =>
             TripDetailPage(tripId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/trips/:id/map',
+        builder: (_, state) =>
+            TripMapPage(tripId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/trips/:id/confirm-vehicle',

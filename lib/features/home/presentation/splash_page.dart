@@ -14,7 +14,7 @@ class SplashPage extends StatelessWidget {
           children: [
             Icon(Icons.route, size: 72, color: scheme.primary),
             const SizedBox(height: 16),
-            Text('TripLog', style: Theme.of(context).textTheme.headlineMedium),
+            Text('Ruteku', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 24),
             const CircularProgressIndicator(),
           ],

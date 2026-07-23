@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "TripLog",
+  "appTitle": "Ruteku",
   "commonRetry": "Retry",
   "commonCancel": "Cancel",
   "commonSave": "Save",
@@ -15,7 +15,6 @@
   "commonNext": "Next",
   "commonDone": "Done",
   "commonConfirm": "Confirm",
-
   "authLoginTitle": "Sign in",
   "authRegisterTitle": "Sign up",
   "authEmail": "Email",
@@ -36,7 +35,6 @@
   "authPasswordTooShort": "Password must be at least 8 characters",
   "authRegisterSuccess": "Registration successful. Check your email for confirmation.",
   "authLogoutUnsyncedWarning": "There is still unsynced data. If you sign out now, that data stays on the device but will not be uploaded until you sign in again.",
-
   "homeTitle": "Home",
   "homeDetectionStatus": "Detection status",
   "homeStartTrip": "Start trip",
@@ -48,7 +46,6 @@
   "homeNoTrips": "No trips recorded yet",
   "homePermissionsIncomplete": "Some permissions are missing",
   "homePermissionsComplete": "All permissions granted",
-
   "stateIdle": "Watching for activity",
   "statePossibleTrip": "Possible trip detected",
   "stateRecording": "Trip is being recorded",
@@ -56,14 +53,12 @@
   "stateFinishing": "Finishing trip",
   "stateFinished": "Trip saved",
   "stateCancelled": "Trip cancelled",
-
   "syncPending": "Waiting to sync",
   "syncSyncing": "Syncing...",
   "syncSynced": "Synced",
   "syncFailed": "Sync failed",
   "syncNow": "Sync now",
   "syncLocalOnly": "Local mode — sync disabled",
-
   "tripCurrentTitle": "Current trip",
   "tripPause": "Pause",
   "tripResume": "Resume",
@@ -92,10 +87,8 @@
   "tripExportGpx": "Export GPX",
   "tripExportGpxDesc": "Share the route as a GPX file (importable into Strava, Google Earth, etc.)",
   "tripExportFailed": "Export failed. This trip has no route points.",
-
   "historyTitle": "Trip history",
   "historyEmpty": "No trips yet. Start your first trip from the home screen.",
-
   "vehicleConfirmTitle": "Confirm vehicle",
   "vehicleConfirmMessage": "We detected a trip using a vehicle.",
   "vehicleConfirmQuestion": "Vehicle type:",
@@ -122,7 +115,6 @@
   "vehicleTrain": "Train",
   "vehicleOther": "Other",
   "vehicleUnknown": "Unknown",
-
   "profileTitle": "Profile",
   "settingsTitle": "Settings",
   "settingsAutoDetection": "Automatic trip detection",
@@ -145,7 +137,6 @@
   "themeDark": "Dark",
   "settingsPermissions": "Permission diagnostics",
   "settingsPrivacy": "Privacy & security",
-
   "privacyTitle": "Privacy & security",
   "privacyDeleteAllLocal": "Delete all local data",
   "privacyDeleteAllLocalConfirm": "All trips and sensor data on this device will be permanently deleted. Continue?",
@@ -154,7 +145,6 @@
   "privacyDeleteTrip": "Delete trip",
   "privacyDeleteTripConfirm": "Permanently delete this trip?",
   "privacyDataDeleted": "Data deleted",
-
   "permLocation": "Location",
   "permLocationDesc": "Used to record your trip route.",
   "permBackgroundLocation": "Background location",
@@ -173,13 +163,11 @@
   "permInactive": "Inactive",
   "permRequest": "Request permission",
   "permOpenSettings": "Open settings",
-
-  "onboardingWelcomeTitle": "Welcome to TripLog",
-  "onboardingWelcomeDesc": "Record your trips automatically. TripLog detects when you are in a vehicle, records the route, and creates a trip summary.",
+  "onboardingWelcomeTitle": "Welcome to Ruteku",
+  "onboardingWelcomeDesc": "Record your trips automatically. Ruteku detects when you are in a vehicle, records the route, and creates a trip summary.",
   "onboardingPermissionsTitle": "Required permissions",
-  "onboardingPermissionsDesc": "For automatic recording to work, TripLog needs a few permissions. Each one is explained before it is requested.",
+  "onboardingPermissionsDesc": "For automatic recording to work, Ruteku needs a few permissions. Each one is explained before it is requested.",
   "onboardingStart": "Get started",
-
   "errorPermissionDenied": "Permission denied. Some features will not work.",
   "errorGpsDisabled": "GPS is off. Enable location services to record trips.",
   "errorActivityUnavailable": "Activity recognition is unavailable on this device. Use manual recording.",
@@ -189,12 +177,111 @@
   "errorTripTooFewPoints": "Trip was not saved because it has too few GPS points.",
   "errorEnvMissing": "Supabase configuration is missing",
   "errorEnvMissingDesc": "Copy .env.example to .env and fill SUPABASE_URL and SUPABASE_ANON_KEY. You can still use local mode without an account.",
-
   "unitKm": "km",
   "unitKmh": "km/h",
   "unitHour": "h",
   "unitMinute": "min",
-
   "recoveredTripTitle": "Trip recovered",
-  "recoveredTripMessage": "An in-progress trip was found and resumed after the app was closed."
+  "recoveredTripMessage": "An in-progress trip was found and resumed after the app was closed.",
+  "stateShortStop": "Brief stop",
+  "stateRestStopCandidate": "Stopped for a while",
+  "stateDestinationCandidate": "Possibly arrived",
+  "stopQuestion30Title": "You have been stopped for 30 minutes",
+  "stopQuestion30Body": "Have you arrived at your destination, or are you resting?",
+  "stopQuestion5hTitle": "The trip has probably finished",
+  "stopQuestion5hBody": "You have been at the same location for more than 5 hours.",
+  "answerArrived": "Arrived",
+  "answerResting": "Resting",
+  "answerContinue": "Continue trip",
+  "finishTripAction": "Finish trip",
+  "keepTripAction": "Keep going",
+  "finishedAutomaticallyBadge": "Finished automatically",
+  "editArrivalTime": "Correct arrival time",
+  "arrivalUpdated": "Arrival time updated",
+  "mapPageTitle": "Trip map",
+  "mapRecenter": "Back to route",
+  "mapZoomIn": "Zoom in",
+  "mapZoomOut": "Zoom out",
+  "mapOpenFullscreen": "Open full-screen map",
+  "gpsQuality": "GPS quality",
+  "gpsGood": "Good",
+  "gpsFair": "Fair",
+  "gpsPoor": "Poor",
+  "stopSheetTitle": "Stop {number}",
+  "@stopSheetTitle": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "stopArrivalTime": "Arrival time",
+  "stopDepartureTime": "Departure time",
+  "stopDurationLabel": "Duration",
+  "stopLocationLabel": "Location",
+  "stopTypeLabel": "Stop type",
+  "stopUnconfirmed": "Not confirmed yet",
+  "stopTypeRest": "Rest",
+  "stopTypeParking": "Parking",
+  "stopTypeFood": "Buying food",
+  "stopTypeFuel": "Refueling",
+  "stopTypeVisit": "Visiting a place",
+  "stopTypeTraffic": "Traffic jam",
+  "stopTypeDestination": "Destination",
+  "stopTypeOther": "Other",
+  "stopLabelSaved": "Stop label saved",
+  "vehicleBicycle": "Bicycle",
+  "vehicleQuestionHigh": "Were you riding a {vehicle} just now?",
+  "@vehicleQuestionHigh": {
+    "placeholders": {
+      "vehicle": {
+        "type": "String"
+      }
+    }
+  },
+  "vehiclePredictionInfo": "Ruteku's prediction based on the trip pattern.",
+  "vehicleConfidenceLabel": "Confidence: {percent}%",
+  "@vehicleConfidenceLabel": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "vehicleYes": "Yes, {vehicle}",
+  "@vehicleYes": {
+    "placeholders": {
+      "vehicle": {
+        "type": "String"
+      }
+    }
+  },
+  "vehicleNo": "No",
+  "vehicleQuestionMedium": "You probably used a {vehicle}",
+  "@vehicleQuestionMedium": {
+    "placeholders": {
+      "vehicle": {
+        "type": "String"
+      }
+    }
+  },
+  "vehicleQuestionMediumAsk": "Is this prediction correct?",
+  "vehicleCorrect": "Correct",
+  "vehicleChange": "Change vehicle",
+  "vehicleQuestionLow": "Which vehicle did you use?",
+  "shareTripTitle": "Share trip",
+  "sharePng": "PNG image",
+  "shareGpx": "GPX file",
+  "shareGeoJson": "GeoJSON file",
+  "shareCopySummary": "Copy summary",
+  "shareCopied": "Summary copied to clipboard",
+  "sharePreparing": "Preparing trip image...",
+  "sharePrivacyTitle": "Privacy options",
+  "shareShowStart": "Show start location",
+  "shareShowEnd": "Show end location",
+  "shareShowUserName": "Show user name",
+  "shareShowMaxSpeed": "Show maximum speed",
+  "sharePrivacyMode": "Privacy mode",
+  "sharePrivacyModeDesc": "Trims ~300 m from the start and end of the route so home locations stay hidden.",
+  "shareContinue": "Continue"
 }

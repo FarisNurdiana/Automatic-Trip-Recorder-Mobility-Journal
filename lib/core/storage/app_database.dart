@@ -58,6 +58,19 @@ class Trips extends Table {
   IntColumn get stopCount => integer().withDefault(const Constant(0))();
   IntColumn get summaryAlgorithmVersion =>
       integer().withDefault(const Constant(0))();
+
+  /// True when the trip was closed by the auto-finish rules (e.g. stationary
+  /// for hours) instead of an explicit user/detector finish.
+  BoolColumn get finishedAutomatically =>
+      boolean().withDefault(const Constant(false))();
+
+  /// Machine-readable reason: manual, autoDetection, arrivedAnswer,
+  /// autoStationary5h, ...
+  TextColumn get finishReason => text().nullable()();
+
+  /// True when the user edited the arrival time after an automatic finish.
+  BoolColumn get arrivalCorrectedByUser =>
+      boolean().withDefault(const Constant(false))();
   TextColumn get deviceModel => text().nullable()();
   TextColumn get operatingSystem => text().nullable()();
   TextColumn get operatingSystemVersion => text().nullable()();
@@ -134,12 +147,37 @@ class SensorSamples extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+class TripStops extends Table {
+  TextColumn get id => text()();
+  TextColumn get tripId => text().references(Trips, #id)();
+  DateTimeColumn get arrivalTime => dateTime()();
+  DateTimeColumn get departureTime => dateTime().nullable()();
+  IntColumn get durationSeconds => integer().withDefault(const Constant(0))();
+  RealColumn get latitude => real()();
+  RealColumn get longitude => real()();
+  RealColumn get radiusMeters => real().nullable()();
+  TextColumn get address => text().nullable()();
+
+  /// [StopType] name; `unconfirmed` until the user labels it.
+  TextColumn get stopType => text().withDefault(const Constant('unconfirmed'))();
+  TextColumn get stopNote => text().nullable()();
+  BoolColumn get isDestination => boolean().withDefault(const Constant(false))();
+  BoolColumn get confirmedByUser => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get notificationSentAt => dateTime().nullable()();
+  TextColumn get syncStatus => text().withDefault(const Constant('pending'))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 // ---------------------------------------------------------------------------
 // Database
 // ---------------------------------------------------------------------------
 
 @DriftDatabase(
-  tables: [Users, Trips, TripPoints, ActivityEvents, SensorSamples],
+  tables: [Users, Trips, TripPoints, ActivityEvents, SensorSamples, TripStops],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
@@ -147,7 +185,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.open() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -156,10 +194,17 @@ class AppDatabase extends _$AppDatabase {
       await _createIndexes();
     },
     onUpgrade: (m, from, to) async {
-      // Versioned, additive migrations. Example for a future version 2:
-      // if (from < 2) {
-      //   await m.addColumn(trips, trips.someNewColumn);
-      // }
+      // Additive migrations only — existing trips must never be lost.
+      if (from < 2) {
+        await m.addColumn(trips, trips.finishedAutomatically);
+        await m.addColumn(trips, trips.finishReason);
+        await m.addColumn(trips, trips.arrivalCorrectedByUser);
+        await m.createTable(tripStops);
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_trip_stops_trip '
+          'ON trip_stops (trip_id, arrival_time)',
+        );
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -182,6 +227,10 @@ class AppDatabase extends _$AppDatabase {
     await customStatement(
       'CREATE INDEX IF NOT EXISTS idx_activity_events_time '
       'ON activity_events (recorded_at DESC)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_trip_stops_trip '
+      'ON trip_stops (trip_id, arrival_time)',
     );
   }
 

@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  static const _seed = Color(0xFF1565C0);
+  static const _seed = Color(0xFF0D47A1);
+  static const _accent = Color(0xFF00B8D4);
 
   static ThemeData light() => _base(Brightness.light);
 
@@ -15,7 +16,7 @@ class AppTheme {
     final scheme = ColorScheme.fromSeed(
       seedColor: _seed,
       brightness: brightness,
-    );
+    ).copyWith(secondary: _accent);
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,

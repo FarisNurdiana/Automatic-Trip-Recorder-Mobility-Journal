@@ -43,9 +43,37 @@ abstract interface class TripRepository {
 
   /// Computes and stores the summary. Returns null (and cancels the trip)
   /// when the trip is invalid — too few points, too short, etc.
-  Future<TripSummaryResult?> finishTrip(String tripId, DateTime endedAt);
+  ///
+  /// [finishReason] records why the trip ended (manual, arrivedAnswer,
+  /// autoStationary, ...). [finishedAutomatically] marks auto-finish so the
+  /// user can correct it later. [arrivalOverride] replaces the last-point
+  /// arrival time (e.g. the moment the vehicle first stopped).
+  Future<TripSummaryResult?> finishTrip(
+    String tripId,
+    DateTime endedAt, {
+    String? finishReason,
+    bool finishedAutomatically = false,
+    DateTime? arrivalOverride,
+  });
 
   Future<void> cancelAndDeleteTrip(String tripId);
+
+  // --- stops ---
+  Future<List<TripStop>> stopsForTrip(String tripId);
+
+  /// User labels a stop (rest/parking/fuel/...). Ground truth, optional.
+  Future<void> labelStop({
+    required String stopId,
+    required StopType type,
+    String? note,
+    bool? isDestination,
+  });
+
+  /// Marks the notification-question timestamp for a stop.
+  Future<void> markStopNotified(String stopId, DateTime at);
+
+  /// User corrects the arrival time after an automatic finish.
+  Future<void> correctArrivalTime(String tripId, DateTime arrival);
 
   Future<void> confirmVehicle({
     required String tripId,
@@ -158,7 +186,13 @@ class DefaultTripRepository implements TripRepository {
   }
 
   @override
-  Future<TripSummaryResult?> finishTrip(String tripId, DateTime endedAt) async {
+  Future<TripSummaryResult?> finishTrip(
+    String tripId,
+    DateTime endedAt, {
+    String? finishReason,
+    bool finishedAutomatically = false,
+    DateTime? arrivalOverride,
+  }) async {
     final trip = await local.getTrip(tripId);
     if (trip == null) return null;
     final points = await pointsForTrip(tripId);
@@ -172,7 +206,7 @@ class DefaultTripRepository implements TripRepository {
           .toCompanion(false)
           .copyWith(
             status: Value(TripRecordingState.finished.name),
-            endedAt: Value(endedAt),
+            endedAt: Value(arrivalOverride ?? endedAt),
             startLatitude: Value(summary.startLatitude),
             startLongitude: Value(summary.startLongitude),
             endLatitude: Value(summary.endLatitude),
@@ -186,12 +220,98 @@ class DefaultTripRepository implements TripRepository {
             maximumSpeedKmh: Value(summary.maximumSpeedKmh),
             stopCount: Value(summary.stops.length),
             summaryAlgorithmVersion: Value(summary.algorithmVersion),
+            finishedAutomatically: Value(finishedAutomatically),
+            finishReason: Value(finishReason),
             syncStatus: const Value('pending'),
             updatedAt: Value(DateTime.now().toUtc()),
           ),
     );
+
+    // Persist detected stops so the user can label them later. The last stop
+    // that touches the trip end is flagged as the destination candidate.
+    final now = DateTime.now().toUtc();
+    for (var i = 0; i < summary.stops.length; i++) {
+      final stop = summary.stops[i];
+      await local.upsertStop(
+        TripStopsCompanion.insert(
+          id: _uuid.v4(),
+          tripId: tripId,
+          arrivalTime: stop.startedAt,
+          departureTime: Value(stop.endedAt),
+          durationSeconds: Value(stop.duration.inSeconds),
+          latitude: stop.latitude,
+          longitude: stop.longitude,
+          isDestination: Value(i == summary.stops.length - 1),
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+    }
     _sequenceCounters.remove(tripId);
     return summary;
+  }
+
+  @override
+  Future<List<TripStop>> stopsForTrip(String tripId) =>
+      local.stopsForTrip(tripId);
+
+  @override
+  Future<void> labelStop({
+    required String stopId,
+    required StopType type,
+    String? note,
+    bool? isDestination,
+  }) async {
+    final stop = await local.getStop(stopId);
+    if (stop == null) return;
+    await local.upsertStop(
+      stop
+          .toCompanion(false)
+          .copyWith(
+            stopType: Value(type.name),
+            stopNote: Value(note ?? stop.stopNote),
+            isDestination: isDestination == null
+                ? const Value.absent()
+                : Value(isDestination),
+            confirmedByUser: const Value(true),
+            syncStatus: const Value('pending'),
+            updatedAt: Value(DateTime.now().toUtc()),
+          ),
+    );
+  }
+
+  @override
+  Future<void> markStopNotified(String stopId, DateTime at) async {
+    final stop = await local.getStop(stopId);
+    if (stop == null) return;
+    await local.upsertStop(
+      stop
+          .toCompanion(false)
+          .copyWith(
+            notificationSentAt: Value(at),
+            updatedAt: Value(DateTime.now().toUtc()),
+          ),
+    );
+  }
+
+  @override
+  Future<void> correctArrivalTime(String tripId, DateTime arrival) async {
+    final trip = await local.getTrip(tripId);
+    if (trip == null) return;
+    final elapsed = arrival.difference(trip.startedAt).inSeconds;
+    await local.upsertTrip(
+      trip
+          .toCompanion(false)
+          .copyWith(
+            endedAt: Value(arrival),
+            elapsedDurationSeconds: elapsed > 0
+                ? Value(elapsed)
+                : const Value.absent(),
+            arrivalCorrectedByUser: const Value(true),
+            syncStatus: const Value('pending'),
+            updatedAt: Value(DateTime.now().toUtc()),
+          ),
+    );
   }
 
   @override

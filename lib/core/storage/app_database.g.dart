@@ -653,6 +653,47 @@ class $TripsTable extends Trips with TableInfo<$TripsTable, Trip> {
         requiredDuringInsert: false,
         defaultValue: const Constant(0),
       );
+  static const VerificationMeta _finishedAutomaticallyMeta =
+      const VerificationMeta('finishedAutomatically');
+  @override
+  late final GeneratedColumn<bool> finishedAutomatically =
+      GeneratedColumn<bool>(
+        'finished_automatically',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("finished_automatically" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
+  static const VerificationMeta _finishReasonMeta = const VerificationMeta(
+    'finishReason',
+  );
+  @override
+  late final GeneratedColumn<String> finishReason = GeneratedColumn<String>(
+    'finish_reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _arrivalCorrectedByUserMeta =
+      const VerificationMeta('arrivalCorrectedByUser');
+  @override
+  late final GeneratedColumn<bool> arrivalCorrectedByUser =
+      GeneratedColumn<bool>(
+        'arrival_corrected_by_user',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("arrival_corrected_by_user" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
   static const VerificationMeta _deviceModelMeta = const VerificationMeta(
     'deviceModel',
   );
@@ -769,6 +810,9 @@ class $TripsTable extends Trips with TableInfo<$TripsTable, Trip> {
     vehiclePredictionChanged,
     stopCount,
     summaryAlgorithmVersion,
+    finishedAutomatically,
+    finishReason,
+    arrivalCorrectedByUser,
     deviceModel,
     operatingSystem,
     operatingSystemVersion,
@@ -999,6 +1043,33 @@ class $TripsTable extends Trips with TableInfo<$TripsTable, Trip> {
         ),
       );
     }
+    if (data.containsKey('finished_automatically')) {
+      context.handle(
+        _finishedAutomaticallyMeta,
+        finishedAutomatically.isAcceptableOrUnknown(
+          data['finished_automatically']!,
+          _finishedAutomaticallyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('finish_reason')) {
+      context.handle(
+        _finishReasonMeta,
+        finishReason.isAcceptableOrUnknown(
+          data['finish_reason']!,
+          _finishReasonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('arrival_corrected_by_user')) {
+      context.handle(
+        _arrivalCorrectedByUserMeta,
+        arrivalCorrectedByUser.isAcceptableOrUnknown(
+          data['arrival_corrected_by_user']!,
+          _arrivalCorrectedByUserMeta,
+        ),
+      );
+    }
     if (data.containsKey('device_model')) {
       context.handle(
         _deviceModelMeta,
@@ -1172,6 +1243,18 @@ class $TripsTable extends Trips with TableInfo<$TripsTable, Trip> {
         DriftSqlType.int,
         data['${effectivePrefix}summary_algorithm_version'],
       )!,
+      finishedAutomatically: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}finished_automatically'],
+      )!,
+      finishReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}finish_reason'],
+      ),
+      arrivalCorrectedByUser: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}arrival_corrected_by_user'],
+      )!,
       deviceModel: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}device_model'],
@@ -1241,6 +1324,17 @@ class Trip extends DataClass implements Insertable<Trip> {
   final bool? vehiclePredictionChanged;
   final int stopCount;
   final int summaryAlgorithmVersion;
+
+  /// True when the trip was closed by the auto-finish rules (e.g. stationary
+  /// for hours) instead of an explicit user/detector finish.
+  final bool finishedAutomatically;
+
+  /// Machine-readable reason: manual, autoDetection, arrivedAnswer,
+  /// autoStationary5h, ...
+  final String? finishReason;
+
+  /// True when the user edited the arrival time after an automatic finish.
+  final bool arrivalCorrectedByUser;
   final String? deviceModel;
   final String? operatingSystem;
   final String? operatingSystemVersion;
@@ -1275,6 +1369,9 @@ class Trip extends DataClass implements Insertable<Trip> {
     this.vehiclePredictionChanged,
     required this.stopCount,
     required this.summaryAlgorithmVersion,
+    required this.finishedAutomatically,
+    this.finishReason,
+    required this.arrivalCorrectedByUser,
     this.deviceModel,
     this.operatingSystem,
     this.operatingSystemVersion,
@@ -1336,6 +1433,11 @@ class Trip extends DataClass implements Insertable<Trip> {
     }
     map['stop_count'] = Variable<int>(stopCount);
     map['summary_algorithm_version'] = Variable<int>(summaryAlgorithmVersion);
+    map['finished_automatically'] = Variable<bool>(finishedAutomatically);
+    if (!nullToAbsent || finishReason != null) {
+      map['finish_reason'] = Variable<String>(finishReason);
+    }
+    map['arrival_corrected_by_user'] = Variable<bool>(arrivalCorrectedByUser);
     if (!nullToAbsent || deviceModel != null) {
       map['device_model'] = Variable<String>(deviceModel);
     }
@@ -1408,6 +1510,11 @@ class Trip extends DataClass implements Insertable<Trip> {
           : Value(vehiclePredictionChanged),
       stopCount: Value(stopCount),
       summaryAlgorithmVersion: Value(summaryAlgorithmVersion),
+      finishedAutomatically: Value(finishedAutomatically),
+      finishReason: finishReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(finishReason),
+      arrivalCorrectedByUser: Value(arrivalCorrectedByUser),
       deviceModel: deviceModel == null && nullToAbsent
           ? const Value.absent()
           : Value(deviceModel),
@@ -1480,6 +1587,13 @@ class Trip extends DataClass implements Insertable<Trip> {
       summaryAlgorithmVersion: serializer.fromJson<int>(
         json['summaryAlgorithmVersion'],
       ),
+      finishedAutomatically: serializer.fromJson<bool>(
+        json['finishedAutomatically'],
+      ),
+      finishReason: serializer.fromJson<String?>(json['finishReason']),
+      arrivalCorrectedByUser: serializer.fromJson<bool>(
+        json['arrivalCorrectedByUser'],
+      ),
       deviceModel: serializer.fromJson<String?>(json['deviceModel']),
       operatingSystem: serializer.fromJson<String?>(json['operatingSystem']),
       operatingSystemVersion: serializer.fromJson<String?>(
@@ -1527,6 +1641,9 @@ class Trip extends DataClass implements Insertable<Trip> {
       'summaryAlgorithmVersion': serializer.toJson<int>(
         summaryAlgorithmVersion,
       ),
+      'finishedAutomatically': serializer.toJson<bool>(finishedAutomatically),
+      'finishReason': serializer.toJson<String?>(finishReason),
+      'arrivalCorrectedByUser': serializer.toJson<bool>(arrivalCorrectedByUser),
       'deviceModel': serializer.toJson<String?>(deviceModel),
       'operatingSystem': serializer.toJson<String?>(operatingSystem),
       'operatingSystemVersion': serializer.toJson<String?>(
@@ -1566,6 +1683,9 @@ class Trip extends DataClass implements Insertable<Trip> {
     Value<bool?> vehiclePredictionChanged = const Value.absent(),
     int? stopCount,
     int? summaryAlgorithmVersion,
+    bool? finishedAutomatically,
+    Value<String?> finishReason = const Value.absent(),
+    bool? arrivalCorrectedByUser,
     Value<String?> deviceModel = const Value.absent(),
     Value<String?> operatingSystem = const Value.absent(),
     Value<String?> operatingSystemVersion = const Value.absent(),
@@ -1615,6 +1735,10 @@ class Trip extends DataClass implements Insertable<Trip> {
     stopCount: stopCount ?? this.stopCount,
     summaryAlgorithmVersion:
         summaryAlgorithmVersion ?? this.summaryAlgorithmVersion,
+    finishedAutomatically: finishedAutomatically ?? this.finishedAutomatically,
+    finishReason: finishReason.present ? finishReason.value : this.finishReason,
+    arrivalCorrectedByUser:
+        arrivalCorrectedByUser ?? this.arrivalCorrectedByUser,
     deviceModel: deviceModel.present ? deviceModel.value : this.deviceModel,
     operatingSystem: operatingSystem.present
         ? operatingSystem.value
@@ -1695,6 +1819,15 @@ class Trip extends DataClass implements Insertable<Trip> {
       summaryAlgorithmVersion: data.summaryAlgorithmVersion.present
           ? data.summaryAlgorithmVersion.value
           : this.summaryAlgorithmVersion,
+      finishedAutomatically: data.finishedAutomatically.present
+          ? data.finishedAutomatically.value
+          : this.finishedAutomatically,
+      finishReason: data.finishReason.present
+          ? data.finishReason.value
+          : this.finishReason,
+      arrivalCorrectedByUser: data.arrivalCorrectedByUser.present
+          ? data.arrivalCorrectedByUser.value
+          : this.arrivalCorrectedByUser,
       deviceModel: data.deviceModel.present
           ? data.deviceModel.value
           : this.deviceModel,
@@ -1746,6 +1879,9 @@ class Trip extends DataClass implements Insertable<Trip> {
           ..write('vehiclePredictionChanged: $vehiclePredictionChanged, ')
           ..write('stopCount: $stopCount, ')
           ..write('summaryAlgorithmVersion: $summaryAlgorithmVersion, ')
+          ..write('finishedAutomatically: $finishedAutomatically, ')
+          ..write('finishReason: $finishReason, ')
+          ..write('arrivalCorrectedByUser: $arrivalCorrectedByUser, ')
           ..write('deviceModel: $deviceModel, ')
           ..write('operatingSystem: $operatingSystem, ')
           ..write('operatingSystemVersion: $operatingSystemVersion, ')
@@ -1785,6 +1921,9 @@ class Trip extends DataClass implements Insertable<Trip> {
     vehiclePredictionChanged,
     stopCount,
     summaryAlgorithmVersion,
+    finishedAutomatically,
+    finishReason,
+    arrivalCorrectedByUser,
     deviceModel,
     operatingSystem,
     operatingSystemVersion,
@@ -1823,6 +1962,9 @@ class Trip extends DataClass implements Insertable<Trip> {
           other.vehiclePredictionChanged == this.vehiclePredictionChanged &&
           other.stopCount == this.stopCount &&
           other.summaryAlgorithmVersion == this.summaryAlgorithmVersion &&
+          other.finishedAutomatically == this.finishedAutomatically &&
+          other.finishReason == this.finishReason &&
+          other.arrivalCorrectedByUser == this.arrivalCorrectedByUser &&
           other.deviceModel == this.deviceModel &&
           other.operatingSystem == this.operatingSystem &&
           other.operatingSystemVersion == this.operatingSystemVersion &&
@@ -1859,6 +2001,9 @@ class TripsCompanion extends UpdateCompanion<Trip> {
   final Value<bool?> vehiclePredictionChanged;
   final Value<int> stopCount;
   final Value<int> summaryAlgorithmVersion;
+  final Value<bool> finishedAutomatically;
+  final Value<String?> finishReason;
+  final Value<bool> arrivalCorrectedByUser;
   final Value<String?> deviceModel;
   final Value<String?> operatingSystem;
   final Value<String?> operatingSystemVersion;
@@ -1894,6 +2039,9 @@ class TripsCompanion extends UpdateCompanion<Trip> {
     this.vehiclePredictionChanged = const Value.absent(),
     this.stopCount = const Value.absent(),
     this.summaryAlgorithmVersion = const Value.absent(),
+    this.finishedAutomatically = const Value.absent(),
+    this.finishReason = const Value.absent(),
+    this.arrivalCorrectedByUser = const Value.absent(),
     this.deviceModel = const Value.absent(),
     this.operatingSystem = const Value.absent(),
     this.operatingSystemVersion = const Value.absent(),
@@ -1930,6 +2078,9 @@ class TripsCompanion extends UpdateCompanion<Trip> {
     this.vehiclePredictionChanged = const Value.absent(),
     this.stopCount = const Value.absent(),
     this.summaryAlgorithmVersion = const Value.absent(),
+    this.finishedAutomatically = const Value.absent(),
+    this.finishReason = const Value.absent(),
+    this.arrivalCorrectedByUser = const Value.absent(),
     this.deviceModel = const Value.absent(),
     this.operatingSystem = const Value.absent(),
     this.operatingSystemVersion = const Value.absent(),
@@ -1971,6 +2122,9 @@ class TripsCompanion extends UpdateCompanion<Trip> {
     Expression<bool>? vehiclePredictionChanged,
     Expression<int>? stopCount,
     Expression<int>? summaryAlgorithmVersion,
+    Expression<bool>? finishedAutomatically,
+    Expression<String>? finishReason,
+    Expression<bool>? arrivalCorrectedByUser,
     Expression<String>? deviceModel,
     Expression<String>? operatingSystem,
     Expression<String>? operatingSystemVersion,
@@ -2016,6 +2170,11 @@ class TripsCompanion extends UpdateCompanion<Trip> {
       if (stopCount != null) 'stop_count': stopCount,
       if (summaryAlgorithmVersion != null)
         'summary_algorithm_version': summaryAlgorithmVersion,
+      if (finishedAutomatically != null)
+        'finished_automatically': finishedAutomatically,
+      if (finishReason != null) 'finish_reason': finishReason,
+      if (arrivalCorrectedByUser != null)
+        'arrival_corrected_by_user': arrivalCorrectedByUser,
       if (deviceModel != null) 'device_model': deviceModel,
       if (operatingSystem != null) 'operating_system': operatingSystem,
       if (operatingSystemVersion != null)
@@ -2056,6 +2215,9 @@ class TripsCompanion extends UpdateCompanion<Trip> {
     Value<bool?>? vehiclePredictionChanged,
     Value<int>? stopCount,
     Value<int>? summaryAlgorithmVersion,
+    Value<bool>? finishedAutomatically,
+    Value<String?>? finishReason,
+    Value<bool>? arrivalCorrectedByUser,
     Value<String?>? deviceModel,
     Value<String?>? operatingSystem,
     Value<String?>? operatingSystemVersion,
@@ -2098,6 +2260,11 @@ class TripsCompanion extends UpdateCompanion<Trip> {
       stopCount: stopCount ?? this.stopCount,
       summaryAlgorithmVersion:
           summaryAlgorithmVersion ?? this.summaryAlgorithmVersion,
+      finishedAutomatically:
+          finishedAutomatically ?? this.finishedAutomatically,
+      finishReason: finishReason ?? this.finishReason,
+      arrivalCorrectedByUser:
+          arrivalCorrectedByUser ?? this.arrivalCorrectedByUser,
       deviceModel: deviceModel ?? this.deviceModel,
       operatingSystem: operatingSystem ?? this.operatingSystem,
       operatingSystemVersion:
@@ -2207,6 +2374,19 @@ class TripsCompanion extends UpdateCompanion<Trip> {
         summaryAlgorithmVersion.value,
       );
     }
+    if (finishedAutomatically.present) {
+      map['finished_automatically'] = Variable<bool>(
+        finishedAutomatically.value,
+      );
+    }
+    if (finishReason.present) {
+      map['finish_reason'] = Variable<String>(finishReason.value);
+    }
+    if (arrivalCorrectedByUser.present) {
+      map['arrival_corrected_by_user'] = Variable<bool>(
+        arrivalCorrectedByUser.value,
+      );
+    }
     if (deviceModel.present) {
       map['device_model'] = Variable<String>(deviceModel.value);
     }
@@ -2267,6 +2447,9 @@ class TripsCompanion extends UpdateCompanion<Trip> {
           ..write('vehiclePredictionChanged: $vehiclePredictionChanged, ')
           ..write('stopCount: $stopCount, ')
           ..write('summaryAlgorithmVersion: $summaryAlgorithmVersion, ')
+          ..write('finishedAutomatically: $finishedAutomatically, ')
+          ..write('finishReason: $finishReason, ')
+          ..write('arrivalCorrectedByUser: $arrivalCorrectedByUser, ')
           ..write('deviceModel: $deviceModel, ')
           ..write('operatingSystem: $operatingSystem, ')
           ..write('operatingSystemVersion: $operatingSystemVersion, ')
@@ -2304,9 +2487,6 @@ class $TripPointsTable extends TripPoints
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES trips (id)',
-    ),
   );
   static const VerificationMeta _recordedAtMeta = const VerificationMeta(
     'recordedAt',
@@ -3887,9 +4067,6 @@ class $SensorSamplesTable extends SensorSamples
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES trips (id)',
-    ),
   );
   static const VerificationMeta _recordedAtMeta = const VerificationMeta(
     'recordedAt',
@@ -4892,6 +5069,998 @@ class SensorSamplesCompanion extends UpdateCompanion<SensorSample> {
   }
 }
 
+class $TripStopsTable extends TripStops
+    with TableInfo<$TripStopsTable, TripStop> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TripStopsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tripIdMeta = const VerificationMeta('tripId');
+  @override
+  late final GeneratedColumn<String> tripId = GeneratedColumn<String>(
+    'trip_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _arrivalTimeMeta = const VerificationMeta(
+    'arrivalTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> arrivalTime = GeneratedColumn<DateTime>(
+    'arrival_time',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _departureTimeMeta = const VerificationMeta(
+    'departureTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> departureTime =
+      GeneratedColumn<DateTime>(
+        'departure_time',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _durationSecondsMeta = const VerificationMeta(
+    'durationSeconds',
+  );
+  @override
+  late final GeneratedColumn<int> durationSeconds = GeneratedColumn<int>(
+    'duration_seconds',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _latitudeMeta = const VerificationMeta(
+    'latitude',
+  );
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+    'latitude',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _longitudeMeta = const VerificationMeta(
+    'longitude',
+  );
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+    'longitude',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _radiusMetersMeta = const VerificationMeta(
+    'radiusMeters',
+  );
+  @override
+  late final GeneratedColumn<double> radiusMeters = GeneratedColumn<double>(
+    'radius_meters',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _addressMeta = const VerificationMeta(
+    'address',
+  );
+  @override
+  late final GeneratedColumn<String> address = GeneratedColumn<String>(
+    'address',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stopTypeMeta = const VerificationMeta(
+    'stopType',
+  );
+  @override
+  late final GeneratedColumn<String> stopType = GeneratedColumn<String>(
+    'stop_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('unconfirmed'),
+  );
+  static const VerificationMeta _stopNoteMeta = const VerificationMeta(
+    'stopNote',
+  );
+  @override
+  late final GeneratedColumn<String> stopNote = GeneratedColumn<String>(
+    'stop_note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDestinationMeta = const VerificationMeta(
+    'isDestination',
+  );
+  @override
+  late final GeneratedColumn<bool> isDestination = GeneratedColumn<bool>(
+    'is_destination',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_destination" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _confirmedByUserMeta = const VerificationMeta(
+    'confirmedByUser',
+  );
+  @override
+  late final GeneratedColumn<bool> confirmedByUser = GeneratedColumn<bool>(
+    'confirmed_by_user',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("confirmed_by_user" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _notificationSentAtMeta =
+      const VerificationMeta('notificationSentAt');
+  @override
+  late final GeneratedColumn<DateTime> notificationSentAt =
+      GeneratedColumn<DateTime>(
+        'notification_sent_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pending'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    tripId,
+    arrivalTime,
+    departureTime,
+    durationSeconds,
+    latitude,
+    longitude,
+    radiusMeters,
+    address,
+    stopType,
+    stopNote,
+    isDestination,
+    confirmedByUser,
+    notificationSentAt,
+    syncStatus,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'trip_stops';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TripStop> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('trip_id')) {
+      context.handle(
+        _tripIdMeta,
+        tripId.isAcceptableOrUnknown(data['trip_id']!, _tripIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tripIdMeta);
+    }
+    if (data.containsKey('arrival_time')) {
+      context.handle(
+        _arrivalTimeMeta,
+        arrivalTime.isAcceptableOrUnknown(
+          data['arrival_time']!,
+          _arrivalTimeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_arrivalTimeMeta);
+    }
+    if (data.containsKey('departure_time')) {
+      context.handle(
+        _departureTimeMeta,
+        departureTime.isAcceptableOrUnknown(
+          data['departure_time']!,
+          _departureTimeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('duration_seconds')) {
+      context.handle(
+        _durationSecondsMeta,
+        durationSeconds.isAcceptableOrUnknown(
+          data['duration_seconds']!,
+          _durationSecondsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('latitude')) {
+      context.handle(
+        _latitudeMeta,
+        latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_latitudeMeta);
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(
+        _longitudeMeta,
+        longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_longitudeMeta);
+    }
+    if (data.containsKey('radius_meters')) {
+      context.handle(
+        _radiusMetersMeta,
+        radiusMeters.isAcceptableOrUnknown(
+          data['radius_meters']!,
+          _radiusMetersMeta,
+        ),
+      );
+    }
+    if (data.containsKey('address')) {
+      context.handle(
+        _addressMeta,
+        address.isAcceptableOrUnknown(data['address']!, _addressMeta),
+      );
+    }
+    if (data.containsKey('stop_type')) {
+      context.handle(
+        _stopTypeMeta,
+        stopType.isAcceptableOrUnknown(data['stop_type']!, _stopTypeMeta),
+      );
+    }
+    if (data.containsKey('stop_note')) {
+      context.handle(
+        _stopNoteMeta,
+        stopNote.isAcceptableOrUnknown(data['stop_note']!, _stopNoteMeta),
+      );
+    }
+    if (data.containsKey('is_destination')) {
+      context.handle(
+        _isDestinationMeta,
+        isDestination.isAcceptableOrUnknown(
+          data['is_destination']!,
+          _isDestinationMeta,
+        ),
+      );
+    }
+    if (data.containsKey('confirmed_by_user')) {
+      context.handle(
+        _confirmedByUserMeta,
+        confirmedByUser.isAcceptableOrUnknown(
+          data['confirmed_by_user']!,
+          _confirmedByUserMeta,
+        ),
+      );
+    }
+    if (data.containsKey('notification_sent_at')) {
+      context.handle(
+        _notificationSentAtMeta,
+        notificationSentAt.isAcceptableOrUnknown(
+          data['notification_sent_at']!,
+          _notificationSentAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TripStop map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TripStop(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      tripId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trip_id'],
+      )!,
+      arrivalTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}arrival_time'],
+      )!,
+      departureTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}departure_time'],
+      ),
+      durationSeconds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_seconds'],
+      )!,
+      latitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}latitude'],
+      )!,
+      longitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}longitude'],
+      )!,
+      radiusMeters: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}radius_meters'],
+      ),
+      address: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}address'],
+      ),
+      stopType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stop_type'],
+      )!,
+      stopNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stop_note'],
+      ),
+      isDestination: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_destination'],
+      )!,
+      confirmedByUser: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}confirmed_by_user'],
+      )!,
+      notificationSentAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}notification_sent_at'],
+      ),
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $TripStopsTable createAlias(String alias) {
+    return $TripStopsTable(attachedDatabase, alias);
+  }
+}
+
+class TripStop extends DataClass implements Insertable<TripStop> {
+  final String id;
+  final String tripId;
+  final DateTime arrivalTime;
+  final DateTime? departureTime;
+  final int durationSeconds;
+  final double latitude;
+  final double longitude;
+  final double? radiusMeters;
+  final String? address;
+
+  /// [StopType] name; `unconfirmed` until the user labels it.
+  final String stopType;
+  final String? stopNote;
+  final bool isDestination;
+  final bool confirmedByUser;
+  final DateTime? notificationSentAt;
+  final String syncStatus;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const TripStop({
+    required this.id,
+    required this.tripId,
+    required this.arrivalTime,
+    this.departureTime,
+    required this.durationSeconds,
+    required this.latitude,
+    required this.longitude,
+    this.radiusMeters,
+    this.address,
+    required this.stopType,
+    this.stopNote,
+    required this.isDestination,
+    required this.confirmedByUser,
+    this.notificationSentAt,
+    required this.syncStatus,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['trip_id'] = Variable<String>(tripId);
+    map['arrival_time'] = Variable<DateTime>(arrivalTime);
+    if (!nullToAbsent || departureTime != null) {
+      map['departure_time'] = Variable<DateTime>(departureTime);
+    }
+    map['duration_seconds'] = Variable<int>(durationSeconds);
+    map['latitude'] = Variable<double>(latitude);
+    map['longitude'] = Variable<double>(longitude);
+    if (!nullToAbsent || radiusMeters != null) {
+      map['radius_meters'] = Variable<double>(radiusMeters);
+    }
+    if (!nullToAbsent || address != null) {
+      map['address'] = Variable<String>(address);
+    }
+    map['stop_type'] = Variable<String>(stopType);
+    if (!nullToAbsent || stopNote != null) {
+      map['stop_note'] = Variable<String>(stopNote);
+    }
+    map['is_destination'] = Variable<bool>(isDestination);
+    map['confirmed_by_user'] = Variable<bool>(confirmedByUser);
+    if (!nullToAbsent || notificationSentAt != null) {
+      map['notification_sent_at'] = Variable<DateTime>(notificationSentAt);
+    }
+    map['sync_status'] = Variable<String>(syncStatus);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  TripStopsCompanion toCompanion(bool nullToAbsent) {
+    return TripStopsCompanion(
+      id: Value(id),
+      tripId: Value(tripId),
+      arrivalTime: Value(arrivalTime),
+      departureTime: departureTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(departureTime),
+      durationSeconds: Value(durationSeconds),
+      latitude: Value(latitude),
+      longitude: Value(longitude),
+      radiusMeters: radiusMeters == null && nullToAbsent
+          ? const Value.absent()
+          : Value(radiusMeters),
+      address: address == null && nullToAbsent
+          ? const Value.absent()
+          : Value(address),
+      stopType: Value(stopType),
+      stopNote: stopNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(stopNote),
+      isDestination: Value(isDestination),
+      confirmedByUser: Value(confirmedByUser),
+      notificationSentAt: notificationSentAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notificationSentAt),
+      syncStatus: Value(syncStatus),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory TripStop.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TripStop(
+      id: serializer.fromJson<String>(json['id']),
+      tripId: serializer.fromJson<String>(json['tripId']),
+      arrivalTime: serializer.fromJson<DateTime>(json['arrivalTime']),
+      departureTime: serializer.fromJson<DateTime?>(json['departureTime']),
+      durationSeconds: serializer.fromJson<int>(json['durationSeconds']),
+      latitude: serializer.fromJson<double>(json['latitude']),
+      longitude: serializer.fromJson<double>(json['longitude']),
+      radiusMeters: serializer.fromJson<double?>(json['radiusMeters']),
+      address: serializer.fromJson<String?>(json['address']),
+      stopType: serializer.fromJson<String>(json['stopType']),
+      stopNote: serializer.fromJson<String?>(json['stopNote']),
+      isDestination: serializer.fromJson<bool>(json['isDestination']),
+      confirmedByUser: serializer.fromJson<bool>(json['confirmedByUser']),
+      notificationSentAt: serializer.fromJson<DateTime?>(
+        json['notificationSentAt'],
+      ),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'tripId': serializer.toJson<String>(tripId),
+      'arrivalTime': serializer.toJson<DateTime>(arrivalTime),
+      'departureTime': serializer.toJson<DateTime?>(departureTime),
+      'durationSeconds': serializer.toJson<int>(durationSeconds),
+      'latitude': serializer.toJson<double>(latitude),
+      'longitude': serializer.toJson<double>(longitude),
+      'radiusMeters': serializer.toJson<double?>(radiusMeters),
+      'address': serializer.toJson<String?>(address),
+      'stopType': serializer.toJson<String>(stopType),
+      'stopNote': serializer.toJson<String?>(stopNote),
+      'isDestination': serializer.toJson<bool>(isDestination),
+      'confirmedByUser': serializer.toJson<bool>(confirmedByUser),
+      'notificationSentAt': serializer.toJson<DateTime?>(notificationSentAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  TripStop copyWith({
+    String? id,
+    String? tripId,
+    DateTime? arrivalTime,
+    Value<DateTime?> departureTime = const Value.absent(),
+    int? durationSeconds,
+    double? latitude,
+    double? longitude,
+    Value<double?> radiusMeters = const Value.absent(),
+    Value<String?> address = const Value.absent(),
+    String? stopType,
+    Value<String?> stopNote = const Value.absent(),
+    bool? isDestination,
+    bool? confirmedByUser,
+    Value<DateTime?> notificationSentAt = const Value.absent(),
+    String? syncStatus,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => TripStop(
+    id: id ?? this.id,
+    tripId: tripId ?? this.tripId,
+    arrivalTime: arrivalTime ?? this.arrivalTime,
+    departureTime: departureTime.present
+        ? departureTime.value
+        : this.departureTime,
+    durationSeconds: durationSeconds ?? this.durationSeconds,
+    latitude: latitude ?? this.latitude,
+    longitude: longitude ?? this.longitude,
+    radiusMeters: radiusMeters.present ? radiusMeters.value : this.radiusMeters,
+    address: address.present ? address.value : this.address,
+    stopType: stopType ?? this.stopType,
+    stopNote: stopNote.present ? stopNote.value : this.stopNote,
+    isDestination: isDestination ?? this.isDestination,
+    confirmedByUser: confirmedByUser ?? this.confirmedByUser,
+    notificationSentAt: notificationSentAt.present
+        ? notificationSentAt.value
+        : this.notificationSentAt,
+    syncStatus: syncStatus ?? this.syncStatus,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  TripStop copyWithCompanion(TripStopsCompanion data) {
+    return TripStop(
+      id: data.id.present ? data.id.value : this.id,
+      tripId: data.tripId.present ? data.tripId.value : this.tripId,
+      arrivalTime: data.arrivalTime.present
+          ? data.arrivalTime.value
+          : this.arrivalTime,
+      departureTime: data.departureTime.present
+          ? data.departureTime.value
+          : this.departureTime,
+      durationSeconds: data.durationSeconds.present
+          ? data.durationSeconds.value
+          : this.durationSeconds,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      radiusMeters: data.radiusMeters.present
+          ? data.radiusMeters.value
+          : this.radiusMeters,
+      address: data.address.present ? data.address.value : this.address,
+      stopType: data.stopType.present ? data.stopType.value : this.stopType,
+      stopNote: data.stopNote.present ? data.stopNote.value : this.stopNote,
+      isDestination: data.isDestination.present
+          ? data.isDestination.value
+          : this.isDestination,
+      confirmedByUser: data.confirmedByUser.present
+          ? data.confirmedByUser.value
+          : this.confirmedByUser,
+      notificationSentAt: data.notificationSentAt.present
+          ? data.notificationSentAt.value
+          : this.notificationSentAt,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TripStop(')
+          ..write('id: $id, ')
+          ..write('tripId: $tripId, ')
+          ..write('arrivalTime: $arrivalTime, ')
+          ..write('departureTime: $departureTime, ')
+          ..write('durationSeconds: $durationSeconds, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('radiusMeters: $radiusMeters, ')
+          ..write('address: $address, ')
+          ..write('stopType: $stopType, ')
+          ..write('stopNote: $stopNote, ')
+          ..write('isDestination: $isDestination, ')
+          ..write('confirmedByUser: $confirmedByUser, ')
+          ..write('notificationSentAt: $notificationSentAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    tripId,
+    arrivalTime,
+    departureTime,
+    durationSeconds,
+    latitude,
+    longitude,
+    radiusMeters,
+    address,
+    stopType,
+    stopNote,
+    isDestination,
+    confirmedByUser,
+    notificationSentAt,
+    syncStatus,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TripStop &&
+          other.id == this.id &&
+          other.tripId == this.tripId &&
+          other.arrivalTime == this.arrivalTime &&
+          other.departureTime == this.departureTime &&
+          other.durationSeconds == this.durationSeconds &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
+          other.radiusMeters == this.radiusMeters &&
+          other.address == this.address &&
+          other.stopType == this.stopType &&
+          other.stopNote == this.stopNote &&
+          other.isDestination == this.isDestination &&
+          other.confirmedByUser == this.confirmedByUser &&
+          other.notificationSentAt == this.notificationSentAt &&
+          other.syncStatus == this.syncStatus &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class TripStopsCompanion extends UpdateCompanion<TripStop> {
+  final Value<String> id;
+  final Value<String> tripId;
+  final Value<DateTime> arrivalTime;
+  final Value<DateTime?> departureTime;
+  final Value<int> durationSeconds;
+  final Value<double> latitude;
+  final Value<double> longitude;
+  final Value<double?> radiusMeters;
+  final Value<String?> address;
+  final Value<String> stopType;
+  final Value<String?> stopNote;
+  final Value<bool> isDestination;
+  final Value<bool> confirmedByUser;
+  final Value<DateTime?> notificationSentAt;
+  final Value<String> syncStatus;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const TripStopsCompanion({
+    this.id = const Value.absent(),
+    this.tripId = const Value.absent(),
+    this.arrivalTime = const Value.absent(),
+    this.departureTime = const Value.absent(),
+    this.durationSeconds = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.radiusMeters = const Value.absent(),
+    this.address = const Value.absent(),
+    this.stopType = const Value.absent(),
+    this.stopNote = const Value.absent(),
+    this.isDestination = const Value.absent(),
+    this.confirmedByUser = const Value.absent(),
+    this.notificationSentAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TripStopsCompanion.insert({
+    required String id,
+    required String tripId,
+    required DateTime arrivalTime,
+    this.departureTime = const Value.absent(),
+    this.durationSeconds = const Value.absent(),
+    required double latitude,
+    required double longitude,
+    this.radiusMeters = const Value.absent(),
+    this.address = const Value.absent(),
+    this.stopType = const Value.absent(),
+    this.stopNote = const Value.absent(),
+    this.isDestination = const Value.absent(),
+    this.confirmedByUser = const Value.absent(),
+    this.notificationSentAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       tripId = Value(tripId),
+       arrivalTime = Value(arrivalTime),
+       latitude = Value(latitude),
+       longitude = Value(longitude),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<TripStop> custom({
+    Expression<String>? id,
+    Expression<String>? tripId,
+    Expression<DateTime>? arrivalTime,
+    Expression<DateTime>? departureTime,
+    Expression<int>? durationSeconds,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
+    Expression<double>? radiusMeters,
+    Expression<String>? address,
+    Expression<String>? stopType,
+    Expression<String>? stopNote,
+    Expression<bool>? isDestination,
+    Expression<bool>? confirmedByUser,
+    Expression<DateTime>? notificationSentAt,
+    Expression<String>? syncStatus,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tripId != null) 'trip_id': tripId,
+      if (arrivalTime != null) 'arrival_time': arrivalTime,
+      if (departureTime != null) 'departure_time': departureTime,
+      if (durationSeconds != null) 'duration_seconds': durationSeconds,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (radiusMeters != null) 'radius_meters': radiusMeters,
+      if (address != null) 'address': address,
+      if (stopType != null) 'stop_type': stopType,
+      if (stopNote != null) 'stop_note': stopNote,
+      if (isDestination != null) 'is_destination': isDestination,
+      if (confirmedByUser != null) 'confirmed_by_user': confirmedByUser,
+      if (notificationSentAt != null)
+        'notification_sent_at': notificationSentAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TripStopsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? tripId,
+    Value<DateTime>? arrivalTime,
+    Value<DateTime?>? departureTime,
+    Value<int>? durationSeconds,
+    Value<double>? latitude,
+    Value<double>? longitude,
+    Value<double?>? radiusMeters,
+    Value<String?>? address,
+    Value<String>? stopType,
+    Value<String?>? stopNote,
+    Value<bool>? isDestination,
+    Value<bool>? confirmedByUser,
+    Value<DateTime?>? notificationSentAt,
+    Value<String>? syncStatus,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return TripStopsCompanion(
+      id: id ?? this.id,
+      tripId: tripId ?? this.tripId,
+      arrivalTime: arrivalTime ?? this.arrivalTime,
+      departureTime: departureTime ?? this.departureTime,
+      durationSeconds: durationSeconds ?? this.durationSeconds,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      radiusMeters: radiusMeters ?? this.radiusMeters,
+      address: address ?? this.address,
+      stopType: stopType ?? this.stopType,
+      stopNote: stopNote ?? this.stopNote,
+      isDestination: isDestination ?? this.isDestination,
+      confirmedByUser: confirmedByUser ?? this.confirmedByUser,
+      notificationSentAt: notificationSentAt ?? this.notificationSentAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (tripId.present) {
+      map['trip_id'] = Variable<String>(tripId.value);
+    }
+    if (arrivalTime.present) {
+      map['arrival_time'] = Variable<DateTime>(arrivalTime.value);
+    }
+    if (departureTime.present) {
+      map['departure_time'] = Variable<DateTime>(departureTime.value);
+    }
+    if (durationSeconds.present) {
+      map['duration_seconds'] = Variable<int>(durationSeconds.value);
+    }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
+    if (radiusMeters.present) {
+      map['radius_meters'] = Variable<double>(radiusMeters.value);
+    }
+    if (address.present) {
+      map['address'] = Variable<String>(address.value);
+    }
+    if (stopType.present) {
+      map['stop_type'] = Variable<String>(stopType.value);
+    }
+    if (stopNote.present) {
+      map['stop_note'] = Variable<String>(stopNote.value);
+    }
+    if (isDestination.present) {
+      map['is_destination'] = Variable<bool>(isDestination.value);
+    }
+    if (confirmedByUser.present) {
+      map['confirmed_by_user'] = Variable<bool>(confirmedByUser.value);
+    }
+    if (notificationSentAt.present) {
+      map['notification_sent_at'] = Variable<DateTime>(
+        notificationSentAt.value,
+      );
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TripStopsCompanion(')
+          ..write('id: $id, ')
+          ..write('tripId: $tripId, ')
+          ..write('arrivalTime: $arrivalTime, ')
+          ..write('departureTime: $departureTime, ')
+          ..write('durationSeconds: $durationSeconds, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('radiusMeters: $radiusMeters, ')
+          ..write('address: $address, ')
+          ..write('stopType: $stopType, ')
+          ..write('stopNote: $stopNote, ')
+          ..write('isDestination: $isDestination, ')
+          ..write('confirmedByUser: $confirmedByUser, ')
+          ..write('notificationSentAt: $notificationSentAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4900,6 +6069,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TripPointsTable tripPoints = $TripPointsTable(this);
   late final $ActivityEventsTable activityEvents = $ActivityEventsTable(this);
   late final $SensorSamplesTable sensorSamples = $SensorSamplesTable(this);
+  late final $TripStopsTable tripStops = $TripStopsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4910,6 +6080,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     tripPoints,
     activityEvents,
     sensorSamples,
+    tripStops,
   ];
 }
 
@@ -5135,6 +6306,9 @@ typedef $$TripsTableCreateCompanionBuilder =
       Value<bool?> vehiclePredictionChanged,
       Value<int> stopCount,
       Value<int> summaryAlgorithmVersion,
+      Value<bool> finishedAutomatically,
+      Value<String?> finishReason,
+      Value<bool> arrivalCorrectedByUser,
       Value<String?> deviceModel,
       Value<String?> operatingSystem,
       Value<String?> operatingSystemVersion,
@@ -5172,6 +6346,9 @@ typedef $$TripsTableUpdateCompanionBuilder =
       Value<bool?> vehiclePredictionChanged,
       Value<int> stopCount,
       Value<int> summaryAlgorithmVersion,
+      Value<bool> finishedAutomatically,
+      Value<String?> finishReason,
+      Value<bool> arrivalCorrectedByUser,
       Value<String?> deviceModel,
       Value<String?> operatingSystem,
       Value<String?> operatingSystemVersion,
@@ -5182,47 +6359,6 @@ typedef $$TripsTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<int> rowid,
     });
-
-final class $$TripsTableReferences
-    extends BaseReferences<_$AppDatabase, $TripsTable, Trip> {
-  $$TripsTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$TripPointsTable, List<TripPoint>>
-  _tripPointsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.tripPoints,
-    aliasName: 'trips__id__trip_points__trip_id',
-  );
-
-  $$TripPointsTableProcessedTableManager get tripPointsRefs {
-    final manager = $$TripPointsTableTableManager(
-      $_db,
-      $_db.tripPoints,
-    ).filter((f) => f.tripId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_tripPointsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$SensorSamplesTable, List<SensorSample>>
-  _sensorSamplesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.sensorSamples,
-    aliasName: 'trips__id__sensor_samples__trip_id',
-  );
-
-  $$SensorSamplesTableProcessedTableManager get sensorSamplesRefs {
-    final manager = $$SensorSamplesTableTableManager(
-      $_db,
-      $_db.sensorSamples,
-    ).filter((f) => f.tripId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_sensorSamplesRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
 
 class $$TripsTableFilterComposer extends Composer<_$AppDatabase, $TripsTable> {
   $$TripsTableFilterComposer({
@@ -5357,6 +6493,21 @@ class $$TripsTableFilterComposer extends Composer<_$AppDatabase, $TripsTable> {
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get finishedAutomatically => $composableBuilder(
+    column: $table.finishedAutomatically,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get finishReason => $composableBuilder(
+    column: $table.finishReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get arrivalCorrectedByUser => $composableBuilder(
+    column: $table.arrivalCorrectedByUser,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get deviceModel => $composableBuilder(
     column: $table.deviceModel,
     builder: (column) => ColumnFilters(column),
@@ -5396,56 +6547,6 @@ class $$TripsTableFilterComposer extends Composer<_$AppDatabase, $TripsTable> {
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  Expression<bool> tripPointsRefs(
-    Expression<bool> Function($$TripPointsTableFilterComposer f) f,
-  ) {
-    final $$TripPointsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.tripPoints,
-      getReferencedColumn: (t) => t.tripId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TripPointsTableFilterComposer(
-            $db: $db,
-            $table: $db.tripPoints,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> sensorSamplesRefs(
-    Expression<bool> Function($$SensorSamplesTableFilterComposer f) f,
-  ) {
-    final $$SensorSamplesTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.sensorSamples,
-      getReferencedColumn: (t) => t.tripId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$SensorSamplesTableFilterComposer(
-            $db: $db,
-            $table: $db.sensorSamples,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$TripsTableOrderingComposer
@@ -5579,6 +6680,21 @@ class $$TripsTableOrderingComposer
 
   ColumnOrderings<int> get summaryAlgorithmVersion => $composableBuilder(
     column: $table.summaryAlgorithmVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get finishedAutomatically => $composableBuilder(
+    column: $table.finishedAutomatically,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get finishReason => $composableBuilder(
+    column: $table.finishReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get arrivalCorrectedByUser => $composableBuilder(
+    column: $table.arrivalCorrectedByUser,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5745,6 +6861,21 @@ class $$TripsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<bool> get finishedAutomatically => $composableBuilder(
+    column: $table.finishedAutomatically,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get finishReason => $composableBuilder(
+    column: $table.finishReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get arrivalCorrectedByUser => $composableBuilder(
+    column: $table.arrivalCorrectedByUser,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get deviceModel => $composableBuilder(
     column: $table.deviceModel,
     builder: (column) => column,
@@ -5780,56 +6911,6 @@ class $$TripsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  Expression<T> tripPointsRefs<T extends Object>(
-    Expression<T> Function($$TripPointsTableAnnotationComposer a) f,
-  ) {
-    final $$TripPointsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.tripPoints,
-      getReferencedColumn: (t) => t.tripId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TripPointsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.tripPoints,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> sensorSamplesRefs<T extends Object>(
-    Expression<T> Function($$SensorSamplesTableAnnotationComposer a) f,
-  ) {
-    final $$SensorSamplesTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.sensorSamples,
-      getReferencedColumn: (t) => t.tripId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$SensorSamplesTableAnnotationComposer(
-            $db: $db,
-            $table: $db.sensorSamples,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$TripsTableTableManager
@@ -5843,9 +6924,9 @@ class $$TripsTableTableManager
           $$TripsTableAnnotationComposer,
           $$TripsTableCreateCompanionBuilder,
           $$TripsTableUpdateCompanionBuilder,
-          (Trip, $$TripsTableReferences),
+          (Trip, BaseReferences<_$AppDatabase, $TripsTable, Trip>),
           Trip,
-          PrefetchHooks Function({bool tripPointsRefs, bool sensorSamplesRefs})
+          PrefetchHooks Function()
         > {
   $$TripsTableTableManager(_$AppDatabase db, $TripsTable table)
     : super(
@@ -5885,6 +6966,9 @@ class $$TripsTableTableManager
                 Value<bool?> vehiclePredictionChanged = const Value.absent(),
                 Value<int> stopCount = const Value.absent(),
                 Value<int> summaryAlgorithmVersion = const Value.absent(),
+                Value<bool> finishedAutomatically = const Value.absent(),
+                Value<String?> finishReason = const Value.absent(),
+                Value<bool> arrivalCorrectedByUser = const Value.absent(),
                 Value<String?> deviceModel = const Value.absent(),
                 Value<String?> operatingSystem = const Value.absent(),
                 Value<String?> operatingSystemVersion = const Value.absent(),
@@ -5920,6 +7004,9 @@ class $$TripsTableTableManager
                 vehiclePredictionChanged: vehiclePredictionChanged,
                 stopCount: stopCount,
                 summaryAlgorithmVersion: summaryAlgorithmVersion,
+                finishedAutomatically: finishedAutomatically,
+                finishReason: finishReason,
+                arrivalCorrectedByUser: arrivalCorrectedByUser,
                 deviceModel: deviceModel,
                 operatingSystem: operatingSystem,
                 operatingSystemVersion: operatingSystemVersion,
@@ -5957,6 +7044,9 @@ class $$TripsTableTableManager
                 Value<bool?> vehiclePredictionChanged = const Value.absent(),
                 Value<int> stopCount = const Value.absent(),
                 Value<int> summaryAlgorithmVersion = const Value.absent(),
+                Value<bool> finishedAutomatically = const Value.absent(),
+                Value<String?> finishReason = const Value.absent(),
+                Value<bool> arrivalCorrectedByUser = const Value.absent(),
                 Value<String?> deviceModel = const Value.absent(),
                 Value<String?> operatingSystem = const Value.absent(),
                 Value<String?> operatingSystemVersion = const Value.absent(),
@@ -5992,6 +7082,9 @@ class $$TripsTableTableManager
                 vehiclePredictionChanged: vehiclePredictionChanged,
                 stopCount: stopCount,
                 summaryAlgorithmVersion: summaryAlgorithmVersion,
+                finishedAutomatically: finishedAutomatically,
+                finishReason: finishReason,
+                arrivalCorrectedByUser: arrivalCorrectedByUser,
                 deviceModel: deviceModel,
                 operatingSystem: operatingSystem,
                 operatingSystemVersion: operatingSystemVersion,
@@ -6003,64 +7096,9 @@ class $$TripsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) =>
-                    (e.readTable(table), $$TripsTableReferences(db, table, e)),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback:
-              ({tripPointsRefs = false, sensorSamplesRefs = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (tripPointsRefs) db.tripPoints,
-                    if (sensorSamplesRefs) db.sensorSamples,
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (tripPointsRefs)
-                        await $_getPrefetchedData<Trip, $TripsTable, TripPoint>(
-                          currentTable: table,
-                          referencedTable: $$TripsTableReferences
-                              ._tripPointsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$TripsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).tripPointsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.tripId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (sensorSamplesRefs)
-                        await $_getPrefetchedData<
-                          Trip,
-                          $TripsTable,
-                          SensorSample
-                        >(
-                          currentTable: table,
-                          referencedTable: $$TripsTableReferences
-                              ._sensorSamplesRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$TripsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).sensorSamplesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.tripId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -6075,9 +7113,9 @@ typedef $$TripsTableProcessedTableManager =
       $$TripsTableAnnotationComposer,
       $$TripsTableCreateCompanionBuilder,
       $$TripsTableUpdateCompanionBuilder,
-      (Trip, $$TripsTableReferences),
+      (Trip, BaseReferences<_$AppDatabase, $TripsTable, Trip>),
       Trip,
-      PrefetchHooks Function({bool tripPointsRefs, bool sensorSamplesRefs})
+      PrefetchHooks Function()
     >;
 typedef $$TripPointsTableCreateCompanionBuilder =
     TripPointsCompanion Function({
@@ -6122,28 +7160,6 @@ typedef $$TripPointsTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$TripPointsTableReferences
-    extends BaseReferences<_$AppDatabase, $TripPointsTable, TripPoint> {
-  $$TripPointsTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $TripsTable _tripIdTable(_$AppDatabase db) =>
-      db.trips.createAlias('trip_points__trip_id__trips__id');
-
-  $$TripsTableProcessedTableManager get tripId {
-    final $_column = $_itemColumn<String>('trip_id')!;
-
-    final manager = $$TripsTableTableManager(
-      $_db,
-      $_db.trips,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_tripIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
 class $$TripPointsTableFilterComposer
     extends Composer<_$AppDatabase, $TripPointsTable> {
   $$TripPointsTableFilterComposer({
@@ -6155,6 +7171,11 @@ class $$TripPointsTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tripId => $composableBuilder(
+    column: $table.tripId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6232,29 +7253,6 @@ class $$TripPointsTableFilterComposer
     column: $table.syncStatus,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$TripsTableFilterComposer get tripId {
-    final $$TripsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.tripId,
-      referencedTable: $db.trips,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TripsTableFilterComposer(
-            $db: $db,
-            $table: $db.trips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$TripPointsTableOrderingComposer
@@ -6268,6 +7266,11 @@ class $$TripPointsTableOrderingComposer
   });
   ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tripId => $composableBuilder(
+    column: $table.tripId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6345,29 +7348,6 @@ class $$TripPointsTableOrderingComposer
     column: $table.syncStatus,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$TripsTableOrderingComposer get tripId {
-    final $$TripsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.tripId,
-      referencedTable: $db.trips,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TripsTableOrderingComposer(
-            $db: $db,
-            $table: $db.trips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$TripPointsTableAnnotationComposer
@@ -6381,6 +7361,9 @@ class $$TripPointsTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get tripId =>
+      $composableBuilder(column: $table.tripId, builder: (column) => column);
 
   GeneratedColumn<DateTime> get recordedAt => $composableBuilder(
     column: $table.recordedAt,
@@ -6442,29 +7425,6 @@ class $$TripPointsTableAnnotationComposer
     column: $table.syncStatus,
     builder: (column) => column,
   );
-
-  $$TripsTableAnnotationComposer get tripId {
-    final $$TripsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.tripId,
-      referencedTable: $db.trips,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TripsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.trips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$TripPointsTableTableManager
@@ -6478,9 +7438,12 @@ class $$TripPointsTableTableManager
           $$TripPointsTableAnnotationComposer,
           $$TripPointsTableCreateCompanionBuilder,
           $$TripPointsTableUpdateCompanionBuilder,
-          (TripPoint, $$TripPointsTableReferences),
+          (
+            TripPoint,
+            BaseReferences<_$AppDatabase, $TripPointsTable, TripPoint>,
+          ),
           TripPoint,
-          PrefetchHooks Function({bool tripId})
+          PrefetchHooks Function()
         > {
   $$TripPointsTableTableManager(_$AppDatabase db, $TripPointsTable table)
     : super(
@@ -6574,54 +7537,9 @@ class $$TripPointsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$TripPointsTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({tripId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (tripId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.tripId,
-                                referencedTable: $$TripPointsTableReferences
-                                    ._tripIdTable(db),
-                                referencedColumn: $$TripPointsTableReferences
-                                    ._tripIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -6636,9 +7554,9 @@ typedef $$TripPointsTableProcessedTableManager =
       $$TripPointsTableAnnotationComposer,
       $$TripPointsTableCreateCompanionBuilder,
       $$TripPointsTableUpdateCompanionBuilder,
-      (TripPoint, $$TripPointsTableReferences),
+      (TripPoint, BaseReferences<_$AppDatabase, $TripPointsTable, TripPoint>),
       TripPoint,
-      PrefetchHooks Function({bool tripId})
+      PrefetchHooks Function()
     >;
 typedef $$ActivityEventsTableCreateCompanionBuilder =
     ActivityEventsCompanion Function({
@@ -6975,32 +7893,6 @@ typedef $$SensorSamplesTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-final class $$SensorSamplesTableReferences
-    extends BaseReferences<_$AppDatabase, $SensorSamplesTable, SensorSample> {
-  $$SensorSamplesTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
-  );
-
-  static $TripsTable _tripIdTable(_$AppDatabase db) =>
-      db.trips.createAlias('sensor_samples__trip_id__trips__id');
-
-  $$TripsTableProcessedTableManager get tripId {
-    final $_column = $_itemColumn<String>('trip_id')!;
-
-    final manager = $$TripsTableTableManager(
-      $_db,
-      $_db.trips,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_tripIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
 class $$SensorSamplesTableFilterComposer
     extends Composer<_$AppDatabase, $SensorSamplesTable> {
   $$SensorSamplesTableFilterComposer({
@@ -7012,6 +7904,11 @@ class $$SensorSamplesTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tripId => $composableBuilder(
+    column: $table.tripId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7089,29 +7986,6 @@ class $$SensorSamplesTableFilterComposer
     column: $table.syncStatus,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$TripsTableFilterComposer get tripId {
-    final $$TripsTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.tripId,
-      referencedTable: $db.trips,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TripsTableFilterComposer(
-            $db: $db,
-            $table: $db.trips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$SensorSamplesTableOrderingComposer
@@ -7125,6 +7999,11 @@ class $$SensorSamplesTableOrderingComposer
   });
   ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tripId => $composableBuilder(
+    column: $table.tripId,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -7202,29 +8081,6 @@ class $$SensorSamplesTableOrderingComposer
     column: $table.syncStatus,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$TripsTableOrderingComposer get tripId {
-    final $$TripsTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.tripId,
-      referencedTable: $db.trips,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TripsTableOrderingComposer(
-            $db: $db,
-            $table: $db.trips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$SensorSamplesTableAnnotationComposer
@@ -7238,6 +8094,9 @@ class $$SensorSamplesTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get tripId =>
+      $composableBuilder(column: $table.tripId, builder: (column) => column);
 
   GeneratedColumn<DateTime> get recordedAt => $composableBuilder(
     column: $table.recordedAt,
@@ -7311,29 +8170,6 @@ class $$SensorSamplesTableAnnotationComposer
     column: $table.syncStatus,
     builder: (column) => column,
   );
-
-  $$TripsTableAnnotationComposer get tripId {
-    final $$TripsTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.tripId,
-      referencedTable: $db.trips,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$TripsTableAnnotationComposer(
-            $db: $db,
-            $table: $db.trips,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$SensorSamplesTableTableManager
@@ -7347,9 +8183,12 @@ class $$SensorSamplesTableTableManager
           $$SensorSamplesTableAnnotationComposer,
           $$SensorSamplesTableCreateCompanionBuilder,
           $$SensorSamplesTableUpdateCompanionBuilder,
-          (SensorSample, $$SensorSamplesTableReferences),
+          (
+            SensorSample,
+            BaseReferences<_$AppDatabase, $SensorSamplesTable, SensorSample>,
+          ),
           SensorSample,
-          PrefetchHooks Function({bool tripId})
+          PrefetchHooks Function()
         > {
   $$SensorSamplesTableTableManager(_$AppDatabase db, $SensorSamplesTable table)
     : super(
@@ -7443,54 +8282,9 @@ class $$SensorSamplesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$SensorSamplesTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({tripId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (tripId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.tripId,
-                                referencedTable: $$SensorSamplesTableReferences
-                                    ._tripIdTable(db),
-                                referencedColumn: $$SensorSamplesTableReferences
-                                    ._tripIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -7505,9 +8299,450 @@ typedef $$SensorSamplesTableProcessedTableManager =
       $$SensorSamplesTableAnnotationComposer,
       $$SensorSamplesTableCreateCompanionBuilder,
       $$SensorSamplesTableUpdateCompanionBuilder,
-      (SensorSample, $$SensorSamplesTableReferences),
+      (
+        SensorSample,
+        BaseReferences<_$AppDatabase, $SensorSamplesTable, SensorSample>,
+      ),
       SensorSample,
-      PrefetchHooks Function({bool tripId})
+      PrefetchHooks Function()
+    >;
+typedef $$TripStopsTableCreateCompanionBuilder =
+    TripStopsCompanion Function({
+      required String id,
+      required String tripId,
+      required DateTime arrivalTime,
+      Value<DateTime?> departureTime,
+      Value<int> durationSeconds,
+      required double latitude,
+      required double longitude,
+      Value<double?> radiusMeters,
+      Value<String?> address,
+      Value<String> stopType,
+      Value<String?> stopNote,
+      Value<bool> isDestination,
+      Value<bool> confirmedByUser,
+      Value<DateTime?> notificationSentAt,
+      Value<String> syncStatus,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$TripStopsTableUpdateCompanionBuilder =
+    TripStopsCompanion Function({
+      Value<String> id,
+      Value<String> tripId,
+      Value<DateTime> arrivalTime,
+      Value<DateTime?> departureTime,
+      Value<int> durationSeconds,
+      Value<double> latitude,
+      Value<double> longitude,
+      Value<double?> radiusMeters,
+      Value<String?> address,
+      Value<String> stopType,
+      Value<String?> stopNote,
+      Value<bool> isDestination,
+      Value<bool> confirmedByUser,
+      Value<DateTime?> notificationSentAt,
+      Value<String> syncStatus,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$TripStopsTableFilterComposer
+    extends Composer<_$AppDatabase, $TripStopsTable> {
+  $$TripStopsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tripId => $composableBuilder(
+    column: $table.tripId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get arrivalTime => $composableBuilder(
+    column: $table.arrivalTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get departureTime => $composableBuilder(
+    column: $table.departureTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get radiusMeters => $composableBuilder(
+    column: $table.radiusMeters,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get address => $composableBuilder(
+    column: $table.address,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stopType => $composableBuilder(
+    column: $table.stopType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stopNote => $composableBuilder(
+    column: $table.stopNote,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDestination => $composableBuilder(
+    column: $table.isDestination,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get confirmedByUser => $composableBuilder(
+    column: $table.confirmedByUser,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get notificationSentAt => $composableBuilder(
+    column: $table.notificationSentAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TripStopsTableOrderingComposer
+    extends Composer<_$AppDatabase, $TripStopsTable> {
+  $$TripStopsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tripId => $composableBuilder(
+    column: $table.tripId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get arrivalTime => $composableBuilder(
+    column: $table.arrivalTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get departureTime => $composableBuilder(
+    column: $table.departureTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get radiusMeters => $composableBuilder(
+    column: $table.radiusMeters,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get address => $composableBuilder(
+    column: $table.address,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stopType => $composableBuilder(
+    column: $table.stopType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stopNote => $composableBuilder(
+    column: $table.stopNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDestination => $composableBuilder(
+    column: $table.isDestination,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get confirmedByUser => $composableBuilder(
+    column: $table.confirmedByUser,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get notificationSentAt => $composableBuilder(
+    column: $table.notificationSentAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TripStopsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TripStopsTable> {
+  $$TripStopsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get tripId =>
+      $composableBuilder(column: $table.tripId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get arrivalTime => $composableBuilder(
+    column: $table.arrivalTime,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get departureTime => $composableBuilder(
+    column: $table.departureTime,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get durationSeconds => $composableBuilder(
+    column: $table.durationSeconds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumn<double> get radiusMeters => $composableBuilder(
+    column: $table.radiusMeters,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get address =>
+      $composableBuilder(column: $table.address, builder: (column) => column);
+
+  GeneratedColumn<String> get stopType =>
+      $composableBuilder(column: $table.stopType, builder: (column) => column);
+
+  GeneratedColumn<String> get stopNote =>
+      $composableBuilder(column: $table.stopNote, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDestination => $composableBuilder(
+    column: $table.isDestination,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get confirmedByUser => $composableBuilder(
+    column: $table.confirmedByUser,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get notificationSentAt => $composableBuilder(
+    column: $table.notificationSentAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$TripStopsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TripStopsTable,
+          TripStop,
+          $$TripStopsTableFilterComposer,
+          $$TripStopsTableOrderingComposer,
+          $$TripStopsTableAnnotationComposer,
+          $$TripStopsTableCreateCompanionBuilder,
+          $$TripStopsTableUpdateCompanionBuilder,
+          (TripStop, BaseReferences<_$AppDatabase, $TripStopsTable, TripStop>),
+          TripStop,
+          PrefetchHooks Function()
+        > {
+  $$TripStopsTableTableManager(_$AppDatabase db, $TripStopsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TripStopsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TripStopsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TripStopsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> tripId = const Value.absent(),
+                Value<DateTime> arrivalTime = const Value.absent(),
+                Value<DateTime?> departureTime = const Value.absent(),
+                Value<int> durationSeconds = const Value.absent(),
+                Value<double> latitude = const Value.absent(),
+                Value<double> longitude = const Value.absent(),
+                Value<double?> radiusMeters = const Value.absent(),
+                Value<String?> address = const Value.absent(),
+                Value<String> stopType = const Value.absent(),
+                Value<String?> stopNote = const Value.absent(),
+                Value<bool> isDestination = const Value.absent(),
+                Value<bool> confirmedByUser = const Value.absent(),
+                Value<DateTime?> notificationSentAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TripStopsCompanion(
+                id: id,
+                tripId: tripId,
+                arrivalTime: arrivalTime,
+                departureTime: departureTime,
+                durationSeconds: durationSeconds,
+                latitude: latitude,
+                longitude: longitude,
+                radiusMeters: radiusMeters,
+                address: address,
+                stopType: stopType,
+                stopNote: stopNote,
+                isDestination: isDestination,
+                confirmedByUser: confirmedByUser,
+                notificationSentAt: notificationSentAt,
+                syncStatus: syncStatus,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String tripId,
+                required DateTime arrivalTime,
+                Value<DateTime?> departureTime = const Value.absent(),
+                Value<int> durationSeconds = const Value.absent(),
+                required double latitude,
+                required double longitude,
+                Value<double?> radiusMeters = const Value.absent(),
+                Value<String?> address = const Value.absent(),
+                Value<String> stopType = const Value.absent(),
+                Value<String?> stopNote = const Value.absent(),
+                Value<bool> isDestination = const Value.absent(),
+                Value<bool> confirmedByUser = const Value.absent(),
+                Value<DateTime?> notificationSentAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => TripStopsCompanion.insert(
+                id: id,
+                tripId: tripId,
+                arrivalTime: arrivalTime,
+                departureTime: departureTime,
+                durationSeconds: durationSeconds,
+                latitude: latitude,
+                longitude: longitude,
+                radiusMeters: radiusMeters,
+                address: address,
+                stopType: stopType,
+                stopNote: stopNote,
+                isDestination: isDestination,
+                confirmedByUser: confirmedByUser,
+                notificationSentAt: notificationSentAt,
+                syncStatus: syncStatus,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TripStopsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TripStopsTable,
+      TripStop,
+      $$TripStopsTableFilterComposer,
+      $$TripStopsTableOrderingComposer,
+      $$TripStopsTableAnnotationComposer,
+      $$TripStopsTableCreateCompanionBuilder,
+      $$TripStopsTableUpdateCompanionBuilder,
+      (TripStop, BaseReferences<_$AppDatabase, $TripStopsTable, TripStop>),
+      TripStop,
+      PrefetchHooks Function()
     >;
 
 class $AppDatabaseManager {
@@ -7523,4 +8758,6 @@ class $AppDatabaseManager {
       $$ActivityEventsTableTableManager(_db, _db.activityEvents);
   $$SensorSamplesTableTableManager get sensorSamples =>
       $$SensorSamplesTableTableManager(_db, _db.sensorSamples);
+  $$TripStopsTableTableManager get tripStops =>
+      $$TripStopsTableTableManager(_db, _db.tripStops);
 }

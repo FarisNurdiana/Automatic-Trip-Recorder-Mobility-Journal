@@ -53,6 +53,14 @@ class FakeRemote implements RemoteTripDataSource {
     upsertedSampleIds.addAll(samples.map((s) => s.id));
   }
 
+  final upsertedStopIds = <String>[];
+
+  @override
+  Future<void> upsertStops(List<TripStop> stops) async {
+    _maybeFail();
+    upsertedStopIds.addAll(stops.map((s) => s.id));
+  }
+
   @override
   Future<List<Map<String, dynamic>>> fetchTrips(String userId) async => [];
 

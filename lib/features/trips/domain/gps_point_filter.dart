@@ -95,7 +95,7 @@ class GpsPointFilter {
         final medianNeighbor = (neighbors[0] + neighbors[1]) / 2;
         if (medianNeighbor > 0 &&
             speedKmh > medianNeighbor * config.maxSpeedSpikeFactor &&
-            speedKmh > config.possibleTripMinSpeedKmh * 4) {
+            speedKmh > config.candidateVehicleSpeedKmh * 4) {
           rejected++;
           continue;
         }

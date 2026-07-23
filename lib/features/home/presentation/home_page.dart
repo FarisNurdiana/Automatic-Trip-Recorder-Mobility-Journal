@@ -7,20 +7,13 @@ import '../../../core/constants/enums.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../shared/widgets/status_widgets.dart';
+import '../../recording/presentation/state_labels.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   String _stateLabel(AppLocalizations l10n, TripRecordingState state) =>
-      switch (state) {
-        TripRecordingState.idle => l10n.stateIdle,
-        TripRecordingState.possibleTrip => l10n.statePossibleTrip,
-        TripRecordingState.recording => l10n.stateRecording,
-        TripRecordingState.temporarilyStopped => l10n.stateTemporarilyStopped,
-        TripRecordingState.finishing => l10n.stateFinishing,
-        TripRecordingState.finished => l10n.stateFinished,
-        TripRecordingState.cancelled => l10n.stateCancelled,
-      };
+      tripStateLabel(l10n, state);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

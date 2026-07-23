@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In id, this message translates to:
-  /// **'TripLog'**
+  /// **'Ruteku'**
   String get appTitle;
 
   /// No description provided for @commonRetry.
@@ -995,13 +995,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingWelcomeTitle.
   ///
   /// In id, this message translates to:
-  /// **'Selamat datang di TripLog'**
+  /// **'Selamat datang di Ruteku'**
   String get onboardingWelcomeTitle;
 
   /// No description provided for @onboardingWelcomeDesc.
   ///
   /// In id, this message translates to:
-  /// **'Catat perjalanan Anda secara otomatis. TripLog mendeteksi saat Anda menggunakan kendaraan, merekam rute, dan membuat ringkasan perjalanan.'**
+  /// **'Catat perjalanan Anda secara otomatis. Ruteku mendeteksi saat Anda menggunakan kendaraan, merekam rute, dan membuat ringkasan perjalanan.'**
   String get onboardingWelcomeDesc;
 
   /// No description provided for @onboardingPermissionsTitle.
@@ -1013,7 +1013,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingPermissionsDesc.
   ///
   /// In id, this message translates to:
-  /// **'Agar perekaman otomatis berfungsi, TripLog membutuhkan beberapa izin. Setiap izin dijelaskan sebelum diminta.'**
+  /// **'Agar perekaman otomatis berfungsi, Ruteku membutuhkan beberapa izin. Setiap izin dijelaskan sebelum diminta.'**
   String get onboardingPermissionsDesc;
 
   /// No description provided for @onboardingStart.
@@ -1111,6 +1111,402 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Perjalanan yang sedang berlangsung ditemukan dan dilanjutkan setelah aplikasi ditutup.'**
   String get recoveredTripMessage;
+
+  /// No description provided for @stateShortStop.
+  ///
+  /// In id, this message translates to:
+  /// **'Berhenti sebentar'**
+  String get stateShortStop;
+
+  /// No description provided for @stateRestStopCandidate.
+  ///
+  /// In id, this message translates to:
+  /// **'Berhenti cukup lama'**
+  String get stateRestStopCandidate;
+
+  /// No description provided for @stateDestinationCandidate.
+  ///
+  /// In id, this message translates to:
+  /// **'Kemungkinan sudah sampai'**
+  String get stateDestinationCandidate;
+
+  /// No description provided for @stopQuestion30Title.
+  ///
+  /// In id, this message translates to:
+  /// **'Anda sudah berhenti selama 30 menit'**
+  String get stopQuestion30Title;
+
+  /// No description provided for @stopQuestion30Body.
+  ///
+  /// In id, this message translates to:
+  /// **'Apakah Anda sudah sampai di tujuan atau sedang beristirahat?'**
+  String get stopQuestion30Body;
+
+  /// No description provided for @stopQuestion5hTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Perjalanan kemungkinan telah selesai'**
+  String get stopQuestion5hTitle;
+
+  /// No description provided for @stopQuestion5hBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Anda berada di lokasi yang sama selama lebih dari 5 jam.'**
+  String get stopQuestion5hBody;
+
+  /// No description provided for @answerArrived.
+  ///
+  /// In id, this message translates to:
+  /// **'Sudah sampai'**
+  String get answerArrived;
+
+  /// No description provided for @answerResting.
+  ///
+  /// In id, this message translates to:
+  /// **'Sedang istirahat'**
+  String get answerResting;
+
+  /// No description provided for @answerContinue.
+  ///
+  /// In id, this message translates to:
+  /// **'Lanjutkan perjalanan'**
+  String get answerContinue;
+
+  /// No description provided for @finishTripAction.
+  ///
+  /// In id, this message translates to:
+  /// **'Selesaikan perjalanan'**
+  String get finishTripAction;
+
+  /// No description provided for @keepTripAction.
+  ///
+  /// In id, this message translates to:
+  /// **'Tetap lanjutkan'**
+  String get keepTripAction;
+
+  /// No description provided for @finishedAutomaticallyBadge.
+  ///
+  /// In id, this message translates to:
+  /// **'Diselesaikan otomatis'**
+  String get finishedAutomaticallyBadge;
+
+  /// No description provided for @editArrivalTime.
+  ///
+  /// In id, this message translates to:
+  /// **'Koreksi waktu tiba'**
+  String get editArrivalTime;
+
+  /// No description provided for @arrivalUpdated.
+  ///
+  /// In id, this message translates to:
+  /// **'Waktu tiba diperbarui'**
+  String get arrivalUpdated;
+
+  /// No description provided for @mapPageTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Peta perjalanan'**
+  String get mapPageTitle;
+
+  /// No description provided for @mapRecenter.
+  ///
+  /// In id, this message translates to:
+  /// **'Kembali ke rute'**
+  String get mapRecenter;
+
+  /// No description provided for @mapZoomIn.
+  ///
+  /// In id, this message translates to:
+  /// **'Perbesar'**
+  String get mapZoomIn;
+
+  /// No description provided for @mapZoomOut.
+  ///
+  /// In id, this message translates to:
+  /// **'Perkecil'**
+  String get mapZoomOut;
+
+  /// No description provided for @mapOpenFullscreen.
+  ///
+  /// In id, this message translates to:
+  /// **'Buka peta layar penuh'**
+  String get mapOpenFullscreen;
+
+  /// No description provided for @gpsQuality.
+  ///
+  /// In id, this message translates to:
+  /// **'Kualitas GPS'**
+  String get gpsQuality;
+
+  /// No description provided for @gpsGood.
+  ///
+  /// In id, this message translates to:
+  /// **'Baik'**
+  String get gpsGood;
+
+  /// No description provided for @gpsFair.
+  ///
+  /// In id, this message translates to:
+  /// **'Sedang'**
+  String get gpsFair;
+
+  /// No description provided for @gpsPoor.
+  ///
+  /// In id, this message translates to:
+  /// **'Buruk'**
+  String get gpsPoor;
+
+  /// No description provided for @stopSheetTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Berhenti {number}'**
+  String stopSheetTitle(int number);
+
+  /// No description provided for @stopArrivalTime.
+  ///
+  /// In id, this message translates to:
+  /// **'Waktu tiba'**
+  String get stopArrivalTime;
+
+  /// No description provided for @stopDepartureTime.
+  ///
+  /// In id, this message translates to:
+  /// **'Waktu berangkat'**
+  String get stopDepartureTime;
+
+  /// No description provided for @stopDurationLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Durasi'**
+  String get stopDurationLabel;
+
+  /// No description provided for @stopLocationLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Lokasi'**
+  String get stopLocationLabel;
+
+  /// No description provided for @stopTypeLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Jenis berhenti'**
+  String get stopTypeLabel;
+
+  /// No description provided for @stopUnconfirmed.
+  ///
+  /// In id, this message translates to:
+  /// **'Belum dikonfirmasi'**
+  String get stopUnconfirmed;
+
+  /// No description provided for @stopTypeRest.
+  ///
+  /// In id, this message translates to:
+  /// **'Istirahat'**
+  String get stopTypeRest;
+
+  /// No description provided for @stopTypeParking.
+  ///
+  /// In id, this message translates to:
+  /// **'Parkir'**
+  String get stopTypeParking;
+
+  /// No description provided for @stopTypeFood.
+  ///
+  /// In id, this message translates to:
+  /// **'Membeli makanan'**
+  String get stopTypeFood;
+
+  /// No description provided for @stopTypeFuel.
+  ///
+  /// In id, this message translates to:
+  /// **'Isi bahan bakar'**
+  String get stopTypeFuel;
+
+  /// No description provided for @stopTypeVisit.
+  ///
+  /// In id, this message translates to:
+  /// **'Mengunjungi lokasi'**
+  String get stopTypeVisit;
+
+  /// No description provided for @stopTypeTraffic.
+  ///
+  /// In id, this message translates to:
+  /// **'Kemacetan'**
+  String get stopTypeTraffic;
+
+  /// No description provided for @stopTypeDestination.
+  ///
+  /// In id, this message translates to:
+  /// **'Tujuan'**
+  String get stopTypeDestination;
+
+  /// No description provided for @stopTypeOther.
+  ///
+  /// In id, this message translates to:
+  /// **'Lainnya'**
+  String get stopTypeOther;
+
+  /// No description provided for @stopLabelSaved.
+  ///
+  /// In id, this message translates to:
+  /// **'Label berhenti disimpan'**
+  String get stopLabelSaved;
+
+  /// No description provided for @vehicleBicycle.
+  ///
+  /// In id, this message translates to:
+  /// **'Sepeda'**
+  String get vehicleBicycle;
+
+  /// No description provided for @vehicleQuestionHigh.
+  ///
+  /// In id, this message translates to:
+  /// **'Apakah tadi Anda menggunakan {vehicle}?'**
+  String vehicleQuestionHigh(String vehicle);
+
+  /// No description provided for @vehiclePredictionInfo.
+  ///
+  /// In id, this message translates to:
+  /// **'Prediksi Ruteku berdasarkan pola perjalanan.'**
+  String get vehiclePredictionInfo;
+
+  /// No description provided for @vehicleConfidenceLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Keyakinan: {percent}%'**
+  String vehicleConfidenceLabel(String percent);
+
+  /// No description provided for @vehicleYes.
+  ///
+  /// In id, this message translates to:
+  /// **'Ya, {vehicle}'**
+  String vehicleYes(String vehicle);
+
+  /// No description provided for @vehicleNo.
+  ///
+  /// In id, this message translates to:
+  /// **'Bukan'**
+  String get vehicleNo;
+
+  /// No description provided for @vehicleQuestionMedium.
+  ///
+  /// In id, this message translates to:
+  /// **'Kemungkinan Anda menggunakan {vehicle}'**
+  String vehicleQuestionMedium(String vehicle);
+
+  /// No description provided for @vehicleQuestionMediumAsk.
+  ///
+  /// In id, this message translates to:
+  /// **'Apakah prediksi ini benar?'**
+  String get vehicleQuestionMediumAsk;
+
+  /// No description provided for @vehicleCorrect.
+  ///
+  /// In id, this message translates to:
+  /// **'Benar'**
+  String get vehicleCorrect;
+
+  /// No description provided for @vehicleChange.
+  ///
+  /// In id, this message translates to:
+  /// **'Ubah kendaraan'**
+  String get vehicleChange;
+
+  /// No description provided for @vehicleQuestionLow.
+  ///
+  /// In id, this message translates to:
+  /// **'Kendaraan apa yang Anda gunakan?'**
+  String get vehicleQuestionLow;
+
+  /// No description provided for @shareTripTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Bagikan perjalanan'**
+  String get shareTripTitle;
+
+  /// No description provided for @sharePng.
+  ///
+  /// In id, this message translates to:
+  /// **'Gambar PNG'**
+  String get sharePng;
+
+  /// No description provided for @shareGpx.
+  ///
+  /// In id, this message translates to:
+  /// **'File GPX'**
+  String get shareGpx;
+
+  /// No description provided for @shareGeoJson.
+  ///
+  /// In id, this message translates to:
+  /// **'File GeoJSON'**
+  String get shareGeoJson;
+
+  /// No description provided for @shareCopySummary.
+  ///
+  /// In id, this message translates to:
+  /// **'Salin ringkasan'**
+  String get shareCopySummary;
+
+  /// No description provided for @shareCopied.
+  ///
+  /// In id, this message translates to:
+  /// **'Ringkasan disalin ke clipboard'**
+  String get shareCopied;
+
+  /// No description provided for @sharePreparing.
+  ///
+  /// In id, this message translates to:
+  /// **'Menyiapkan gambar perjalanan...'**
+  String get sharePreparing;
+
+  /// No description provided for @sharePrivacyTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Pilihan privasi'**
+  String get sharePrivacyTitle;
+
+  /// No description provided for @shareShowStart.
+  ///
+  /// In id, this message translates to:
+  /// **'Tampilkan lokasi awal'**
+  String get shareShowStart;
+
+  /// No description provided for @shareShowEnd.
+  ///
+  /// In id, this message translates to:
+  /// **'Tampilkan lokasi akhir'**
+  String get shareShowEnd;
+
+  /// No description provided for @shareShowUserName.
+  ///
+  /// In id, this message translates to:
+  /// **'Tampilkan nama pengguna'**
+  String get shareShowUserName;
+
+  /// No description provided for @shareShowMaxSpeed.
+  ///
+  /// In id, this message translates to:
+  /// **'Tampilkan kecepatan maksimum'**
+  String get shareShowMaxSpeed;
+
+  /// No description provided for @sharePrivacyMode.
+  ///
+  /// In id, this message translates to:
+  /// **'Mode privasi'**
+  String get sharePrivacyMode;
+
+  /// No description provided for @sharePrivacyModeDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Memotong ±300 m di awal dan akhir rute agar lokasi rumah tidak terlihat.'**
+  String get sharePrivacyModeDesc;
+
+  /// No description provided for @shareContinue.
+  ///
+  /// In id, this message translates to:
+  /// **'Lanjut'**
+  String get shareContinue;
 }
 
 class _AppLocalizationsDelegate

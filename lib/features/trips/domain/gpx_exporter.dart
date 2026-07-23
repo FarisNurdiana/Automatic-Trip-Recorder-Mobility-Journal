@@ -9,7 +9,7 @@ import '../../../core/location/location_models.dart';
 class GpxExporter {
   const GpxExporter();
 
-  /// [name] becomes the track name (e.g. "TripLog 16 Jul 2026 08:00").
+  /// [name] becomes the track name (e.g. "Ruteku 16 Jul 2026 08:00").
   /// [points] must be ordered by time; pass filtered points so exported
   /// tracks do not contain GPS outliers.
   String build({
@@ -20,7 +20,7 @@ class GpxExporter {
     final buffer = StringBuffer()
       ..writeln('<?xml version="1.0" encoding="UTF-8"?>')
       ..writeln(
-        '<gpx version="1.1" creator="TripLog" '
+        '<gpx version="1.1" creator="Ruteku" '
         'xmlns="http://www.topografix.com/GPX/1/1" '
         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
         'xsi:schemaLocation="http://www.topografix.com/GPX/1/1 '

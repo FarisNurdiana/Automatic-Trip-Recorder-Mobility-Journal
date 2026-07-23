@@ -9,6 +9,7 @@ abstract interface class RemoteTripDataSource {
   Future<void> upsertPoints(List<TripPoint> points);
   Future<void> upsertActivityEvents(String userId, List<ActivityEvent> events);
   Future<void> upsertSensorSamples(List<SensorSample> samples);
+  Future<void> upsertStops(List<TripStop> stops);
   Future<List<Map<String, dynamic>>> fetchTrips(String userId);
   Future<void> deleteTrip(String tripId);
   Future<void> deleteAllUserData(String userId);
@@ -51,6 +52,9 @@ class SupabaseTripDataSource implements RemoteTripDataSource {
       'vehicle_prediction_changed': trip.vehiclePredictionChanged,
       'stop_count': trip.stopCount,
       'summary_algorithm_version': trip.summaryAlgorithmVersion,
+      'finished_automatically': trip.finishedAutomatically,
+      'finish_reason': trip.finishReason,
+      'arrival_time_corrected_by_user': trip.arrivalCorrectedByUser,
       'device_model': trip.deviceModel,
       'operating_system': trip.operatingSystem,
       'operating_system_version': trip.operatingSystemVersion,
@@ -129,6 +133,32 @@ class SupabaseTripDataSource implements RemoteTripDataSource {
           'sampling_rate_hz': s.samplingRate,
           'speed': s.speed,
           'activity_state': s.activityState,
+        },
+    ]);
+  }
+
+  @override
+  Future<void> upsertStops(List<TripStop> stops) async {
+    if (stops.isEmpty) return;
+    await client.from('trip_stops').upsert([
+      for (final s in stops)
+        {
+          'id': s.id,
+          'trip_id': s.tripId,
+          'arrival_time': s.arrivalTime.toUtc().toIso8601String(),
+          'departure_time': s.departureTime?.toUtc().toIso8601String(),
+          'duration_seconds': s.durationSeconds,
+          'latitude': s.latitude,
+          'longitude': s.longitude,
+          'radius_meters': s.radiusMeters,
+          'address': s.address,
+          'stop_type': s.stopType,
+          'stop_note': s.stopNote,
+          'is_destination': s.isDestination,
+          'confirmed_by_user': s.confirmedByUser,
+          'notification_sent_at': s.notificationSentAt
+              ?.toUtc()
+              .toIso8601String(),
         },
     ]);
   }

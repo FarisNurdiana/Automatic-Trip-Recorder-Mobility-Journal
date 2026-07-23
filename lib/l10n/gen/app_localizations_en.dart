@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'TripLog';
+  String get appTitle => 'Ruteku';
 
   @override
   String get commonRetry => 'Retry';
@@ -479,18 +479,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get permOpenSettings => 'Open settings';
 
   @override
-  String get onboardingWelcomeTitle => 'Welcome to TripLog';
+  String get onboardingWelcomeTitle => 'Welcome to Ruteku';
 
   @override
   String get onboardingWelcomeDesc =>
-      'Record your trips automatically. TripLog detects when you are in a vehicle, records the route, and creates a trip summary.';
+      'Record your trips automatically. Ruteku detects when you are in a vehicle, records the route, and creates a trip summary.';
 
   @override
   String get onboardingPermissionsTitle => 'Required permissions';
 
   @override
   String get onboardingPermissionsDesc =>
-      'For automatic recording to work, TripLog needs a few permissions. Each one is explained before it is requested.';
+      'For automatic recording to work, Ruteku needs a few permissions. Each one is explained before it is requested.';
 
   @override
   String get onboardingStart => 'Get started';
@@ -547,4 +547,216 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recoveredTripMessage =>
       'An in-progress trip was found and resumed after the app was closed.';
+
+  @override
+  String get stateShortStop => 'Brief stop';
+
+  @override
+  String get stateRestStopCandidate => 'Stopped for a while';
+
+  @override
+  String get stateDestinationCandidate => 'Possibly arrived';
+
+  @override
+  String get stopQuestion30Title => 'You have been stopped for 30 minutes';
+
+  @override
+  String get stopQuestion30Body =>
+      'Have you arrived at your destination, or are you resting?';
+
+  @override
+  String get stopQuestion5hTitle => 'The trip has probably finished';
+
+  @override
+  String get stopQuestion5hBody =>
+      'You have been at the same location for more than 5 hours.';
+
+  @override
+  String get answerArrived => 'Arrived';
+
+  @override
+  String get answerResting => 'Resting';
+
+  @override
+  String get answerContinue => 'Continue trip';
+
+  @override
+  String get finishTripAction => 'Finish trip';
+
+  @override
+  String get keepTripAction => 'Keep going';
+
+  @override
+  String get finishedAutomaticallyBadge => 'Finished automatically';
+
+  @override
+  String get editArrivalTime => 'Correct arrival time';
+
+  @override
+  String get arrivalUpdated => 'Arrival time updated';
+
+  @override
+  String get mapPageTitle => 'Trip map';
+
+  @override
+  String get mapRecenter => 'Back to route';
+
+  @override
+  String get mapZoomIn => 'Zoom in';
+
+  @override
+  String get mapZoomOut => 'Zoom out';
+
+  @override
+  String get mapOpenFullscreen => 'Open full-screen map';
+
+  @override
+  String get gpsQuality => 'GPS quality';
+
+  @override
+  String get gpsGood => 'Good';
+
+  @override
+  String get gpsFair => 'Fair';
+
+  @override
+  String get gpsPoor => 'Poor';
+
+  @override
+  String stopSheetTitle(int number) {
+    return 'Stop $number';
+  }
+
+  @override
+  String get stopArrivalTime => 'Arrival time';
+
+  @override
+  String get stopDepartureTime => 'Departure time';
+
+  @override
+  String get stopDurationLabel => 'Duration';
+
+  @override
+  String get stopLocationLabel => 'Location';
+
+  @override
+  String get stopTypeLabel => 'Stop type';
+
+  @override
+  String get stopUnconfirmed => 'Not confirmed yet';
+
+  @override
+  String get stopTypeRest => 'Rest';
+
+  @override
+  String get stopTypeParking => 'Parking';
+
+  @override
+  String get stopTypeFood => 'Buying food';
+
+  @override
+  String get stopTypeFuel => 'Refueling';
+
+  @override
+  String get stopTypeVisit => 'Visiting a place';
+
+  @override
+  String get stopTypeTraffic => 'Traffic jam';
+
+  @override
+  String get stopTypeDestination => 'Destination';
+
+  @override
+  String get stopTypeOther => 'Other';
+
+  @override
+  String get stopLabelSaved => 'Stop label saved';
+
+  @override
+  String get vehicleBicycle => 'Bicycle';
+
+  @override
+  String vehicleQuestionHigh(String vehicle) {
+    return 'Were you riding a $vehicle just now?';
+  }
+
+  @override
+  String get vehiclePredictionInfo =>
+      'Ruteku\'s prediction based on the trip pattern.';
+
+  @override
+  String vehicleConfidenceLabel(String percent) {
+    return 'Confidence: $percent%';
+  }
+
+  @override
+  String vehicleYes(String vehicle) {
+    return 'Yes, $vehicle';
+  }
+
+  @override
+  String get vehicleNo => 'No';
+
+  @override
+  String vehicleQuestionMedium(String vehicle) {
+    return 'You probably used a $vehicle';
+  }
+
+  @override
+  String get vehicleQuestionMediumAsk => 'Is this prediction correct?';
+
+  @override
+  String get vehicleCorrect => 'Correct';
+
+  @override
+  String get vehicleChange => 'Change vehicle';
+
+  @override
+  String get vehicleQuestionLow => 'Which vehicle did you use?';
+
+  @override
+  String get shareTripTitle => 'Share trip';
+
+  @override
+  String get sharePng => 'PNG image';
+
+  @override
+  String get shareGpx => 'GPX file';
+
+  @override
+  String get shareGeoJson => 'GeoJSON file';
+
+  @override
+  String get shareCopySummary => 'Copy summary';
+
+  @override
+  String get shareCopied => 'Summary copied to clipboard';
+
+  @override
+  String get sharePreparing => 'Preparing trip image...';
+
+  @override
+  String get sharePrivacyTitle => 'Privacy options';
+
+  @override
+  String get shareShowStart => 'Show start location';
+
+  @override
+  String get shareShowEnd => 'Show end location';
+
+  @override
+  String get shareShowUserName => 'Show user name';
+
+  @override
+  String get shareShowMaxSpeed => 'Show maximum speed';
+
+  @override
+  String get sharePrivacyMode => 'Privacy mode';
+
+  @override
+  String get sharePrivacyModeDesc =>
+      'Trims ~300 m from the start and end of the route so home locations stay hidden.';
+
+  @override
+  String get shareContinue => 'Continue';
 }

@@ -198,7 +198,12 @@ class DefaultSyncService implements SyncService {
       for (final e in events) e.id,
     ], SyncStatus.synced);
 
-    // 4. Sensor samples in batches.
+    // 4. Stops (labels are ground truth for the dataset).
+    final stops = await local.stopsForTrip(tripId);
+    await remote.upsertStops(stops);
+    await local.setStopsSyncStatus(tripId, SyncStatus.synced);
+
+    // 5. Sensor samples in batches.
     final samples = await local.sensorSamplesForTrip(tripId);
     for (var i = 0; i < samples.length; i += sensorBatchSize) {
       final batch = samples.sublist(

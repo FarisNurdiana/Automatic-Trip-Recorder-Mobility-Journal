@@ -4,8 +4,8 @@ import '../../../core/utils/geo_utils.dart';
 import 'gps_point_filter.dart';
 
 /// A detected stop within a trip.
-class TripStop {
-  const TripStop({
+class DetectedStop {
+  const DetectedStop({
     required this.latitude,
     required this.longitude,
     required this.startedAt,
@@ -52,7 +52,7 @@ class TripSummaryResult {
   final double averageSpeedKmh;
   final double movingAverageSpeedKmh;
   final double maximumSpeedKmh;
-  final List<TripStop> stops;
+  final List<DetectedStop> stops;
   final double startLatitude;
   final double startLongitude;
   final double endLatitude;
@@ -189,11 +189,11 @@ class DefaultTripSummaryCalculator implements TripSummaryCalculator {
     return out;
   }
 
-  List<TripStop> _detectStops(
+  List<DetectedStop> _detectStops(
     List<RecordedLocation> points,
     List<double> smoothedSpeeds,
   ) {
-    final stops = <TripStop>[];
+    final stops = <DetectedStop>[];
     int? clusterStart;
     for (var i = 0; i < points.length; i++) {
       final isStopped = smoothedSpeeds[i] <= config.stopSpeedThresholdKmh;
@@ -215,7 +215,7 @@ class DefaultTripSummaryCalculator implements TripSummaryCalculator {
             lon += points[j].longitude;
           }
           stops.add(
-            TripStop(
+            DetectedStop(
               latitude: lat / n,
               longitude: lon / n,
               startedAt: start.recordedAt,

@@ -9,7 +9,7 @@ class AppLocalizationsId extends AppLocalizations {
   AppLocalizationsId([String locale = 'id']) : super(locale);
 
   @override
-  String get appTitle => 'TripLog';
+  String get appTitle => 'Ruteku';
 
   @override
   String get commonRetry => 'Coba lagi';
@@ -482,18 +482,18 @@ class AppLocalizationsId extends AppLocalizations {
   String get permOpenSettings => 'Buka pengaturan';
 
   @override
-  String get onboardingWelcomeTitle => 'Selamat datang di TripLog';
+  String get onboardingWelcomeTitle => 'Selamat datang di Ruteku';
 
   @override
   String get onboardingWelcomeDesc =>
-      'Catat perjalanan Anda secara otomatis. TripLog mendeteksi saat Anda menggunakan kendaraan, merekam rute, dan membuat ringkasan perjalanan.';
+      'Catat perjalanan Anda secara otomatis. Ruteku mendeteksi saat Anda menggunakan kendaraan, merekam rute, dan membuat ringkasan perjalanan.';
 
   @override
   String get onboardingPermissionsTitle => 'Izin yang dibutuhkan';
 
   @override
   String get onboardingPermissionsDesc =>
-      'Agar perekaman otomatis berfungsi, TripLog membutuhkan beberapa izin. Setiap izin dijelaskan sebelum diminta.';
+      'Agar perekaman otomatis berfungsi, Ruteku membutuhkan beberapa izin. Setiap izin dijelaskan sebelum diminta.';
 
   @override
   String get onboardingStart => 'Mulai';
@@ -550,4 +550,216 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get recoveredTripMessage =>
       'Perjalanan yang sedang berlangsung ditemukan dan dilanjutkan setelah aplikasi ditutup.';
+
+  @override
+  String get stateShortStop => 'Berhenti sebentar';
+
+  @override
+  String get stateRestStopCandidate => 'Berhenti cukup lama';
+
+  @override
+  String get stateDestinationCandidate => 'Kemungkinan sudah sampai';
+
+  @override
+  String get stopQuestion30Title => 'Anda sudah berhenti selama 30 menit';
+
+  @override
+  String get stopQuestion30Body =>
+      'Apakah Anda sudah sampai di tujuan atau sedang beristirahat?';
+
+  @override
+  String get stopQuestion5hTitle => 'Perjalanan kemungkinan telah selesai';
+
+  @override
+  String get stopQuestion5hBody =>
+      'Anda berada di lokasi yang sama selama lebih dari 5 jam.';
+
+  @override
+  String get answerArrived => 'Sudah sampai';
+
+  @override
+  String get answerResting => 'Sedang istirahat';
+
+  @override
+  String get answerContinue => 'Lanjutkan perjalanan';
+
+  @override
+  String get finishTripAction => 'Selesaikan perjalanan';
+
+  @override
+  String get keepTripAction => 'Tetap lanjutkan';
+
+  @override
+  String get finishedAutomaticallyBadge => 'Diselesaikan otomatis';
+
+  @override
+  String get editArrivalTime => 'Koreksi waktu tiba';
+
+  @override
+  String get arrivalUpdated => 'Waktu tiba diperbarui';
+
+  @override
+  String get mapPageTitle => 'Peta perjalanan';
+
+  @override
+  String get mapRecenter => 'Kembali ke rute';
+
+  @override
+  String get mapZoomIn => 'Perbesar';
+
+  @override
+  String get mapZoomOut => 'Perkecil';
+
+  @override
+  String get mapOpenFullscreen => 'Buka peta layar penuh';
+
+  @override
+  String get gpsQuality => 'Kualitas GPS';
+
+  @override
+  String get gpsGood => 'Baik';
+
+  @override
+  String get gpsFair => 'Sedang';
+
+  @override
+  String get gpsPoor => 'Buruk';
+
+  @override
+  String stopSheetTitle(int number) {
+    return 'Berhenti $number';
+  }
+
+  @override
+  String get stopArrivalTime => 'Waktu tiba';
+
+  @override
+  String get stopDepartureTime => 'Waktu berangkat';
+
+  @override
+  String get stopDurationLabel => 'Durasi';
+
+  @override
+  String get stopLocationLabel => 'Lokasi';
+
+  @override
+  String get stopTypeLabel => 'Jenis berhenti';
+
+  @override
+  String get stopUnconfirmed => 'Belum dikonfirmasi';
+
+  @override
+  String get stopTypeRest => 'Istirahat';
+
+  @override
+  String get stopTypeParking => 'Parkir';
+
+  @override
+  String get stopTypeFood => 'Membeli makanan';
+
+  @override
+  String get stopTypeFuel => 'Isi bahan bakar';
+
+  @override
+  String get stopTypeVisit => 'Mengunjungi lokasi';
+
+  @override
+  String get stopTypeTraffic => 'Kemacetan';
+
+  @override
+  String get stopTypeDestination => 'Tujuan';
+
+  @override
+  String get stopTypeOther => 'Lainnya';
+
+  @override
+  String get stopLabelSaved => 'Label berhenti disimpan';
+
+  @override
+  String get vehicleBicycle => 'Sepeda';
+
+  @override
+  String vehicleQuestionHigh(String vehicle) {
+    return 'Apakah tadi Anda menggunakan $vehicle?';
+  }
+
+  @override
+  String get vehiclePredictionInfo =>
+      'Prediksi Ruteku berdasarkan pola perjalanan.';
+
+  @override
+  String vehicleConfidenceLabel(String percent) {
+    return 'Keyakinan: $percent%';
+  }
+
+  @override
+  String vehicleYes(String vehicle) {
+    return 'Ya, $vehicle';
+  }
+
+  @override
+  String get vehicleNo => 'Bukan';
+
+  @override
+  String vehicleQuestionMedium(String vehicle) {
+    return 'Kemungkinan Anda menggunakan $vehicle';
+  }
+
+  @override
+  String get vehicleQuestionMediumAsk => 'Apakah prediksi ini benar?';
+
+  @override
+  String get vehicleCorrect => 'Benar';
+
+  @override
+  String get vehicleChange => 'Ubah kendaraan';
+
+  @override
+  String get vehicleQuestionLow => 'Kendaraan apa yang Anda gunakan?';
+
+  @override
+  String get shareTripTitle => 'Bagikan perjalanan';
+
+  @override
+  String get sharePng => 'Gambar PNG';
+
+  @override
+  String get shareGpx => 'File GPX';
+
+  @override
+  String get shareGeoJson => 'File GeoJSON';
+
+  @override
+  String get shareCopySummary => 'Salin ringkasan';
+
+  @override
+  String get shareCopied => 'Ringkasan disalin ke clipboard';
+
+  @override
+  String get sharePreparing => 'Menyiapkan gambar perjalanan...';
+
+  @override
+  String get sharePrivacyTitle => 'Pilihan privasi';
+
+  @override
+  String get shareShowStart => 'Tampilkan lokasi awal';
+
+  @override
+  String get shareShowEnd => 'Tampilkan lokasi akhir';
+
+  @override
+  String get shareShowUserName => 'Tampilkan nama pengguna';
+
+  @override
+  String get shareShowMaxSpeed => 'Tampilkan kecepatan maksimum';
+
+  @override
+  String get sharePrivacyMode => 'Mode privasi';
+
+  @override
+  String get sharePrivacyModeDesc =>
+      'Memotong ±300 m di awal dan akhir rute agar lokasi rumah tidak terlihat.';
+
+  @override
+  String get shareContinue => 'Lanjut';
 }

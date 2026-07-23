@@ -1,6 +1,6 @@
 {
   "@@locale": "id",
-  "appTitle": "TripLog",
+  "appTitle": "Ruteku",
   "commonRetry": "Coba lagi",
   "commonCancel": "Batal",
   "commonSave": "Simpan",
@@ -15,7 +15,6 @@
   "commonNext": "Lanjut",
   "commonDone": "Selesai",
   "commonConfirm": "Konfirmasi",
-
   "authLoginTitle": "Masuk",
   "authRegisterTitle": "Daftar",
   "authEmail": "Email",
@@ -36,7 +35,6 @@
   "authPasswordTooShort": "Kata sandi minimal 8 karakter",
   "authRegisterSuccess": "Pendaftaran berhasil. Periksa email Anda untuk konfirmasi.",
   "authLogoutUnsyncedWarning": "Masih ada data yang belum tersinkronisasi. Jika keluar sekarang, data tersebut tetap tersimpan di perangkat tetapi tidak akan diunggah sampai Anda masuk kembali.",
-
   "homeTitle": "Beranda",
   "homeDetectionStatus": "Status deteksi",
   "homeStartTrip": "Mulai perjalanan",
@@ -48,7 +46,6 @@
   "homeNoTrips": "Belum ada perjalanan tercatat",
   "homePermissionsIncomplete": "Beberapa izin belum diberikan",
   "homePermissionsComplete": "Semua izin lengkap",
-
   "stateIdle": "Mencari aktivitas",
   "statePossibleTrip": "Kemungkinan perjalanan terdeteksi",
   "stateRecording": "Perjalanan sedang direkam",
@@ -56,14 +53,12 @@
   "stateFinishing": "Menyelesaikan perjalanan",
   "stateFinished": "Perjalanan tersimpan",
   "stateCancelled": "Perjalanan dibatalkan",
-
   "syncPending": "Menunggu sinkronisasi",
   "syncSyncing": "Menyinkronkan...",
   "syncSynced": "Tersinkronisasi",
   "syncFailed": "Sinkronisasi gagal",
   "syncNow": "Sinkronkan sekarang",
   "syncLocalOnly": "Mode lokal — sinkronisasi nonaktif",
-
   "tripCurrentTitle": "Perjalanan saat ini",
   "tripPause": "Jeda",
   "tripResume": "Lanjutkan",
@@ -92,10 +87,8 @@
   "tripExportGpx": "Ekspor GPX",
   "tripExportGpxDesc": "Bagikan rute sebagai file GPX (dapat diimpor ke Strava, Google Earth, dll.)",
   "tripExportFailed": "Ekspor gagal. Perjalanan tidak memiliki titik rute.",
-
   "historyTitle": "Riwayat perjalanan",
   "historyEmpty": "Belum ada perjalanan. Mulai perjalanan pertama Anda dari beranda.",
-
   "vehicleConfirmTitle": "Konfirmasi kendaraan",
   "vehicleConfirmMessage": "Kami mendeteksi perjalanan menggunakan kendaraan.",
   "vehicleConfirmQuestion": "Jenis kendaraan:",
@@ -122,7 +115,6 @@
   "vehicleTrain": "Kereta",
   "vehicleOther": "Lainnya",
   "vehicleUnknown": "Tidak diketahui",
-
   "profileTitle": "Profil",
   "settingsTitle": "Pengaturan",
   "settingsAutoDetection": "Deteksi perjalanan otomatis",
@@ -145,7 +137,6 @@
   "themeDark": "Gelap",
   "settingsPermissions": "Diagnostik izin",
   "settingsPrivacy": "Privasi & keamanan",
-
   "privacyTitle": "Privasi & keamanan",
   "privacyDeleteAllLocal": "Hapus semua data lokal",
   "privacyDeleteAllLocalConfirm": "Semua perjalanan dan data sensor di perangkat ini akan dihapus permanen. Lanjutkan?",
@@ -154,7 +145,6 @@
   "privacyDeleteTrip": "Hapus perjalanan",
   "privacyDeleteTripConfirm": "Hapus perjalanan ini secara permanen?",
   "privacyDataDeleted": "Data berhasil dihapus",
-
   "permLocation": "Lokasi",
   "permLocationDesc": "Digunakan untuk merekam rute perjalanan.",
   "permBackgroundLocation": "Lokasi latar belakang",
@@ -173,13 +163,11 @@
   "permInactive": "Tidak aktif",
   "permRequest": "Minta izin",
   "permOpenSettings": "Buka pengaturan",
-
-  "onboardingWelcomeTitle": "Selamat datang di TripLog",
-  "onboardingWelcomeDesc": "Catat perjalanan Anda secara otomatis. TripLog mendeteksi saat Anda menggunakan kendaraan, merekam rute, dan membuat ringkasan perjalanan.",
+  "onboardingWelcomeTitle": "Selamat datang di Ruteku",
+  "onboardingWelcomeDesc": "Catat perjalanan Anda secara otomatis. Ruteku mendeteksi saat Anda menggunakan kendaraan, merekam rute, dan membuat ringkasan perjalanan.",
   "onboardingPermissionsTitle": "Izin yang dibutuhkan",
-  "onboardingPermissionsDesc": "Agar perekaman otomatis berfungsi, TripLog membutuhkan beberapa izin. Setiap izin dijelaskan sebelum diminta.",
+  "onboardingPermissionsDesc": "Agar perekaman otomatis berfungsi, Ruteku membutuhkan beberapa izin. Setiap izin dijelaskan sebelum diminta.",
   "onboardingStart": "Mulai",
-
   "errorPermissionDenied": "Izin ditolak. Beberapa fitur tidak akan berfungsi.",
   "errorGpsDisabled": "GPS tidak aktif. Aktifkan layanan lokasi untuk merekam perjalanan.",
   "errorActivityUnavailable": "Pengenalan aktivitas tidak tersedia di perangkat ini. Gunakan perekaman manual.",
@@ -189,12 +177,111 @@
   "errorTripTooFewPoints": "Perjalanan tidak disimpan karena titik GPS terlalu sedikit.",
   "errorEnvMissing": "Konfigurasi Supabase belum diisi",
   "errorEnvMissingDesc": "Salin .env.example menjadi .env lalu isi SUPABASE_URL dan SUPABASE_ANON_KEY. Anda tetap dapat menggunakan mode lokal tanpa akun.",
-
   "unitKm": "km",
   "unitKmh": "km/jam",
   "unitHour": "jam",
   "unitMinute": "menit",
-
   "recoveredTripTitle": "Perjalanan dipulihkan",
-  "recoveredTripMessage": "Perjalanan yang sedang berlangsung ditemukan dan dilanjutkan setelah aplikasi ditutup."
+  "recoveredTripMessage": "Perjalanan yang sedang berlangsung ditemukan dan dilanjutkan setelah aplikasi ditutup.",
+  "stateShortStop": "Berhenti sebentar",
+  "stateRestStopCandidate": "Berhenti cukup lama",
+  "stateDestinationCandidate": "Kemungkinan sudah sampai",
+  "stopQuestion30Title": "Anda sudah berhenti selama 30 menit",
+  "stopQuestion30Body": "Apakah Anda sudah sampai di tujuan atau sedang beristirahat?",
+  "stopQuestion5hTitle": "Perjalanan kemungkinan telah selesai",
+  "stopQuestion5hBody": "Anda berada di lokasi yang sama selama lebih dari 5 jam.",
+  "answerArrived": "Sudah sampai",
+  "answerResting": "Sedang istirahat",
+  "answerContinue": "Lanjutkan perjalanan",
+  "finishTripAction": "Selesaikan perjalanan",
+  "keepTripAction": "Tetap lanjutkan",
+  "finishedAutomaticallyBadge": "Diselesaikan otomatis",
+  "editArrivalTime": "Koreksi waktu tiba",
+  "arrivalUpdated": "Waktu tiba diperbarui",
+  "mapPageTitle": "Peta perjalanan",
+  "mapRecenter": "Kembali ke rute",
+  "mapZoomIn": "Perbesar",
+  "mapZoomOut": "Perkecil",
+  "mapOpenFullscreen": "Buka peta layar penuh",
+  "gpsQuality": "Kualitas GPS",
+  "gpsGood": "Baik",
+  "gpsFair": "Sedang",
+  "gpsPoor": "Buruk",
+  "stopSheetTitle": "Berhenti {number}",
+  "@stopSheetTitle": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "stopArrivalTime": "Waktu tiba",
+  "stopDepartureTime": "Waktu berangkat",
+  "stopDurationLabel": "Durasi",
+  "stopLocationLabel": "Lokasi",
+  "stopTypeLabel": "Jenis berhenti",
+  "stopUnconfirmed": "Belum dikonfirmasi",
+  "stopTypeRest": "Istirahat",
+  "stopTypeParking": "Parkir",
+  "stopTypeFood": "Membeli makanan",
+  "stopTypeFuel": "Isi bahan bakar",
+  "stopTypeVisit": "Mengunjungi lokasi",
+  "stopTypeTraffic": "Kemacetan",
+  "stopTypeDestination": "Tujuan",
+  "stopTypeOther": "Lainnya",
+  "stopLabelSaved": "Label berhenti disimpan",
+  "vehicleBicycle": "Sepeda",
+  "vehicleQuestionHigh": "Apakah tadi Anda menggunakan {vehicle}?",
+  "@vehicleQuestionHigh": {
+    "placeholders": {
+      "vehicle": {
+        "type": "String"
+      }
+    }
+  },
+  "vehiclePredictionInfo": "Prediksi Ruteku berdasarkan pola perjalanan.",
+  "vehicleConfidenceLabel": "Keyakinan: {percent}%",
+  "@vehicleConfidenceLabel": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "vehicleYes": "Ya, {vehicle}",
+  "@vehicleYes": {
+    "placeholders": {
+      "vehicle": {
+        "type": "String"
+      }
+    }
+  },
+  "vehicleNo": "Bukan",
+  "vehicleQuestionMedium": "Kemungkinan Anda menggunakan {vehicle}",
+  "@vehicleQuestionMedium": {
+    "placeholders": {
+      "vehicle": {
+        "type": "String"
+      }
+    }
+  },
+  "vehicleQuestionMediumAsk": "Apakah prediksi ini benar?",
+  "vehicleCorrect": "Benar",
+  "vehicleChange": "Ubah kendaraan",
+  "vehicleQuestionLow": "Kendaraan apa yang Anda gunakan?",
+  "shareTripTitle": "Bagikan perjalanan",
+  "sharePng": "Gambar PNG",
+  "shareGpx": "File GPX",
+  "shareGeoJson": "File GeoJSON",
+  "shareCopySummary": "Salin ringkasan",
+  "shareCopied": "Ringkasan disalin ke clipboard",
+  "sharePreparing": "Menyiapkan gambar perjalanan...",
+  "sharePrivacyTitle": "Pilihan privasi",
+  "shareShowStart": "Tampilkan lokasi awal",
+  "shareShowEnd": "Tampilkan lokasi akhir",
+  "shareShowUserName": "Tampilkan nama pengguna",
+  "shareShowMaxSpeed": "Tampilkan kecepatan maksimum",
+  "sharePrivacyMode": "Mode privasi",
+  "sharePrivacyModeDesc": "Memotong ±300 m di awal dan akhir rute agar lokasi rumah tidak terlihat.",
+  "shareContinue": "Lanjut"
 }

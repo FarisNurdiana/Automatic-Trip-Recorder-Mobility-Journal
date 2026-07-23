@@ -18,6 +18,9 @@ import '../../../core/utils/geo_utils.dart';
 import '../../trips/data/trip_repository.dart';
 import '../domain/trip_state_machine.dart';
 
+/// Which stationary question the UI should present.
+enum StopQuestionKind { restOrArrived, destination }
+
 /// Immutable UI state for the recording feature.
 class RecordingUiState {
   const RecordingUiState({
@@ -26,10 +29,13 @@ class RecordingUiState {
     this.liveDistanceMeters = 0,
     this.liveElapsed = Duration.zero,
     this.currentSpeedKmh,
+    this.currentAccuracyMeters,
     this.lastActivity,
     this.finishedTripId,
     this.recoveredTrip = false,
     this.errorKey,
+    this.stopQuestion,
+    this.stopQuestionSince,
   });
 
   final TripRecordingState machineState;
@@ -37,6 +43,10 @@ class RecordingUiState {
   final double liveDistanceMeters;
   final Duration liveElapsed;
   final double? currentSpeedKmh;
+
+  /// Last GPS horizontal accuracy — the UI shows it as a GPS quality
+  /// indicator.
+  final double? currentAccuracyMeters;
   final DetectedActivity? lastActivity;
 
   /// Set right after a trip finishes, so the UI can navigate to the vehicle
@@ -49,6 +59,12 @@ class RecordingUiState {
   /// Machine-readable error identifier mapped to a localized message in UI.
   final String? errorKey;
 
+  /// Pending stationary question (30-minute / 5-hour rule); null when none.
+  final StopQuestionKind? stopQuestion;
+
+  /// When the stop that triggered the question began (arrival candidate).
+  final DateTime? stopQuestionSince;
+
   RecordingUiState copyWith({
     TripRecordingState? machineState,
     Trip? activeTrip,
@@ -56,12 +72,16 @@ class RecordingUiState {
     double? liveDistanceMeters,
     Duration? liveElapsed,
     double? currentSpeedKmh,
+    double? currentAccuracyMeters,
     DetectedActivity? lastActivity,
     String? finishedTripId,
     bool clearFinishedTrip = false,
     bool? recoveredTrip,
     String? errorKey,
     bool clearError = false,
+    StopQuestionKind? stopQuestion,
+    DateTime? stopQuestionSince,
+    bool clearStopQuestion = false,
   }) {
     return RecordingUiState(
       machineState: machineState ?? this.machineState,
@@ -69,12 +89,20 @@ class RecordingUiState {
       liveDistanceMeters: liveDistanceMeters ?? this.liveDistanceMeters,
       liveElapsed: liveElapsed ?? this.liveElapsed,
       currentSpeedKmh: currentSpeedKmh ?? this.currentSpeedKmh,
+      currentAccuracyMeters:
+          currentAccuracyMeters ?? this.currentAccuracyMeters,
       lastActivity: lastActivity ?? this.lastActivity,
       finishedTripId: clearFinishedTrip
           ? null
           : (finishedTripId ?? this.finishedTripId),
       recoveredTrip: recoveredTrip ?? this.recoveredTrip,
       errorKey: clearError ? null : (errorKey ?? this.errorKey),
+      stopQuestion: clearStopQuestion
+          ? null
+          : (stopQuestion ?? this.stopQuestion),
+      stopQuestionSince: clearStopQuestion
+          ? null
+          : (stopQuestionSince ?? this.stopQuestionSince),
     );
   }
 }
@@ -200,7 +228,10 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
   }
 
   Future<void> _onLocation(RecordedLocation location) async {
-    state = state.copyWith(currentSpeedKmh: location.speedKmh);
+    state = state.copyWith(
+      currentSpeedKmh: location.speedKmh,
+      currentAccuracyMeters: location.horizontalAccuracy,
+    );
     sensorService.updateSpeed(location.speed);
 
     final transitions = stateMachine.onLocation(location);
@@ -269,6 +300,12 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
         await resume();
       case TrackingNotificationAction.stop:
         await finish();
+      case TrackingNotificationAction.arrived:
+        await answerStopQuestion(StopQuestionAnswer.arrived);
+      case TrackingNotificationAction.resting:
+        await answerStopQuestion(StopQuestionAnswer.resting);
+      case TrackingNotificationAction.continueTrip:
+        await answerStopQuestion(StopQuestionAnswer.continueTrip);
     }
   }
 
@@ -319,25 +356,82 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
               TripRecordingState.recording,
             );
           }
+          // Movement resumed: any pending stop question becomes moot.
+          state = state.copyWith(clearStopQuestion: true);
           await _startTracking(LocationSamplingProfile.moving);
           await _refreshNotification();
+        case TripRecordingState.shortStop:
         case TripRecordingState.temporarilyStopped:
           if (state.activeTrip != null) {
-            await repository.setTripStatus(
-              state.activeTrip!.id,
-              TripRecordingState.temporarilyStopped,
-            );
+            await repository.setTripStatus(state.activeTrip!.id, t.to);
           }
           await _setProfile(LocationSamplingProfile.stopped);
           await _refreshNotification();
+        case TripRecordingState.restStopCandidate:
+          if (state.activeTrip != null) {
+            await repository.setTripStatus(state.activeTrip!.id, t.to);
+          }
+          state = state.copyWith(
+            stopQuestion: StopQuestionKind.restOrArrived,
+            stopQuestionSince: stateMachine.currentStopStartedAt,
+          );
+          await _showQuestionNotification(destination: false);
+        case TripRecordingState.destinationCandidate:
+          if (state.activeTrip != null) {
+            await repository.setTripStatus(state.activeTrip!.id, t.to);
+          }
+          state = state.copyWith(
+            stopQuestion: StopQuestionKind.destination,
+            stopQuestionSince: stateMachine.currentStopStartedAt,
+          );
+          await _showQuestionNotification(destination: true);
         case TripRecordingState.finishing:
-          await _finishTrip(t.at);
+          await _finishTrip(t.at, reason: t.reason);
         case TripRecordingState.cancelled:
           await _cancelTrip();
         case TripRecordingState.finished:
           break;
       }
     }
+  }
+
+  /// Answers the "arrived / resting / continue" question from UI or the
+  /// notification.
+  Future<void> answerStopQuestion(StopQuestionAnswer answer) async {
+    state = state.copyWith(clearStopQuestion: true);
+    await _applyTransitions(stateMachine.answerStopQuestion(answer, _clock()));
+    if (answer == StopQuestionAnswer.resting) {
+      // Ground-truth label: the ongoing stop is a rest stop.
+      final trip = state.activeTrip;
+      if (trip != null) {
+        try {
+          final stops = await repository.stopsForTrip(trip.id);
+          if (stops.isNotEmpty) {
+            await repository.labelStop(
+              stopId: stops.last.id,
+              type: StopType.rest,
+            );
+          }
+        } catch (e) {
+          _log.warning('labeling rest stop failed', e);
+        }
+      }
+    }
+  }
+
+  Future<void> _showQuestionNotification({required bool destination}) async {
+    // Reuses the persistent tracking notification: the body carries the
+    // question, and the action row switches to answer buttons on Android.
+    await locationService.updateNotification(
+      title: destination
+          ? 'Perjalanan kemungkinan telah selesai'
+          : 'Anda sudah berhenti selama 30 menit',
+      body: destination
+          ? 'Anda berada di lokasi yang sama selama lebih dari 5 jam.'
+          : 'Apakah Anda sudah sampai di tujuan atau sedang beristirahat?',
+      paused: true,
+      question: true,
+    );
   }
 
   Future<void> _createTrip(DateTime at) async {
@@ -369,7 +463,7 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     await _startSensorsIfEnabled(trip.id);
   }
 
-  Future<void> _finishTrip(DateTime at) async {
+  Future<void> _finishTrip(DateTime at, {String? reason}) async {
     final trip = state.activeTrip;
     if (trip == null) {
       stateMachine.reset();
@@ -378,9 +472,23 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     }
     await repository.setTripStatus(trip.id, TripRecordingState.finishing);
     await _stopSensors(trip.id);
+    // Automatic finishes use the moment the vehicle first stopped as the
+    // arrival candidate — not the moment the rule fired hours later.
+    final automatic =
+        reason != null &&
+        (reason.contains('auto-finish') || reason.contains('arrived'));
+    final arrivalOverride = automatic
+        ? stateMachine.currentStopStartedAt
+        : null;
     TripSummarySafeResult summaryResult;
     try {
-      final summary = await repository.finishTrip(trip.id, at);
+      final summary = await repository.finishTrip(
+        trip.id,
+        at,
+        finishReason: reason,
+        finishedAutomatically: reason?.contains('auto-finish') ?? false,
+        arrivalOverride: arrivalOverride,
+      );
       summaryResult = TripSummarySafeResult(summary != null);
     } catch (e) {
       _log.severe('finishTrip failed', e);

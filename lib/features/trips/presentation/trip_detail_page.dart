@@ -1,14 +1,9 @@
-import 'dart:io';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../app/providers.dart';
 import '../../../core/constants/enums.dart';
@@ -19,8 +14,9 @@ import '../../../core/utils/polyline_simplifier.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../shared/widgets/status_widgets.dart';
 import '../domain/gps_point_filter.dart';
-import '../domain/gpx_exporter.dart';
-import '../domain/trip_summary_calculator.dart';
+import 'share/trip_share_sheet.dart';
+import 'widgets/trip_map.dart';
+import 'widgets/vehicle_ui.dart';
 
 /// Everything the detail page needs, loaded once.
 class TripDetailData {
@@ -28,15 +24,17 @@ class TripDetailData {
     required this.trip,
     required this.rawPoints,
     required this.displayPoints,
-    required this.stops,
+    required this.stopRows,
   });
 
   final Trip trip;
   final List<RecordedLocation> rawPoints;
 
-  /// Simplified for rendering — raw points stay in the database untouched.
+  /// Smoothed + simplified for rendering — raw points stay in the database.
   final List<LatLng> displayPoints;
-  final List<TripStop> stops;
+
+  /// Persisted stops (labelable by the user).
+  final List<TripStop> stopRows;
 }
 
 final tripDetailProvider = FutureProvider.family<TripDetailData?, String>((
@@ -48,17 +46,17 @@ final tripDetailProvider = FutureProvider.family<TripDetailData?, String>((
   if (trip == null) return null;
   final raw = await repo.pointsForTrip(tripId);
   final filtered = GpsPointFilter().filter(raw);
-  final simplified = PolylineSimplifier.simplify([
-    for (final p in filtered.accepted) SimplePoint(p.latitude, p.longitude),
-  ]);
-  final summary = DefaultTripSummaryCalculator().calculate(raw);
+  final display = PolylineSimplifier.simplify(
+    PolylineSimplifier.smooth([
+      for (final p in filtered.accepted) SimplePoint(p.latitude, p.longitude),
+    ]),
+  );
+  final stops = await repo.stopsForTrip(tripId);
   return TripDetailData(
     trip: trip,
     rawPoints: filtered.accepted,
-    displayPoints: [
-      for (final p in simplified) LatLng(p.latitude, p.longitude),
-    ],
-    stops: summary?.stops ?? const [],
+    displayPoints: [for (final p in display) LatLng(p.latitude, p.longitude)],
+    stopRows: stops,
   );
 });
 
@@ -74,16 +72,6 @@ class TripDetailPage extends ConsumerStatefulWidget {
 class _TripDetailPageState extends ConsumerState<TripDetailPage> {
   final _mapController = MapController();
 
-  void _fitRoute(List<LatLng> points) {
-    if (points.length < 2) return;
-    _mapController.fitCamera(
-      CameraFit.coordinates(
-        coordinates: points,
-        padding: const EdgeInsets.all(40),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -92,14 +80,18 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.tripCurrentTitle),
+        title: Text(l10n.mapPageTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.ios_share),
-            tooltip: l10n.tripExportGpx,
+            tooltip: l10n.shareTripTitle,
             onPressed: detail.valueOrNull == null
                 ? null
-                : () => _exportGpx(context, detail.valueOrNull!),
+                : () => showTripShareSheet(
+                    context,
+                    detail.valueOrNull!,
+                    user: ref.read(authControllerProvider).user,
+                  ),
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
@@ -118,47 +110,6 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
         },
       ),
     );
-  }
-
-  /// Exports the (filtered) track as a GPX file and opens the system share
-  /// sheet, so the trip can be shown off or imported into Strava and friends.
-  Future<void> _exportGpx(BuildContext context, TripDetailData data) async {
-    final l10n = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).languageCode;
-    final messenger = ScaffoldMessenger.of(context);
-    if (data.rawPoints.length < 2) {
-      messenger.showSnackBar(SnackBar(content: Text(l10n.tripExportFailed)));
-      return;
-    }
-    final trip = data.trip;
-    final name =
-        'TripLog ${Formatters.dateTime(trip.startedAt, locale: locale)}';
-    final description =
-        '${Formatters.distanceKm(trip.distanceMeters, locale: locale)} • '
-        '${Formatters.duration(Duration(seconds: trip.elapsedDurationSeconds), locale: locale)} • '
-        '${Formatters.speedKmh(trip.averageSpeedKmh, locale: locale)}';
-    final gpx = const GpxExporter().build(
-      name: name,
-      description: description,
-      points: data.rawPoints,
-    );
-    try {
-      final dir = await getTemporaryDirectory();
-      final stamp = trip.startedAt
-          .toIso8601String()
-          .replaceAll(':', '-')
-          .split('.')
-          .first;
-      final file = File(p.join(dir.path, 'triplog_$stamp.gpx'));
-      await file.writeAsString(gpx);
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'application/gpx+xml')],
-        subject: name,
-        text: description,
-      );
-    } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(l10n.commonError)));
-    }
   }
 
   Future<void> _confirmDelete(BuildContext context) async {
@@ -186,6 +137,51 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
     }
   }
 
+  Future<void> _openFullscreenMap(TripDetailData data) async {
+    final result = await context.push<Object?>('/trips/${widget.tripId}/map');
+    if (result == 'share' && mounted) {
+      await showTripShareSheet(
+        context,
+        data,
+        user: ref.read(authControllerProvider).user,
+      );
+    }
+  }
+
+  Future<void> _correctArrival(TripDetailData data) async {
+    final l10n = AppLocalizations.of(context);
+    final trip = data.trip;
+    final initial = trip.endedAt ?? DateTime.now();
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initial.toLocal(),
+      firstDate: trip.startedAt.toLocal().subtract(const Duration(days: 1)),
+      lastDate: DateTime.now().add(const Duration(days: 1)),
+    );
+    if (pickedDate == null || !mounted) return;
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initial.toLocal()),
+    );
+    if (pickedTime == null || !mounted) return;
+    final arrival = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+    await ref
+        .read(tripRepositoryProvider)
+        .correctArrivalTime(widget.tripId, arrival.toUtc());
+    ref.invalidate(tripDetailProvider(widget.tripId));
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.arrivalUpdated)));
+    }
+  }
+
   Widget _buildDetail(
     BuildContext context,
     AppLocalizations l10n,
@@ -200,86 +196,41 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
 
     return ListView(
       children: [
-        // --- map ---
+        // --- map preview with expand-to-fullscreen ---
         SizedBox(
           height: 300,
           child: points.isEmpty
               ? EmptyStateView(message: l10n.tripNoPoints, icon: Icons.map)
               : Stack(
                   children: [
-                    FlutterMap(
-                      mapController: _mapController,
-                      options: MapOptions(
-                        initialCameraFit: points.length >= 2
-                            ? CameraFit.coordinates(
-                                coordinates: points,
-                                padding: const EdgeInsets.all(40),
-                              )
-                            : null,
-                        initialCenter: points.isNotEmpty
-                            ? points.first
-                            : const LatLng(0, 0),
-                        initialZoom: 14,
-                      ),
-                      children: [
-                        TileLayer(
-                          urlTemplate:
-                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                          userAgentPackageName: 'com.triplog.triplog',
-                        ),
-                        PolylineLayer(
-                          polylines: [
-                            Polyline(
-                              points: points,
-                              strokeWidth: 4,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ],
-                        ),
-                        MarkerLayer(
-                          markers: [
-                            if (points.isNotEmpty)
-                              Marker(
-                                point: points.first,
-                                child: const Icon(
-                                  Icons.trip_origin,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            if (points.length > 1)
-                              Marker(
-                                point: points.last,
-                                child: const Icon(
-                                  Icons.flag,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            for (final stop in data.stops)
-                              Marker(
-                                point: LatLng(stop.latitude, stop.longitude),
-                                child: const Icon(
-                                  Icons.local_parking,
-                                  size: 20,
-                                  color: Colors.orange,
-                                ),
-                              ),
-                          ],
-                        ),
-                        RichAttributionWidget(
-                          attributions: [
-                            TextSourceAttribution('OpenStreetMap contributors'),
-                          ],
-                        ),
-                      ],
+                    TripMap(
+                      controller: _mapController,
+                      points: points,
+                      stops: data.stopRows,
                     ),
                     Positioned(
                       right: 12,
-                      bottom: 12,
-                      child: FloatingActionButton.small(
-                        heroTag: 'fit',
-                        tooltip: l10n.tripFitRoute,
-                        onPressed: () => _fitRoute(points),
-                        child: const Icon(Icons.fit_screen),
+                      top: 12,
+                      child: Material(
+                        color: Theme.of(context).colorScheme.primary,
+                        shape: const CircleBorder(),
+                        elevation: 3,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => _openFullscreenMap(data),
+                          child: Tooltip(
+                            message: l10n.mapOpenFullscreen,
+                            child: SizedBox(
+                              width: 44,
+                              height: 44,
+                              child: Icon(
+                                Icons.open_in_full,
+                                size: 22,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -397,24 +348,35 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
                 child: ListTile(
                   leading: const Icon(Icons.schedule),
                   title: Text(
-                    '${l10n.tripDeparture}: ${Formatters.dateTime(trip.startedAt, locale: locale)}',
+                    '${l10n.tripDeparture}: '
+                    '${Formatters.dateTime(trip.startedAt, locale: locale)}',
                   ),
                   subtitle: trip.endedAt == null
                       ? null
                       : Text(
-                          '${l10n.tripArrival}: ${Formatters.dateTime(trip.endedAt!, locale: locale)}',
+                          '${l10n.tripArrival}: '
+                          '${Formatters.dateTime(trip.endedAt!, locale: locale)}'
+                          '${trip.finishedAutomatically ? '\n${l10n.finishedAutomaticallyBadge}' : ''}',
                         ),
+                  isThreeLine: trip.finishedAutomatically,
+                  trailing: trip.finishedAutomatically
+                      ? IconButton(
+                          icon: const Icon(Icons.edit_calendar_outlined),
+                          tooltip: l10n.editArrivalTime,
+                          onPressed: () => _correctArrival(data),
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(height: 8),
               Card(
                 child: ListTile(
-                  leading: const Icon(Icons.directions_car_outlined),
-                  title: Text(_vehicleLabel(l10n, vehicle)),
+                  leading: Icon(vehicleIcon(vehicle)),
+                  title: Text(vehicleLabel(l10n, vehicle)),
                   subtitle: trip.vehicleConfidence == null
                       ? null
                       : Text(
-                          l10n.vehicleConfidence(
+                          l10n.vehicleConfidenceLabel(
                             (trip.vehicleConfidence! * 100).toStringAsFixed(0),
                           ),
                         ),
@@ -427,14 +389,14 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
               ),
 
               // --- stops list ---
-              if (data.stops.isNotEmpty) ...[
+              if (data.stopRows.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Text(
-                  '${l10n.tripStops} (${data.stops.length})',
+                  '${l10n.tripStops} (${data.stopRows.length})',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
-                for (final stop in data.stops)
+                for (final stop in data.stopRows)
                   Card(
                     child: ListTile(
                       dense: true,
@@ -443,11 +405,15 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
                         color: Colors.orange,
                       ),
                       title: Text(
-                        '${Formatters.time(stop.startedAt, locale: locale)} - ${Formatters.time(stop.endedAt, locale: locale)}',
+                        '${Formatters.time(stop.arrivalTime, locale: locale)}'
+                        '${stop.departureTime != null ? ' - ${Formatters.time(stop.departureTime!, locale: locale)}' : ''}',
                       ),
                       subtitle: Text(
-                        Formatters.duration(stop.duration, locale: locale),
+                        '${Formatters.duration(Duration(seconds: stop.durationSeconds), locale: locale)}'
+                        ' • ${_stopTypeLabel(l10n, stop)}',
                       ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => _openFullscreenMap(data),
                     ),
                   ),
               ],
@@ -473,16 +439,20 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
     );
   }
 
-  String _vehicleLabel(AppLocalizations l10n, VehicleType type) =>
-      switch (type) {
-        VehicleType.car => l10n.vehicleCar,
-        VehicleType.motorcycle => l10n.vehicleMotorcycle,
-        VehicleType.bus => l10n.vehicleBus,
-        VehicleType.truck => l10n.vehicleTruck,
-        VehicleType.train => l10n.vehicleTrain,
-        VehicleType.other => l10n.vehicleOther,
-        VehicleType.unknown => l10n.vehicleUnknown,
-      };
+  String _stopTypeLabel(AppLocalizations l10n, TripStop stop) {
+    if (!stop.confirmedByUser) return l10n.stopUnconfirmed;
+    return switch (StopType.fromName(stop.stopType)) {
+      StopType.rest => l10n.stopTypeRest,
+      StopType.parking => l10n.stopTypeParking,
+      StopType.food => l10n.stopTypeFood,
+      StopType.fuel => l10n.stopTypeFuel,
+      StopType.visit => l10n.stopTypeVisit,
+      StopType.traffic => l10n.stopTypeTraffic,
+      StopType.destination => l10n.stopTypeDestination,
+      StopType.other => l10n.stopTypeOther,
+      StopType.unconfirmed => l10n.stopUnconfirmed,
+    };
+  }
 }
 
 class _SpeedChart extends StatelessWidget {
