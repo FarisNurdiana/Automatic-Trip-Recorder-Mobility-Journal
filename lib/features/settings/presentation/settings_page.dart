@@ -106,6 +106,13 @@ class SettingsPage extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/settings/privacy'),
           ),
+          ListTile(
+            leading: const Icon(Icons.receipt_long_outlined),
+            title: Text(l10n.detectionLogTitle),
+            subtitle: Text(l10n.detectionLogDesc),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/settings/detection-log'),
+          ),
         ],
       ),
     );

@@ -68,7 +68,15 @@ class TripSummaryResult {
 abstract interface class TripSummaryCalculator {
   /// Returns null when the trip has too few valid points, is too short in
   /// distance, or too short in duration (per config).
-  TripSummaryResult? calculate(List<RecordedLocation> rawPoints);
+  ///
+  /// With [lenient] true (explicit user action such as a manual finish) the
+  /// minimum distance/duration/point-count rules are skipped: anything with
+  /// at least two usable points is summarized, so a deliberately recorded
+  /// trip is never discarded silently.
+  TripSummaryResult? calculate(
+    List<RecordedLocation> rawPoints, {
+    bool lenient = false,
+  });
 }
 
 /// Version-tagged rule-based implementation.
@@ -86,15 +94,23 @@ class DefaultTripSummaryCalculator implements TripSummaryCalculator {
   final GpsPointFilter filter;
 
   @override
-  TripSummaryResult? calculate(List<RecordedLocation> rawPoints) {
+  TripSummaryResult? calculate(
+    List<RecordedLocation> rawPoints, {
+    bool lenient = false,
+  }) {
     final filtered = filter.filter(rawPoints);
-    final points = filtered.accepted;
-    if (points.length < config.minTripPoints) return null;
+    var points = filtered.accepted;
+    // A manual finish must not be discarded by the strict filter: fall back
+    // to the raw points when the filter leaves fewer than two usable fixes.
+    if (lenient && points.length < 2 && rawPoints.length >= 2) {
+      points = rawPoints;
+    }
+    if (points.length < (lenient ? 2 : config.minTripPoints)) return null;
 
     final departure = points.first.recordedAt;
     final arrival = points.last.recordedAt;
     final elapsed = arrival.difference(departure);
-    if (elapsed < config.minTripDuration) return null;
+    if (!lenient && elapsed < config.minTripDuration) return null;
 
     // Distance over validated points.
     var distance = 0.0;
@@ -106,7 +122,7 @@ class DefaultTripSummaryCalculator implements TripSummaryCalculator {
         points[i].longitude,
       );
     }
-    if (distance < config.minTripDistanceMeters) return null;
+    if (!lenient && distance < config.minTripDistanceMeters) return null;
 
     // Per-point speeds: reported when available, implied otherwise, then
     // median-smoothed so single glitches do not distort moving time/max.

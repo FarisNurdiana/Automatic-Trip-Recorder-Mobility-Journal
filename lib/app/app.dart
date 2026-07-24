@@ -10,26 +10,70 @@ import 'providers.dart';
 import 'router.dart';
 import 'theme.dart';
 
+final _messengerKey = GlobalKey<ScaffoldMessengerState>();
+
 class TripLogApp extends ConsumerWidget {
   const TripLogApp({super.key});
+
+  /// Localized message for a recording-pipeline error key; null hides it.
+  static String? _errorMessage(AppLocalizations l10n, String key) =>
+      switch (key) {
+        'tripTooShort' => l10n.tripTooShort,
+        'tripNoGps' => l10n.errorTripNoGps,
+        'gpsDisabled' => l10n.errorGpsDisabled,
+        'permissionDenied' => l10n.errorPermissionDenied,
+        'database' => l10n.errorDatabase,
+        'notSignedIn' => l10n.errorNotSignedIn,
+        'sensorUnavailable' => l10n.errorSensorUnavailable,
+        // Informational; the settings page already explains this state.
+        'activityUnavailable' => null,
+        _ => null,
+      };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final settings = ref.watch(settingsControllerProvider);
 
-    // Navigate to vehicle confirmation whenever a trip finishes.
+    // Navigate to vehicle confirmation whenever a trip finishes, and surface
+    // recording errors as snackbars — a discarded trip must never be silent.
     ref.listen(tripRecordingControllerProvider, (previous, next) {
       final finishedId = next.finishedTripId;
       if (finishedId != null && previous?.finishedTripId != finishedId) {
         ref
             .read(tripRecordingControllerProvider.notifier)
             .consumeFinishedTrip();
+        final messenger = _messengerKey.currentState;
+        final l10n = _messengerKey.currentContext == null
+            ? null
+            : AppLocalizations.of(_messengerKey.currentContext!);
+        if (messenger != null && l10n != null) {
+          messenger.showSnackBar(SnackBar(content: Text(l10n.tripSaved)));
+        }
         router.push('/trips/$finishedId/confirm-vehicle');
+      }
+
+      final errorKey = next.errorKey;
+      if (errorKey != null && previous?.errorKey != errorKey) {
+        final messenger = _messengerKey.currentState;
+        final ctx = _messengerKey.currentContext;
+        if (messenger != null && ctx != null) {
+          final message = _errorMessage(AppLocalizations.of(ctx), errorKey);
+          if (message != null) {
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text(message),
+                duration: const Duration(seconds: 5),
+              ),
+            );
+          }
+        }
+        ref.read(tripRecordingControllerProvider.notifier).clearError();
       }
     });
 
     return MaterialApp.router(
+      scaffoldMessengerKey: _messengerKey,
       title: 'Ruteku',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),

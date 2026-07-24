@@ -474,20 +474,23 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     await _stopSensors(trip.id);
     // Automatic finishes use the moment the vehicle first stopped as the
     // arrival candidate — not the moment the rule fired hours later.
-    final automatic =
-        reason != null &&
-        (reason.contains('auto-finish') || reason.contains('arrived'));
-    final arrivalOverride = automatic
+    final autoFinish = reason?.contains('auto-finish') ?? false;
+    final arrivedAnswer = reason?.contains('arrived') ?? false;
+    final arrivalOverride = (autoFinish || arrivedAnswer)
         ? stateMachine.currentStopStartedAt
         : null;
+    // Anything the user ended on purpose is kept even when it is short —
+    // only silent automatic finishes stay behind the strict validity rules.
+    final lenient = !autoFinish;
     TripSummarySafeResult summaryResult;
     try {
       final summary = await repository.finishTrip(
         trip.id,
         at,
         finishReason: reason,
-        finishedAutomatically: reason?.contains('auto-finish') ?? false,
+        finishedAutomatically: autoFinish,
         arrivalOverride: arrivalOverride,
+        lenient: lenient,
       );
       summaryResult = TripSummarySafeResult(summary != null);
     } catch (e) {
@@ -501,7 +504,9 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
       machineState: TripRecordingState.idle,
       clearActiveTrip: true,
       finishedTripId: summaryResult.valid ? trip.id : null,
-      errorKey: summaryResult.valid ? null : 'tripTooShort',
+      errorKey: summaryResult.valid
+          ? null
+          : (lenient ? 'tripNoGps' : 'tripTooShort'),
       liveDistanceMeters: 0,
       liveElapsed: Duration.zero,
     );

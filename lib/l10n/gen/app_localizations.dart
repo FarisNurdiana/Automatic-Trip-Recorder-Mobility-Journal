@@ -1603,6 +1603,96 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Sumber: UU No. 22/2009 & Permenhub PM 13/2014 (lihat dokumentasi).'**
   String get signsSourceNote;
+
+  /// No description provided for @tripSaved.
+  ///
+  /// In id, this message translates to:
+  /// **'Perjalanan tersimpan'**
+  String get tripSaved;
+
+  /// No description provided for @errorTripNoGps.
+  ///
+  /// In id, this message translates to:
+  /// **'Perjalanan tidak tersimpan: tidak ada titik GPS yang terekam. Periksa GPS dan izin lokasi, lalu coba lagi.'**
+  String get errorTripNoGps;
+
+  /// No description provided for @errorNotSignedIn.
+  ///
+  /// In id, this message translates to:
+  /// **'Masuk atau aktifkan mode lokal terlebih dahulu untuk merekam perjalanan.'**
+  String get errorNotSignedIn;
+
+  /// No description provided for @navHome.
+  ///
+  /// In id, this message translates to:
+  /// **'Beranda'**
+  String get navHome;
+
+  /// No description provided for @navHistory.
+  ///
+  /// In id, this message translates to:
+  /// **'Riwayat'**
+  String get navHistory;
+
+  /// No description provided for @navSigns.
+  ///
+  /// In id, this message translates to:
+  /// **'Rambu'**
+  String get navSigns;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In id, this message translates to:
+  /// **'Pengaturan'**
+  String get navSettings;
+
+  /// No description provided for @detectionLogTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Log deteksi'**
+  String get detectionLogTitle;
+
+  /// No description provided for @detectionLogEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'Belum ada aktivitas deteksi. Log terisi otomatis saat aplikasi memantau atau merekam perjalanan.'**
+  String get detectionLogEmpty;
+
+  /// No description provided for @detectionLogDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Keputusan deteksi terbaru (mengapa perjalanan dimulai, ditunda, atau titik GPS ditolak).'**
+  String get detectionLogDesc;
+
+  /// No description provided for @homeHeroReady.
+  ///
+  /// In id, this message translates to:
+  /// **'Siap mencatat perjalananmu'**
+  String get homeHeroReady;
+
+  /// No description provided for @homeHeroReadyDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Deteksi otomatis aktif — atau mulai manual kapan saja.'**
+  String get homeHeroReadyDesc;
+
+  /// No description provided for @homeHeroActiveDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Perjalanan sedang direkam di latar belakang.'**
+  String get homeHeroActiveDesc;
+
+  /// No description provided for @homeSeeAll.
+  ///
+  /// In id, this message translates to:
+  /// **'Lihat semua'**
+  String get homeSeeAll;
+
+  /// No description provided for @homeQuickMenu.
+  ///
+  /// In id, this message translates to:
+  /// **'Menu cepat'**
+  String get homeQuickMenu;
 }
 
 class _AppLocalizationsDelegate

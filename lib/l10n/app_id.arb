@@ -299,5 +299,20 @@
   "signsSafetyNote": "Catatan keselamatan",
   "signsEmpty": "Tidak ada rambu yang cocok dengan pencarian.",
   "signsFavorites": "Favorit",
-  "signsSourceNote": "Sumber: UU No. 22/2009 & Permenhub PM 13/2014 (lihat dokumentasi)."
+  "signsSourceNote": "Sumber: UU No. 22/2009 & Permenhub PM 13/2014 (lihat dokumentasi).",
+  "tripSaved": "Perjalanan tersimpan",
+  "errorTripNoGps": "Perjalanan tidak tersimpan: tidak ada titik GPS yang terekam. Periksa GPS dan izin lokasi, lalu coba lagi.",
+  "errorNotSignedIn": "Masuk atau aktifkan mode lokal terlebih dahulu untuk merekam perjalanan.",
+  "navHome": "Beranda",
+  "navHistory": "Riwayat",
+  "navSigns": "Rambu",
+  "navSettings": "Pengaturan",
+  "detectionLogTitle": "Log deteksi",
+  "detectionLogEmpty": "Belum ada aktivitas deteksi. Log terisi otomatis saat aplikasi memantau atau merekam perjalanan.",
+  "detectionLogDesc": "Keputusan deteksi terbaru (mengapa perjalanan dimulai, ditunda, atau titik GPS ditolak).",
+  "homeHeroReady": "Siap mencatat perjalananmu",
+  "homeHeroReadyDesc": "Deteksi otomatis aktif — atau mulai manual kapan saja.",
+  "homeHeroActiveDesc": "Perjalanan sedang direkam di latar belakang.",
+  "homeSeeAll": "Lihat semua",
+  "homeQuickMenu": "Menu cepat"
 }

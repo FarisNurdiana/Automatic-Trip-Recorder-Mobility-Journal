@@ -47,13 +47,15 @@ abstract interface class TripRepository {
   /// [finishReason] records why the trip ended (manual, arrivedAnswer,
   /// autoStationary, ...). [finishedAutomatically] marks auto-finish so the
   /// user can correct it later. [arrivalOverride] replaces the last-point
-  /// arrival time (e.g. the moment the vehicle first stopped).
+  /// arrival time (e.g. the moment the vehicle first stopped). [lenient]
+  /// skips the minimum distance/duration rules for explicit user finishes.
   Future<TripSummaryResult?> finishTrip(
     String tripId,
     DateTime endedAt, {
     String? finishReason,
     bool finishedAutomatically = false,
     DateTime? arrivalOverride,
+    bool lenient = false,
   });
 
   Future<void> cancelAndDeleteTrip(String tripId);
@@ -192,11 +194,12 @@ class DefaultTripRepository implements TripRepository {
     String? finishReason,
     bool finishedAutomatically = false,
     DateTime? arrivalOverride,
+    bool lenient = false,
   }) async {
     final trip = await local.getTrip(tripId);
     if (trip == null) return null;
     final points = await pointsForTrip(tripId);
-    final summary = summaryCalculator.calculate(points);
+    final summary = summaryCalculator.calculate(points, lenient: lenient);
     if (summary == null) {
       await setTripStatus(tripId, TripRecordingState.cancelled);
       return null;

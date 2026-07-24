@@ -4,16 +4,15 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/providers.dart';
 import '../../../core/constants/enums.dart';
+import '../../../core/storage/app_database.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../shared/widgets/status_widgets.dart';
 import '../../recording/presentation/state_labels.dart';
+import '../../trips/presentation/widgets/vehicle_ui.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
-
-  String _stateLabel(AppLocalizations l10n, TripRecordingState state) =>
-      tripStateLabel(l10n, state);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,10 +35,6 @@ class HomePage extends ConsumerWidget {
             icon: const Icon(Icons.person_outline),
             onPressed: () => context.push('/profile'),
           ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push('/settings'),
-          ),
         ],
       ),
       body: RefreshIndicator(
@@ -48,59 +43,35 @@ class HomePage extends ConsumerWidget {
           ref.invalidate(tripTotalsProvider);
         },
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
           children: [
-            // --- detection status ---
-            Card(
-              color: isActive
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : null,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.homeDetectionStatus,
-                      style: Theme.of(context).textTheme.labelMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          isActive ? Icons.radio_button_checked : Icons.radar,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _stateLabel(l10n, recording.machineState),
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    if (isActive)
-                      FilledButton.icon(
-                        onPressed: () => context.push('/current-trip'),
-                        icon: const Icon(Icons.navigation),
-                        label: Text(l10n.tripCurrentTitle),
-                      )
-                    else
-                      FilledButton.icon(
-                        onPressed: () async {
-                          await ref
-                              .read(tripRecordingControllerProvider.notifier)
-                              .startManual();
-                          if (context.mounted) context.push('/current-trip');
-                        },
-                        icon: const Icon(Icons.play_arrow),
-                        label: Text(l10n.homeStartTrip),
-                      ),
-                  ],
-                ),
+            _HeroCard(
+              isActive: isActive,
+              statusLabel: tripStateLabel(l10n, recording.machineState),
+              subtitle: isActive
+                  ? l10n.homeHeroActiveDesc
+                  : l10n.homeHeroReadyDesc,
+              distance: Formatters.distanceKm(
+                recording.liveDistanceMeters,
+                locale: locale,
               ),
+              duration: Formatters.duration(
+                recording.liveElapsed,
+                locale: locale,
+              ),
+              buttonLabel: isActive
+                  ? l10n.tripCurrentTitle
+                  : l10n.homeStartTrip,
+              onPressed: () async {
+                if (isActive) {
+                  context.push('/current-trip');
+                  return;
+                }
+                await ref
+                    .read(tripRecordingControllerProvider.notifier)
+                    .startManual();
+                if (context.mounted) context.push('/current-trip');
+              },
             ),
             const SizedBox(height: 12),
 
@@ -130,14 +101,26 @@ class HomePage extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
 
             // --- last trip ---
-            Text(
-              l10n.homeLastTrip,
-              style: Theme.of(context).textTheme.titleSmall,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.homeLastTrip,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => context.go('/trips'),
+                  child: Text(l10n.homeSeeAll),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             trips.when(
               loading: () => const LoadingView(),
               error: (e, _) => ErrorView(message: l10n.commonError),
@@ -146,108 +129,325 @@ class HomePage extends ConsumerWidget {
                     .where((t) => t.status == TripRecordingState.finished.name)
                     .toList();
                 if (finished.isEmpty) {
-                  return EmptyStateView(
-                    message: l10n.homeNoTrips,
-                    icon: Icons.route_outlined,
+                  return Card(
+                    child: EmptyStateView(
+                      message: l10n.homeNoTrips,
+                      icon: Icons.route_outlined,
+                    ),
                   );
                 }
-                final t = finished.first;
-                return Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.directions_car_outlined),
-                    title: Text(
-                      Formatters.dateTime(t.startedAt, locale: locale),
-                    ),
-                    subtitle: Text(
-                      '${Formatters.distanceKm(t.distanceMeters, locale: locale)} • '
-                      '${Formatters.duration(Duration(seconds: t.elapsedDurationSeconds), locale: locale)}',
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => context.push('/trips/${t.id}'),
-                  ),
-                );
+                return _LastTripCard(trip: finished.first, locale: locale);
               },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
 
-            // --- permission status ---
-            Card(
-              child: ListTile(
-                leading: permissions.maybeWhen(
-                  data: (p) => Icon(
-                    p.allCoreGranted
-                        ? Icons.verified_user
-                        : Icons.gpp_maybe_outlined,
-                    color: p.allCoreGranted
-                        ? Colors.green
-                        : Theme.of(context).colorScheme.error,
-                  ),
-                  orElse: () => const Icon(Icons.verified_user_outlined),
-                ),
-                title: Text(l10n.homePermissions),
-                subtitle: permissions.maybeWhen(
-                  data: (p) => Text(
-                    p.allCoreGranted
-                        ? l10n.homePermissionsComplete
-                        : l10n.homePermissionsIncomplete,
-                  ),
-                  orElse: () => Text(l10n.commonLoading),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/settings/permissions'),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // --- sync status ---
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.sync),
-                title: Text(l10n.homeSyncStatus),
-                subtitle: Text(
-                  auth.isLocalMode
-                      ? l10n.syncLocalOnly
-                      : syncState.maybeWhen(
-                          data: (s) => switch (s.status) {
-                            SyncStatus.pending => l10n.syncPending,
-                            SyncStatus.syncing =>
-                              '${l10n.syncSyncing} (${s.pendingTrips})',
-                            SyncStatus.synced => l10n.syncSynced,
-                            SyncStatus.failed => l10n.syncFailed,
-                          },
-                          orElse: () => l10n.syncSynced,
-                        ),
-                ),
-                trailing: auth.isLocalMode
-                    ? null
-                    : IconButton(
-                        icon: const Icon(Icons.refresh),
-                        tooltip: l10n.syncNow,
-                        onPressed: () {
-                          final userId = auth.user?.id;
-                          final sync = ref.read(syncServiceProvider);
-                          if (userId != null && sync != null) {
-                            sync.syncNow(userId);
-                          }
-                        },
-                      ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: () => context.push('/trips'),
-              icon: const Icon(Icons.history),
-              label: Text(l10n.historyTitle),
+            // --- health: permissions + sync ---
+            Text(
+              l10n.homeQuickMenu,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: () => context.push('/signs'),
-              icon: const Icon(Icons.signpost_outlined),
-              label: Text(l10n.signsTitle),
+            Card(
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: permissions.maybeWhen(
+                      data: (p) => _LeadingBadge(
+                        icon: p.allCoreGranted
+                            ? Icons.verified_user
+                            : Icons.gpp_maybe_outlined,
+                        color: p.allCoreGranted
+                            ? Colors.green
+                            : Theme.of(context).colorScheme.error,
+                      ),
+                      orElse: () =>
+                          const _LeadingBadge(icon: Icons.verified_user),
+                    ),
+                    title: Text(l10n.homePermissions),
+                    subtitle: permissions.maybeWhen(
+                      data: (p) => Text(
+                        p.allCoreGranted
+                            ? l10n.homePermissionsComplete
+                            : l10n.homePermissionsIncomplete,
+                      ),
+                      orElse: () => Text(l10n.commonLoading),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/settings/permissions'),
+                  ),
+                  Divider(
+                    height: 1,
+                    indent: 16,
+                    endIndent: 16,
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                  ListTile(
+                    leading: const _LeadingBadge(icon: Icons.sync),
+                    title: Text(l10n.homeSyncStatus),
+                    subtitle: Text(
+                      auth.isLocalMode
+                          ? l10n.syncLocalOnly
+                          : syncState.maybeWhen(
+                              data: (s) => switch (s.status) {
+                                SyncStatus.pending => l10n.syncPending,
+                                SyncStatus.syncing =>
+                                  '${l10n.syncSyncing} (${s.pendingTrips})',
+                                SyncStatus.synced => l10n.syncSynced,
+                                SyncStatus.failed => l10n.syncFailed,
+                              },
+                              orElse: () => l10n.syncSynced,
+                            ),
+                    ),
+                    trailing: auth.isLocalMode
+                        ? null
+                        : IconButton(
+                            icon: const Icon(Icons.refresh),
+                            tooltip: l10n.syncNow,
+                            onPressed: () {
+                              final userId = auth.user?.id;
+                              final sync = ref.read(syncServiceProvider);
+                              if (userId != null && sync != null) {
+                                sync.syncNow(userId);
+                              }
+                            },
+                          ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Gradient hero card: detection status + primary action. When a trip is
+/// active it shows live distance/duration and a pulsing recording dot.
+class _HeroCard extends StatelessWidget {
+  const _HeroCard({
+    required this.isActive,
+    required this.statusLabel,
+    required this.subtitle,
+    required this.distance,
+    required this.duration,
+    required this.buttonLabel,
+    required this.onPressed,
+  });
+
+  final bool isActive;
+  final String statusLabel;
+  final String subtitle;
+  final String distance;
+  final String duration;
+  final String buttonLabel;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            scheme.primary,
+            Color.lerp(scheme.primary, scheme.secondary, 0.55)!,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.primary.withValues(alpha: 0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (isActive)
+                const _PulsingDot()
+              else
+                Icon(
+                  Icons.radar,
+                  size: 18,
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  statusLabel,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontSize: 13,
+            ),
+          ),
+          if (isActive) ...[
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                _HeroStat(icon: Icons.straighten, value: distance),
+                const SizedBox(width: 16),
+                _HeroStat(icon: Icons.schedule, value: duration),
+              ],
+            ),
+          ],
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: scheme.primary,
+              minimumSize: const Size.fromHeight(48),
+            ),
+            onPressed: onPressed,
+            icon: Icon(isActive ? Icons.navigation : Icons.play_arrow),
+            label: Text(buttonLabel),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroStat extends StatelessWidget {
+  const _HeroStat({required this.icon, required this.value});
+
+  final IconData icon;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.white.withValues(alpha: 0.9)),
+        const SizedBox(width: 6),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Small red dot that pulses while recording.
+class _PulsingDot extends StatefulWidget {
+  const _PulsingDot();
+
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: Tween(begin: 0.35, end: 1.0).animate(_controller),
+      child: Container(
+        width: 12,
+        height: 12,
+        decoration: const BoxDecoration(
+          color: Color(0xFFFF5252),
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+}
+
+class _LastTripCard extends StatelessWidget {
+  const _LastTripCard({required this.trip, required this.locale});
+
+  final Trip trip;
+  final String locale;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final vehicle = VehicleType.fromName(
+      trip.confirmedVehicleType ?? trip.detectedVehicleType,
+    );
+    return Card(
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        leading: CircleAvatar(
+          radius: 22,
+          backgroundColor: scheme.secondaryContainer,
+          child: Icon(vehicleIcon(vehicle), color: scheme.onSecondaryContainer),
+        ),
+        title: Text(
+          Formatters.dateTime(trip.startedAt, locale: locale),
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            '${Formatters.distanceKm(trip.distanceMeters, locale: locale)} • '
+            '${Formatters.duration(Duration(seconds: trip.elapsedDurationSeconds), locale: locale)} • '
+            '${vehicleLabel(l10n, vehicle)}',
+          ),
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push('/trips/${trip.id}'),
+      ),
+    );
+  }
+}
+
+class _LeadingBadge extends StatelessWidget {
+  const _LeadingBadge({required this.icon, this.color});
+
+  final IconData icon;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(icon, size: 22, color: color ?? scheme.onSecondaryContainer),
     );
   }
 }

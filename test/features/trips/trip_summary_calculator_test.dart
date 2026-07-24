@@ -89,5 +89,39 @@ void main() {
       ];
       expect(calculator.calculate(quick), isNull);
     });
+
+    group('lenient mode (explicit user finish)', () {
+      test('keeps a trip below the minimum distance', () {
+        final short = [
+          for (var i = 0; i < 20; i++)
+            loc(
+              secondsFromStart: i * 10,
+              lat: -6.2 + i * 0.000001,
+              speedKmh: 1,
+            ),
+        ];
+        final summary = calculator.calculate(short, lenient: true);
+        expect(summary, isNotNull);
+        expect(summary!.distanceMeters, lessThan(300));
+      });
+
+      test('keeps a trip below the minimum duration and point count', () {
+        final quick = [
+          loc(secondsFromStart: 0, lat: -6.2, speedKmh: 30),
+          loc(secondsFromStart: 5, lat: -6.2004, speedKmh: 30),
+          loc(secondsFromStart: 10, lat: -6.2008, speedKmh: 30),
+        ];
+        expect(calculator.calculate(quick), isNull);
+        expect(calculator.calculate(quick, lenient: true), isNotNull);
+      });
+
+      test('still returns null with fewer than two points', () {
+        expect(
+          calculator.calculate([loc(secondsFromStart: 0)], lenient: true),
+          isNull,
+        );
+        expect(calculator.calculate(const [], lenient: true), isNull);
+      });
+    });
   });
 }

@@ -105,6 +105,37 @@ void main() {
       },
     );
 
+    test(
+      'lenient finish keeps a short manual trip instead of cancelling it',
+      () async {
+        final trip = await repo.createTrip(userId: 'user-1', startedAt: t0);
+        // Only a handful of nearly-stationary points — the emulator case
+        // that previously vanished without a trace.
+        for (var i = 0; i < 4; i++) {
+          await repo.appendPoint(
+            trip.id,
+            loc(secondsFromStart: i * 5, lat: -6.2 + i * 0.000002),
+          );
+        }
+        final strict = await repo.finishTrip(
+          trip.id,
+          t0.add(const Duration(seconds: 20)),
+        );
+        expect(strict, isNull, reason: 'strict rules reject it');
+
+        final summary = await repo.finishTrip(
+          trip.id,
+          t0.add(const Duration(seconds: 20)),
+          finishReason: 'manual finish',
+          lenient: true,
+        );
+        expect(summary, isNotNull);
+        final stored = (await repo.getTrip(trip.id))!;
+        expect(stored.status, 'finished');
+        expect(stored.finishReason, 'manual finish');
+      },
+    );
+
     test('correctArrivalTime updates arrival and marks correction', () async {
       final trip = await finishedTrip();
       final corrected = t0.add(const Duration(minutes: 9));

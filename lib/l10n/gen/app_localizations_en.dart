@@ -810,4 +810,55 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get signsSourceNote =>
       'Sources: Law No. 22/2009 & Ministerial Regulation PM 13/2014 (see docs).';
+
+  @override
+  String get tripSaved => 'Trip saved';
+
+  @override
+  String get errorTripNoGps =>
+      'Trip not saved: no GPS points were recorded. Check GPS and the location permission, then try again.';
+
+  @override
+  String get errorNotSignedIn =>
+      'Sign in or enable local mode before recording a trip.';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navHistory => 'History';
+
+  @override
+  String get navSigns => 'Signs';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get detectionLogTitle => 'Detection log';
+
+  @override
+  String get detectionLogEmpty =>
+      'No detection activity yet. The log fills automatically while the app monitors or records a trip.';
+
+  @override
+  String get detectionLogDesc =>
+      'Recent detection decisions (why a trip started, was deferred, or a GPS fix was rejected).';
+
+  @override
+  String get homeHeroReady => 'Ready to record your trip';
+
+  @override
+  String get homeHeroReadyDesc =>
+      'Automatic detection is on — or start manually anytime.';
+
+  @override
+  String get homeHeroActiveDesc =>
+      'Your trip is being recorded in the background.';
+
+  @override
+  String get homeSeeAll => 'See all';
+
+  @override
+  String get homeQuickMenu => 'Quick menu';
 }

@@ -299,5 +299,20 @@
   "signsSafetyNote": "Safety note",
   "signsEmpty": "No signs match your search.",
   "signsFavorites": "Favorites",
-  "signsSourceNote": "Sources: Law No. 22/2009 & Ministerial Regulation PM 13/2014 (see docs)."
+  "signsSourceNote": "Sources: Law No. 22/2009 & Ministerial Regulation PM 13/2014 (see docs).",
+  "tripSaved": "Trip saved",
+  "errorTripNoGps": "Trip not saved: no GPS points were recorded. Check GPS and the location permission, then try again.",
+  "errorNotSignedIn": "Sign in or enable local mode before recording a trip.",
+  "navHome": "Home",
+  "navHistory": "History",
+  "navSigns": "Signs",
+  "navSettings": "Settings",
+  "detectionLogTitle": "Detection log",
+  "detectionLogEmpty": "No detection activity yet. The log fills automatically while the app monitors or records a trip.",
+  "detectionLogDesc": "Recent detection decisions (why a trip started, was deferred, or a GPS fix was rejected).",
+  "homeHeroReady": "Ready to record your trip",
+  "homeHeroReadyDesc": "Automatic detection is on — or start manually anytime.",
+  "homeHeroActiveDesc": "Your trip is being recorded in the background.",
+  "homeSeeAll": "See all",
+  "homeQuickMenu": "Quick menu"
 }

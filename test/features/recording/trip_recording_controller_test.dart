@@ -120,7 +120,7 @@ void main() {
       expect(location.started, isFalse, reason: 'GPS must stop after finish');
     });
 
-    test('too-short trip surfaces tripTooShort error', () async {
+    test('manual finish without usable GPS surfaces tripNoGps error', () async {
       await controller.init();
       await controller.startManual();
       await pump();
@@ -129,7 +129,24 @@ void main() {
       await controller.finish();
       await pump();
       expect(controller.state.finishedTripId, isNull);
-      expect(controller.state.errorKey, 'tripTooShort');
+      expect(controller.state.errorKey, 'tripNoGps');
+    });
+
+    test('manual finish keeps a short trip (lenient rules)', () async {
+      await controller.init();
+      await controller.startManual();
+      await pump();
+      // Two nearby fixes only — far below the strict 300 m / 60 s minimums.
+      location.emit(loc(secondsFromStart: 0, speedKmh: 5));
+      location.emit(loc(secondsFromStart: 8, lat: -6.20005, speedKmh: 5));
+      await pump();
+      final tripId = controller.state.activeTrip!.id;
+      await controller.finish();
+      await pump();
+      expect(controller.state.errorKey, isNull);
+      expect(controller.state.finishedTripId, tripId);
+      final trip = (await repo.getTrip(tripId))!;
+      expect(trip.status, TripRecordingState.finished.name);
     });
 
     test('cancel deletes the trip completely', () async {

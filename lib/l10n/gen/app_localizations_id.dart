@@ -813,4 +813,55 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get signsSourceNote =>
       'Sumber: UU No. 22/2009 & Permenhub PM 13/2014 (lihat dokumentasi).';
+
+  @override
+  String get tripSaved => 'Perjalanan tersimpan';
+
+  @override
+  String get errorTripNoGps =>
+      'Perjalanan tidak tersimpan: tidak ada titik GPS yang terekam. Periksa GPS dan izin lokasi, lalu coba lagi.';
+
+  @override
+  String get errorNotSignedIn =>
+      'Masuk atau aktifkan mode lokal terlebih dahulu untuk merekam perjalanan.';
+
+  @override
+  String get navHome => 'Beranda';
+
+  @override
+  String get navHistory => 'Riwayat';
+
+  @override
+  String get navSigns => 'Rambu';
+
+  @override
+  String get navSettings => 'Pengaturan';
+
+  @override
+  String get detectionLogTitle => 'Log deteksi';
+
+  @override
+  String get detectionLogEmpty =>
+      'Belum ada aktivitas deteksi. Log terisi otomatis saat aplikasi memantau atau merekam perjalanan.';
+
+  @override
+  String get detectionLogDesc =>
+      'Keputusan deteksi terbaru (mengapa perjalanan dimulai, ditunda, atau titik GPS ditolak).';
+
+  @override
+  String get homeHeroReady => 'Siap mencatat perjalananmu';
+
+  @override
+  String get homeHeroReadyDesc =>
+      'Deteksi otomatis aktif — atau mulai manual kapan saja.';
+
+  @override
+  String get homeHeroActiveDesc =>
+      'Perjalanan sedang direkam di latar belakang.';
+
+  @override
+  String get homeSeeAll => 'Lihat semua';
+
+  @override
+  String get homeQuickMenu => 'Menu cepat';
 }
