@@ -1693,6 +1693,18 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Menu cepat'**
   String get homeQuickMenu;
+
+  /// No description provided for @mapPlayAnimation.
+  ///
+  /// In id, this message translates to:
+  /// **'Putar animasi perjalanan'**
+  String get mapPlayAnimation;
+
+  /// No description provided for @shareTripHeading.
+  ///
+  /// In id, this message translates to:
+  /// **'Perjalanan {date}'**
+  String shareTripHeading(String date);
 }
 
 class _AppLocalizationsDelegate

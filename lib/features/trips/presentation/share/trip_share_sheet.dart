@@ -368,7 +368,10 @@ class _ShareCapturePageState extends ConsumerState<_ShareCapturePage> {
   }
 }
 
-/// The visual share card: brand header, map, key stats, watermark.
+/// Strava-style share card: a clean light map with a bold route on top, then
+/// a white panel with avatar/name/date, a big heading, and a centered stat
+/// grid (small label above a big bold value). The card is always rendered in
+/// light colors regardless of the app theme, like Strava's share images.
 class TripShareCard extends StatelessWidget {
   TripShareCard({
     super.key,
@@ -376,6 +379,10 @@ class TripShareCard extends StatelessWidget {
     required this.options,
     this.userName,
   });
+
+  static const _ink = Color(0xFF16181C);
+  static const _inkSoft = Color(0xFF6B7280);
+  static const _brand = Color(0xFF0D47A1);
 
   final TripDetailData data;
   final SharePrivacyOptions options;
@@ -399,137 +406,149 @@ class TripShareCard extends StatelessWidget {
     );
     final points = [for (final p in display) LatLng(p.latitude, p.longitude)];
 
+    final stats = <(String, String)>[
+      (
+        l10n.tripDistance,
+        Formatters.distanceKm(trip.distanceMeters, locale: locale),
+      ),
+      (
+        l10n.tripDuration,
+        Formatters.duration(
+          Duration(seconds: trip.elapsedDurationSeconds),
+          locale: locale,
+        ),
+      ),
+      (
+        l10n.tripMovingTime,
+        Formatters.duration(
+          Duration(seconds: trip.movingDurationSeconds),
+          locale: locale,
+        ),
+      ),
+      (
+        l10n.tripAvgSpeed,
+        Formatters.speedKmh(trip.averageSpeedKmh, locale: locale),
+      ),
+      if (options.showMaxSpeed)
+        (
+          l10n.tripMaxSpeed,
+          Formatters.speedKmh(trip.maximumSpeedKmh, locale: locale),
+        ),
+      if (vehicle != VehicleType.unknown)
+        (l10n.vehicleConfirmTitle, vehicleLabel(l10n, vehicle)),
+    ];
+
     return Container(
       width: 360,
-      color: Theme.of(context).colorScheme.surface,
+      color: Colors.white,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Row(
-              children: [
-                Icon(Icons.route, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Ruteku',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  Formatters.date(trip.startedAt, locale: locale),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
-          if (userName != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                userName!,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
           SizedBox(
-            height: 260,
+            height: 280,
             child: TripMap(
               controller: _mapController,
               points: points,
               stops: const [],
               interactive: false,
               showControls: false,
+              lightTiles: true,
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Avatar + name + date, like a Strava activity header.
                 Row(
                   children: [
-                    _stat(
-                      context,
-                      l10n.tripDistance,
-                      Formatters.distanceKm(
-                        trip.distanceMeters,
-                        locale: locale,
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: const BoxDecoration(
+                        color: _brand,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.route,
+                        color: Colors.white,
+                        size: 20,
                       ),
                     ),
-                    _stat(
-                      context,
-                      l10n.tripDuration,
-                      Formatters.duration(
-                        Duration(seconds: trip.elapsedDurationSeconds),
-                        locale: locale,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            userName ?? 'Ruteku',
+                            style: const TextStyle(
+                              color: _ink,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            Formatters.dateTime(trip.startedAt, locale: locale),
+                            style: const TextStyle(
+                              color: _inkSoft,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    _stat(
-                      context,
-                      l10n.tripMovingTime,
-                      Formatters.duration(
-                        Duration(seconds: trip.movingDurationSeconds),
-                        locale: locale,
-                      ),
-                    ),
-                    _stat(
-                      context,
-                      l10n.tripAvgSpeed,
-                      Formatters.speedKmh(trip.averageSpeedKmh, locale: locale),
-                    ),
-                  ],
+                const SizedBox(height: 12),
+                Text(
+                  l10n.shareTripHeading(
+                    Formatters.date(trip.startedAt, locale: locale),
+                  ),
+                  style: const TextStyle(
+                    color: _ink,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
                 ),
-                if (options.showMaxSpeed) ...[
-                  const SizedBox(height: 10),
+                const SizedBox(height: 14),
+                // Centered two-column stat grid, Strava style.
+                for (var i = 0; i < stats.length; i += 2) ...[
                   Row(
                     children: [
-                      _stat(
-                        context,
-                        l10n.tripMaxSpeed,
-                        Formatters.speedKmh(
-                          trip.maximumSpeedKmh,
-                          locale: locale,
-                        ),
-                      ),
-                      if (vehicle != VehicleType.unknown)
-                        _stat(
-                          context,
-                          l10n.vehicleConfirmTitle,
-                          vehicleLabel(l10n, vehicle),
-                        ),
+                      _stat(stats[i].$1, stats[i].$2),
+                      if (i + 1 < stats.length)
+                        _stat(stats[i + 1].$1, stats[i + 1].$2)
+                      else
+                        const Spacer(),
                     ],
                   ),
+                  if (i + 2 < stats.length)
+                    const Divider(height: 20, color: Color(0xFFE5E7EB)),
                 ],
                 if (options.showStartLocation && trip.startLatitude != null)
                   _coordRow(
-                    context,
                     l10n.tripStart,
                     trip.startLatitude!,
                     trip.startLongitude!,
                   ),
                 if (options.showEndLocation && trip.endLatitude != null)
                   _coordRow(
-                    context,
                     l10n.tripEnd,
                     trip.endLatitude!,
                     trip.endLongitude!,
                   ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
+                const SizedBox(height: 12),
+                const Center(
                   child: Text(
                     'ruteku • catat perjalanan otomatis',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
+                    style: TextStyle(
+                      color: _inkSoft,
+                      fontSize: 11,
+                      letterSpacing: 0.4,
                     ),
                   ),
                 ),
@@ -541,36 +560,34 @@ class TripShareCard extends StatelessWidget {
     );
   }
 
-  Widget _stat(BuildContext context, String label, String value) => Expanded(
+  Widget _stat(String label, String value) => Expanded(
     child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: _inkSoft, fontSize: 12),
         ),
+        const SizedBox(height: 2),
         Text(
           value,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: _ink,
+            fontSize: 19,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.3,
+          ),
         ),
       ],
     ),
   );
 
-  Widget _coordRow(
-    BuildContext context,
-    String label,
-    double lat,
-    double lon,
-  ) => Padding(
-    padding: const EdgeInsets.only(top: 6),
+  Widget _coordRow(String label, double lat, double lon) => Padding(
+    padding: const EdgeInsets.only(top: 8),
     child: Text(
       '$label: ${lat.toStringAsFixed(5)}, ${lon.toStringAsFixed(5)}',
-      style: Theme.of(context).textTheme.bodySmall,
+      style: const TextStyle(color: _inkSoft, fontSize: 12),
     ),
   );
 }

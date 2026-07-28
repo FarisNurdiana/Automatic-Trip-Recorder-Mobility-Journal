@@ -5,6 +5,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../../core/storage/app_database.dart';
+import '../../../../core/utils/route_playback.dart';
+import 'map_tiles.dart';
 
 /// Shared trip map used by the detail page and the full-screen map page.
 ///
@@ -22,6 +24,8 @@ class TripMap extends StatelessWidget {
     this.interactive = true,
     this.showControls = true,
     this.extraControls = const [],
+    this.lightTiles = false,
+    this.playbackFrame,
   });
 
   final MapController controller;
@@ -35,6 +39,14 @@ class TripMap extends StatelessWidget {
 
   /// Extra buttons stacked under the built-in controls.
   final List<Widget> extraControls;
+
+  /// Always use the light basemap regardless of theme (e.g. share exports).
+  final bool lightTiles;
+
+  /// When set, the map renders trip playback: the route so far in full
+  /// color, the rest dimmed, and a moving vehicle marker at the frame's
+  /// position. Direction arrows are hidden while playing.
+  final PlaybackFrame? playbackFrame;
 
   void fitRoute() {
     if (points.length < 2) return;
@@ -95,7 +107,9 @@ class TripMap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark =
+        !lightTiles && Theme.of(context).brightness == Brightness.dark;
+    final playing = playbackFrame != null;
 
     return Stack(
       children: [
@@ -117,13 +131,7 @@ class TripMap extends StatelessWidget {
             ),
           ),
           children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.triplog.triplog',
-              // Built-in flutter_map dark treatment keeps street names
-              // readable without a paid dark tile provider.
-              tileBuilder: isDark ? darkModeTileBuilder : null,
-            ),
+            appTileLayer(context, forceLight: lightTiles),
             PolylineLayer(
               polylines: [
                 // Casing below the route line keeps it visible on any tile.
@@ -135,11 +143,20 @@ class TripMap extends StatelessWidget {
                 Polyline(
                   points: points,
                   strokeWidth: 5.5,
-                  color: scheme.primary,
+                  color: playing
+                      ? scheme.primary.withValues(alpha: 0.25)
+                      : scheme.primary,
                 ),
+                // The already-traveled part of the route during playback.
+                if (playing && playbackFrame!.traveled.length >= 2)
+                  Polyline(
+                    points: playbackFrame!.traveled,
+                    strokeWidth: 5.5,
+                    color: scheme.primary,
+                  ),
               ],
             ),
-            MarkerLayer(markers: _directionMarkers(scheme)),
+            if (!playing) MarkerLayer(markers: _directionMarkers(scheme)),
             MarkerLayer(
               markers: [
                 // Stop markers (amber), tappable when onStopTap is given.
@@ -183,13 +200,34 @@ class TripMap extends StatelessWidget {
                     height: 30,
                     child: _dotMarker(Colors.red.shade600, Icons.flag),
                   ),
+                // Moving vehicle marker during playback.
+                if (playing)
+                  Marker(
+                    point: playbackFrame!.position,
+                    width: 36,
+                    height: 36,
+                    child: Transform.rotate(
+                      angle: playbackFrame!.bearingRadians,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: scheme.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2.5),
+                          boxShadow: const [
+                            BoxShadow(color: Colors.black45, blurRadius: 6),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.navigation,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
-            const RichAttributionWidget(
-              attributions: [
-                TextSourceAttribution('OpenStreetMap contributors'),
-              ],
-            ),
+            mapAttribution,
           ],
         ),
         if (showControls)

@@ -861,4 +861,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeQuickMenu => 'Quick menu';
+
+  @override
+  String get mapPlayAnimation => 'Play trip animation';
+
+  @override
+  String shareTripHeading(String date) {
+    return 'Trip on $date';
+  }
 }

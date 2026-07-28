@@ -314,5 +314,12 @@
   "homeHeroReadyDesc": "Automatic detection is on — or start manually anytime.",
   "homeHeroActiveDesc": "Your trip is being recorded in the background.",
   "homeSeeAll": "See all",
-  "homeQuickMenu": "Quick menu"
+  "homeQuickMenu": "Quick menu",
+  "mapPlayAnimation": "Play trip animation",
+  "shareTripHeading": "Trip on {date}",
+  "@shareTripHeading": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  }
 }
