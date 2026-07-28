@@ -15,12 +15,14 @@ import '../../../../core/constants/enums.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/polyline_simplifier.dart';
 import '../../../../l10n/gen/app_localizations.dart';
+import '../../../../shared/widgets/ruteku_logo.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../domain/geojson_exporter.dart';
 import '../../domain/gpx_exporter.dart';
 import '../../domain/share_privacy.dart';
 import '../trip_detail_page.dart';
 import '../widgets/trip_map.dart';
+import 'trip_share_poster.dart';
 import '../widgets/vehicle_ui.dart';
 
 /// Entry point: "Bagikan perjalanan" bottom sheet with PNG / GPX / GeoJSON /
@@ -56,6 +58,14 @@ Future<void> showTripShareSheet(
             onTap: () {
               Navigator.pop(ctx);
               _sharePng(context, data, user: user);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.wallpaper_outlined),
+            title: Text(l10n.sharePoster),
+            onTap: () {
+              Navigator.pop(ctx);
+              _sharePng(context, data, user: user, poster: true);
             },
           ),
           ListTile(
@@ -182,6 +192,7 @@ Future<void> _sharePng(
   BuildContext context,
   TripDetailData data, {
   AppUser? user,
+  bool poster = false,
 }) async {
   final options = await _askPrivacyOptions(context);
   if (options == null || !context.mounted) return;
@@ -191,10 +202,25 @@ Future<void> _sharePng(
       builder: (_) => _ShareCapturePage(
         data: data,
         options: options,
+        poster: poster,
         userName: options.showUserName ? user?.displayName : null,
       ),
     ),
   );
+}
+
+/// Privacy-trimmed + smoothed + simplified route points for share images.
+List<LatLng> _shareDisplayPoints(
+  TripDetailData data,
+  SharePrivacyOptions options,
+) {
+  final trimmed = options.applyTo(data.rawPoints);
+  final display = PolylineSimplifier.simplify(
+    PolylineSimplifier.smooth([
+      for (final p in trimmed) SimplePoint(p.latitude, p.longitude),
+    ]),
+  );
+  return [for (final p in display) LatLng(p.latitude, p.longitude)];
 }
 
 Future<SharePrivacyOptions?> _askPrivacyOptions(BuildContext context) {
@@ -272,11 +298,15 @@ class _ShareCapturePage extends ConsumerStatefulWidget {
   const _ShareCapturePage({
     required this.data,
     required this.options,
+    this.poster = false,
     this.userName,
   });
 
   final TripDetailData data;
   final SharePrivacyOptions options;
+
+  /// True renders the tile-free poster instead of the map card.
+  final bool poster;
   final String? userName;
 
   @override
@@ -298,8 +328,13 @@ class _ShareCapturePageState extends ConsumerState<_ShareCapturePage> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
-      // Give the map tiles time to load before the snapshot.
-      await Future<void>.delayed(const Duration(milliseconds: 2500));
+      // Give the map tiles time to load before the snapshot; the poster has
+      // no tiles so it only needs a frame to settle.
+      await Future<void>.delayed(
+        widget.poster
+            ? const Duration(milliseconds: 400)
+            : const Duration(milliseconds: 2500),
+      );
       await WidgetsBinding.instance.endOfFrame;
       final boundary =
           _boundaryKey.currentContext?.findRenderObject()
@@ -335,11 +370,21 @@ class _ShareCapturePageState extends ConsumerState<_ShareCapturePage> {
             child: SingleChildScrollView(
               child: RepaintBoundary(
                 key: _boundaryKey,
-                child: TripShareCard(
-                  data: widget.data,
-                  options: widget.options,
-                  userName: widget.userName,
-                ),
+                child: widget.poster
+                    ? TripSharePoster(
+                        data: widget.data,
+                        options: widget.options,
+                        points: _shareDisplayPoints(
+                          widget.data,
+                          widget.options,
+                        ),
+                        userName: widget.userName,
+                      )
+                    : TripShareCard(
+                        data: widget.data,
+                        options: widget.options,
+                        userName: widget.userName,
+                      ),
               ),
             ),
           ),
@@ -382,7 +427,6 @@ class TripShareCard extends StatelessWidget {
 
   static const _ink = Color(0xFF16181C);
   static const _inkSoft = Color(0xFF6B7280);
-  static const _brand = Color(0xFF0D47A1);
 
   final TripDetailData data;
   final SharePrivacyOptions options;
@@ -398,13 +442,7 @@ class TripShareCard extends StatelessWidget {
       trip.confirmedVehicleType ?? trip.detectedVehicleType,
     );
 
-    final trimmed = options.applyTo(data.rawPoints);
-    final display = PolylineSimplifier.simplify(
-      PolylineSimplifier.smooth([
-        for (final p in trimmed) SimplePoint(p.latitude, p.longitude),
-      ]),
-    );
-    final points = [for (final p in display) LatLng(p.latitude, p.longitude)];
+    final points = _shareDisplayPoints(data, options);
 
     final stats = <(String, String)>[
       (
@@ -467,15 +505,13 @@ class TripShareCard extends StatelessWidget {
                     Container(
                       width: 38,
                       height: 38,
-                      decoration: const BoxDecoration(
-                        color: _brand,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.route,
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
                         color: Colors.white,
-                        size: 20,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
                       ),
+                      child: const RutekuLogo(size: 26),
                     ),
                     const SizedBox(width: 10),
                     Expanded(

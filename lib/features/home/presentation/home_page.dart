@@ -7,6 +7,7 @@ import '../../../core/constants/enums.dart';
 import '../../../core/storage/app_database.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../../shared/widgets/ruteku_logo.dart';
 import '../../../shared/widgets/status_widgets.dart';
 import '../../recording/presentation/state_labels.dart';
 import '../../trips/presentation/widgets/vehicle_ui.dart';
@@ -29,7 +30,13 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.appTitle),
+        title: Row(
+          children: [
+            const RutekuLogo(size: 28),
+            const SizedBox(width: 8),
+            Text(l10n.appTitle),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),

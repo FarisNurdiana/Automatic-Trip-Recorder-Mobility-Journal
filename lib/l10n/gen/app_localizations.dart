@@ -1700,6 +1700,12 @@ abstract class AppLocalizations {
   /// **'Putar animasi perjalanan'**
   String get mapPlayAnimation;
 
+  /// No description provided for @sharePoster.
+  ///
+  /// In id, this message translates to:
+  /// **'Poster rute (PNG)'**
+  String get sharePoster;
+
   /// No description provided for @shareTripHeading.
   ///
   /// In id, this message translates to:

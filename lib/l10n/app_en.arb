@@ -316,6 +316,7 @@
   "homeSeeAll": "See all",
   "homeQuickMenu": "Quick menu",
   "mapPlayAnimation": "Play trip animation",
+  "sharePoster": "Route poster (PNG)",
   "shareTripHeading": "Trip on {date}",
   "@shareTripHeading": {
     "placeholders": {

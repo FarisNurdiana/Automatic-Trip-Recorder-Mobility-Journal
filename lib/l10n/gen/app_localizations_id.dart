@@ -869,6 +869,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get mapPlayAnimation => 'Putar animasi perjalanan';
 
   @override
+  String get sharePoster => 'Poster rute (PNG)';
+
+  @override
   String shareTripHeading(String date) {
     return 'Perjalanan $date';
   }

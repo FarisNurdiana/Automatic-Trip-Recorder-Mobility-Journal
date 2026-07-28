@@ -316,6 +316,7 @@
   "homeSeeAll": "Lihat semua",
   "homeQuickMenu": "Menu cepat",
   "mapPlayAnimation": "Putar animasi perjalanan",
+  "sharePoster": "Poster rute (PNG)",
   "shareTripHeading": "Perjalanan {date}",
   "@shareTripHeading": {
     "placeholders": {
