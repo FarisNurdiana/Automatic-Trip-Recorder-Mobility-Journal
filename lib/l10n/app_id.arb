@@ -334,6 +334,16 @@
     }
   },
   "homeGreetingAnon": "Halo 👋",
+  "fuelSectionTitle": "Konsumsi BBM",
+  "fuelSectionDesc": "Masukkan konsumsi khas kendaraanmu (mis. 1 liter untuk 40 km berarti 40 km/L). Ruteku memakai angka ini untuk memperkirakan BBM dan biaya tiap perjalanan dari jarak tempuh GPS.",
+  "fuelMotorcycleKmPerLiter": "Konsumsi motor (km per liter)",
+  "fuelCarKmPerLiter": "Konsumsi mobil (km per liter)",
+  "fuelPricePerLiter": "Harga BBM per liter",
+  "fuelNotSet": "Belum diatur — estimasi tidak ditampilkan",
+  "fuelInputHint": "Kosongkan untuk menghapus",
+  "fuelEstimateLabel": "Perkiraan BBM",
+  "fuelCostLabel": "Perkiraan biaya",
+  "fuelEstimateNote": "Estimasi dari angka km/L yang Anda masukkan, bukan pengukuran mesin.",
   "shareTripHeading": "Perjalanan {date}",
   "@shareTripHeading": {
     "placeholders": {

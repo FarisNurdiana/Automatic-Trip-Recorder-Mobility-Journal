@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/config/sensor_config.dart';
 import '../../../core/constants/enums.dart';
+import '../../../core/utils/fuel_estimator.dart';
 
 /// User preferences persisted in SharedPreferences.
 class SettingsState {
@@ -15,6 +16,7 @@ class SettingsState {
     this.locale,
     this.onboardingCompleted = false,
     this.localMode = false,
+    this.fuelProfile = const FuelProfile(),
   });
 
   final bool autoDetectionEnabled;
@@ -29,6 +31,9 @@ class SettingsState {
   /// Using the app without a Supabase account.
   final bool localMode;
 
+  /// User-entered km/L + fuel price for per-trip fuel estimates.
+  final FuelProfile fuelProfile;
+
   SettingsState copyWith({
     bool? autoDetectionEnabled,
     SensorSamplingConfig? sensorConfig,
@@ -38,6 +43,7 @@ class SettingsState {
     bool clearLocale = false,
     bool? onboardingCompleted,
     bool? localMode,
+    FuelProfile? fuelProfile,
   }) => SettingsState(
     autoDetectionEnabled: autoDetectionEnabled ?? this.autoDetectionEnabled,
     sensorConfig: sensorConfig ?? this.sensorConfig,
@@ -46,6 +52,7 @@ class SettingsState {
     locale: clearLocale ? null : (locale ?? this.locale),
     onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
     localMode: localMode ?? this.localMode,
+    fuelProfile: fuelProfile ?? this.fuelProfile,
   );
 }
 
@@ -74,6 +81,39 @@ class SettingsController extends StateNotifier<SettingsState> {
       locale: localeCode == null ? null : Locale(localeCode),
       onboardingCompleted: prefs.getBool('onboardingCompleted') ?? false,
       localMode: prefs.getBool('localMode') ?? false,
+      fuelProfile: FuelProfile(
+        motorcycleKmPerLiter: prefs.getDouble('fuelKmPerLiterMotorcycle'),
+        carKmPerLiter: prefs.getDouble('fuelKmPerLiterCar'),
+        fuelPricePerLiter: prefs.getDouble('fuelPricePerLiter'),
+      ),
+    );
+  }
+
+  /// Stores one fuel-profile field; null clears it (no estimate shown).
+  Future<void> setFuelProfileValue(String key, double? value) async {
+    assert(
+      key == 'fuelKmPerLiterMotorcycle' ||
+          key == 'fuelKmPerLiterCar' ||
+          key == 'fuelPricePerLiter',
+    );
+    if (value == null || value <= 0) {
+      await _prefs.remove(key);
+    } else {
+      await _prefs.setDouble(key, value);
+    }
+    final p = state.fuelProfile;
+    state = state.copyWith(
+      fuelProfile: FuelProfile(
+        motorcycleKmPerLiter: key == 'fuelKmPerLiterMotorcycle'
+            ? (value != null && value > 0 ? value : null)
+            : p.motorcycleKmPerLiter,
+        carKmPerLiter: key == 'fuelKmPerLiterCar'
+            ? (value != null && value > 0 ? value : null)
+            : p.carKmPerLiter,
+        fuelPricePerLiter: key == 'fuelPricePerLiter'
+            ? (value != null && value > 0 ? value : null)
+            : p.fuelPricePerLiter,
+      ),
     );
   }
 

@@ -10,6 +10,7 @@ import '../../../core/constants/enums.dart';
 import '../../../core/location/location_models.dart';
 import '../../../core/storage/app_database.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/fuel_estimator.dart';
 import '../../../core/utils/polyline_simplifier.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../shared/widgets/status_widgets.dart';
@@ -182,6 +183,21 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
     }
   }
 
+  /// "0.126" L -> "0,13"; "1.5" -> "1,50".
+  static String _liters(double liters) =>
+      liters.toStringAsFixed(2).replaceAll('.', ',');
+
+  /// Rounded rupiah with thousands dots: 15250.4 -> "15.250".
+  static String _rupiah(double amount) {
+    final digits = amount.round().toString();
+    final out = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) out.write('.');
+      out.write(digits[i]);
+    }
+    return out.toString();
+  }
+
   Widget _buildDetail(
     BuildContext context,
     AppLocalizations l10n,
@@ -192,6 +208,13 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
     final points = data.displayPoints;
     final vehicle = VehicleType.fromName(
       trip.confirmedVehicleType ?? trip.detectedVehicleType,
+    );
+    // Fuel estimate from the user's own km/L figure (null when not set for
+    // this vehicle type — nothing is guessed).
+    final fuel = estimateFuel(
+      distanceMeters: trip.distanceMeters,
+      vehicleType: vehicle,
+      profile: ref.watch(settingsControllerProvider).fuelProfile,
     );
 
     return ListView(
@@ -343,6 +366,39 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
                   ),
                 ],
               ),
+              if (fuel != null) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: StatTile(
+                        label: l10n.fuelEstimateLabel,
+                        icon: Icons.local_gas_station_outlined,
+                        value: '≈ ${_liters(fuel.liters)} L',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: fuel.cost == null
+                          ? const SizedBox.shrink()
+                          : StatTile(
+                              label: l10n.fuelCostLabel,
+                              icon: Icons.payments_outlined,
+                              value: '≈ Rp ${_rupiah(fuel.cost!)}',
+                            ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, left: 4),
+                  child: Text(
+                    l10n.fuelEstimateNote,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 12),
               Card(
                 child: ListTile(

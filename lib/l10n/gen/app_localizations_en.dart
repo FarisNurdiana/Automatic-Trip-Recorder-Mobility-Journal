@@ -911,6 +911,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeGreetingAnon => 'Hi 👋';
 
   @override
+  String get fuelSectionTitle => 'Fuel consumption';
+
+  @override
+  String get fuelSectionDesc =>
+      'Enter your vehicle\'s typical consumption (e.g. 1 liter per 40 km means 40 km/L). Ruteku uses it to estimate fuel and cost per trip from the GPS distance.';
+
+  @override
+  String get fuelMotorcycleKmPerLiter =>
+      'Motorcycle consumption (km per liter)';
+
+  @override
+  String get fuelCarKmPerLiter => 'Car consumption (km per liter)';
+
+  @override
+  String get fuelPricePerLiter => 'Fuel price per liter';
+
+  @override
+  String get fuelNotSet => 'Not set — no estimate shown';
+
+  @override
+  String get fuelInputHint => 'Leave empty to clear';
+
+  @override
+  String get fuelEstimateLabel => 'Estimated fuel';
+
+  @override
+  String get fuelCostLabel => 'Estimated cost';
+
+  @override
+  String get fuelEstimateNote =>
+      'Estimated from the km/L figure you entered, not measured from the engine.';
+
+  @override
   String shareTripHeading(String date) {
     return 'Trip on $date';
   }

@@ -5,9 +5,59 @@ import 'package:go_router/go_router.dart';
 import '../../../app/providers.dart';
 import '../../../core/constants/enums.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../application/settings_controller.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
+
+  /// "12.0" -> "12", "11.5" -> "11,5"-style short number for subtitles.
+  static String _trimNumber(double value) {
+    final text = value.toStringAsFixed(value == value.roundToDouble() ? 0 : 1);
+    return text.replaceAll('.', ',');
+  }
+
+  /// Numeric input dialog for one fuel-profile value. Empty input clears it.
+  static Future<void> _editFuelValue(
+    BuildContext context,
+    SettingsController controller, {
+    required String title,
+    required String suffix,
+    required double? current,
+    required String prefsKey,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    final input = TextEditingController(
+      text: current == null ? '' : _trimNumber(current),
+    );
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: input,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            hintText: l10n.fuelInputHint,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, input.text),
+            child: Text(l10n.commonSave),
+          ),
+        ],
+      ),
+    );
+    if (result == null) return;
+    final value = double.tryParse(result.trim().replaceAll(',', '.'));
+    await controller.setFuelProfileValue(prefsKey, value);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,6 +104,81 @@ class SettingsPage extends ConsumerWidget {
                 for (final p in PhoneMountPosition.values)
                   DropdownMenuItem(value: p, child: Text(mountLabel(p))),
               ],
+            ),
+          ),
+          const Divider(),
+          // --- fuel profile (per-trip fuel estimates) ---
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Text(
+              l10n.fuelSectionTitle,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 2, 16, 4),
+            child: Text(
+              l10n.fuelSectionDesc,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.two_wheeler),
+            title: Text(l10n.fuelMotorcycleKmPerLiter),
+            subtitle: Text(
+              settings.fuelProfile.motorcycleKmPerLiter == null
+                  ? l10n.fuelNotSet
+                  : '${_trimNumber(settings.fuelProfile.motorcycleKmPerLiter!)} km/L',
+            ),
+            trailing: const Icon(Icons.edit_outlined, size: 20),
+            onTap: () => _editFuelValue(
+              context,
+              controller,
+              title: l10n.fuelMotorcycleKmPerLiter,
+              suffix: 'km/L',
+              current: settings.fuelProfile.motorcycleKmPerLiter,
+              prefsKey: 'fuelKmPerLiterMotorcycle',
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.directions_car),
+            title: Text(l10n.fuelCarKmPerLiter),
+            subtitle: Text(
+              settings.fuelProfile.carKmPerLiter == null
+                  ? l10n.fuelNotSet
+                  : '${_trimNumber(settings.fuelProfile.carKmPerLiter!)} km/L',
+            ),
+            trailing: const Icon(Icons.edit_outlined, size: 20),
+            onTap: () => _editFuelValue(
+              context,
+              controller,
+              title: l10n.fuelCarKmPerLiter,
+              suffix: 'km/L',
+              current: settings.fuelProfile.carKmPerLiter,
+              prefsKey: 'fuelKmPerLiterCar',
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.payments_outlined),
+            title: Text(l10n.fuelPricePerLiter),
+            subtitle: Text(
+              settings.fuelProfile.fuelPricePerLiter == null
+                  ? l10n.fuelNotSet
+                  : 'Rp ${_trimNumber(settings.fuelProfile.fuelPricePerLiter!)} / L',
+            ),
+            trailing: const Icon(Icons.edit_outlined, size: 20),
+            onTap: () => _editFuelValue(
+              context,
+              controller,
+              title: l10n.fuelPricePerLiter,
+              suffix: 'Rp/L',
+              current: settings.fuelProfile.fuelPricePerLiter,
+              prefsKey: 'fuelPricePerLiter',
             ),
           ),
           const Divider(),

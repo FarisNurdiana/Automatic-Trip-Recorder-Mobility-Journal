@@ -914,6 +914,38 @@ class AppLocalizationsId extends AppLocalizations {
   String get homeGreetingAnon => 'Halo 👋';
 
   @override
+  String get fuelSectionTitle => 'Konsumsi BBM';
+
+  @override
+  String get fuelSectionDesc =>
+      'Masukkan konsumsi khas kendaraanmu (mis. 1 liter untuk 40 km berarti 40 km/L). Ruteku memakai angka ini untuk memperkirakan BBM dan biaya tiap perjalanan dari jarak tempuh GPS.';
+
+  @override
+  String get fuelMotorcycleKmPerLiter => 'Konsumsi motor (km per liter)';
+
+  @override
+  String get fuelCarKmPerLiter => 'Konsumsi mobil (km per liter)';
+
+  @override
+  String get fuelPricePerLiter => 'Harga BBM per liter';
+
+  @override
+  String get fuelNotSet => 'Belum diatur — estimasi tidak ditampilkan';
+
+  @override
+  String get fuelInputHint => 'Kosongkan untuk menghapus';
+
+  @override
+  String get fuelEstimateLabel => 'Perkiraan BBM';
+
+  @override
+  String get fuelCostLabel => 'Perkiraan biaya';
+
+  @override
+  String get fuelEstimateNote =>
+      'Estimasi dari angka km/L yang Anda masukkan, bukan pengukuran mesin.';
+
+  @override
   String shareTripHeading(String date) {
     return 'Perjalanan $date';
   }

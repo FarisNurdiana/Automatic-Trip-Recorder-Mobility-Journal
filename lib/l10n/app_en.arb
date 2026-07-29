@@ -334,6 +334,16 @@
     }
   },
   "homeGreetingAnon": "Hi 👋",
+  "fuelSectionTitle": "Fuel consumption",
+  "fuelSectionDesc": "Enter your vehicle's typical consumption (e.g. 1 liter per 40 km means 40 km/L). Ruteku uses it to estimate fuel and cost per trip from the GPS distance.",
+  "fuelMotorcycleKmPerLiter": "Motorcycle consumption (km per liter)",
+  "fuelCarKmPerLiter": "Car consumption (km per liter)",
+  "fuelPricePerLiter": "Fuel price per liter",
+  "fuelNotSet": "Not set — no estimate shown",
+  "fuelInputHint": "Leave empty to clear",
+  "fuelEstimateLabel": "Estimated fuel",
+  "fuelCostLabel": "Estimated cost",
+  "fuelEstimateNote": "Estimated from the km/L figure you entered, not measured from the engine.",
   "shareTripHeading": "Trip on {date}",
   "@shareTripHeading": {
     "placeholders": {

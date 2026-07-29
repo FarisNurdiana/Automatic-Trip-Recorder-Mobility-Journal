@@ -1778,6 +1778,66 @@ abstract class AppLocalizations {
   /// **'Halo 👋'**
   String get homeGreetingAnon;
 
+  /// No description provided for @fuelSectionTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Konsumsi BBM'**
+  String get fuelSectionTitle;
+
+  /// No description provided for @fuelSectionDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Masukkan konsumsi khas kendaraanmu (mis. 1 liter untuk 40 km berarti 40 km/L). Ruteku memakai angka ini untuk memperkirakan BBM dan biaya tiap perjalanan dari jarak tempuh GPS.'**
+  String get fuelSectionDesc;
+
+  /// No description provided for @fuelMotorcycleKmPerLiter.
+  ///
+  /// In id, this message translates to:
+  /// **'Konsumsi motor (km per liter)'**
+  String get fuelMotorcycleKmPerLiter;
+
+  /// No description provided for @fuelCarKmPerLiter.
+  ///
+  /// In id, this message translates to:
+  /// **'Konsumsi mobil (km per liter)'**
+  String get fuelCarKmPerLiter;
+
+  /// No description provided for @fuelPricePerLiter.
+  ///
+  /// In id, this message translates to:
+  /// **'Harga BBM per liter'**
+  String get fuelPricePerLiter;
+
+  /// No description provided for @fuelNotSet.
+  ///
+  /// In id, this message translates to:
+  /// **'Belum diatur — estimasi tidak ditampilkan'**
+  String get fuelNotSet;
+
+  /// No description provided for @fuelInputHint.
+  ///
+  /// In id, this message translates to:
+  /// **'Kosongkan untuk menghapus'**
+  String get fuelInputHint;
+
+  /// No description provided for @fuelEstimateLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Perkiraan BBM'**
+  String get fuelEstimateLabel;
+
+  /// No description provided for @fuelCostLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Perkiraan biaya'**
+  String get fuelCostLabel;
+
+  /// No description provided for @fuelEstimateNote.
+  ///
+  /// In id, this message translates to:
+  /// **'Estimasi dari angka km/L yang Anda masukkan, bukan pengukuran mesin.'**
+  String get fuelEstimateNote;
+
   /// No description provided for @shareTripHeading.
   ///
   /// In id, this message translates to:
