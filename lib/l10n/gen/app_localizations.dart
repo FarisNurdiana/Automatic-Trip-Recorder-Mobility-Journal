@@ -1814,6 +1814,36 @@ abstract class AppLocalizations {
   /// **'Halo 👋'**
   String get homeGreetingAnon;
 
+  /// No description provided for @settingsKeepScreenOn.
+  ///
+  /// In id, this message translates to:
+  /// **'Layar tetap menyala saat merekam'**
+  String get settingsKeepScreenOn;
+
+  /// No description provided for @settingsKeepScreenOnDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Berguna saat HP terpasang di holder. Sedikit menambah pemakaian baterai.'**
+  String get settingsKeepScreenOnDesc;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Rekap'**
+  String get statsTitle;
+
+  /// No description provided for @statsExportCsv.
+  ///
+  /// In id, this message translates to:
+  /// **'Ekspor CSV (semua perjalanan)'**
+  String get statsExportCsv;
+
+  /// No description provided for @statsExportCsvDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'File CSV bisa dibuka di Excel/Google Sheets untuk klaim atau pembukuan.'**
+  String get statsExportCsvDesc;
+
   /// No description provided for @fuelSectionTitle.
   ///
   /// In id, this message translates to:

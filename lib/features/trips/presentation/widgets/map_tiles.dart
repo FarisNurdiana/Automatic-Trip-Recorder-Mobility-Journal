@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 
+import 'cached_tile_provider.dart';
+
 /// Basemap tiles with a clean, Google-Maps-like appearance.
 ///
 /// Light mode uses CARTO "Voyager" (soft pastel roads/water like Google
@@ -15,6 +17,8 @@ TileLayer appTileLayer(BuildContext context, {bool forceLight = false}) {
         : 'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     userAgentPackageName: 'com.triplog.triplog',
     retinaMode: RetinaMode.isHighDensity(context),
+    // Disk cache: previously viewed areas keep rendering offline.
+    tileProvider: DiskCachingTileProvider(userAgent: 'com.triplog.triplog'),
   );
 }
 

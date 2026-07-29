@@ -49,6 +49,8 @@ dependencies:
   # Photo picker for the Strava-style photo-overlay export. Uses the system
   # photo picker on Android 13+, no storage permission needed.
   image_picker: ^1.1.2
+  # Keeps the screen on while a trip is recording (holder/dashboard use).
+  wakelock_plus: ^1.2.8
   intl: ^0.20.2
   uuid: ^4.5.1
   logging: ^1.3.0

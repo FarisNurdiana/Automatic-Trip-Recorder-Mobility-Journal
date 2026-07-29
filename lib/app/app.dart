@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../l10n/gen/app_localizations.dart';
 import 'providers.dart';
@@ -38,6 +39,17 @@ class TripLogApp extends ConsumerWidget {
     // Navigate to vehicle confirmation whenever a trip finishes, and surface
     // recording errors as snackbars — a discarded trip must never be silent.
     ref.listen(tripRecordingControllerProvider, (previous, next) {
+      // Keep the screen awake while a trip is active (holder use). Gated by
+      // the user setting; wakelock only applies while the app is visible.
+      final wasActive = previous?.machineState.isActiveTrip ?? false;
+      final isActive = next.machineState.isActiveTrip;
+      if (isActive != wasActive) {
+        final keepOn = ref.read(settingsControllerProvider).keepScreenOn;
+        unawaited(
+          isActive && keepOn ? WakelockPlus.enable() : WakelockPlus.disable(),
+        );
+      }
+
       final finishedId = next.finishedTripId;
       if (finishedId != null && previous?.finishedTripId != finishedId) {
         ref
@@ -50,6 +62,14 @@ class TripLogApp extends ConsumerWidget {
         if (messenger != null && l10n != null) {
           messenger.showSnackBar(SnackBar(content: Text(l10n.tripSaved)));
         }
+        // Label the endpoints with human-readable places (best effort).
+        final repo = ref.read(tripRepositoryProvider);
+        final resolver = ref.read(tripAddressResolverProvider);
+        unawaited(
+          repo.getTrip(finishedId).then((trip) {
+            if (trip != null) return resolver.ensure(trip);
+          }),
+        );
         router.push('/trips/$finishedId/confirm-vehicle');
       }
 

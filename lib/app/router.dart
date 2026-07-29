@@ -20,6 +20,7 @@ import '../features/trips/presentation/trip_detail_page.dart';
 import '../features/trips/presentation/trip_history_page.dart';
 import '../features/traffic_signs/presentation/traffic_signs_page.dart';
 import '../features/trips/presentation/trip_map_page.dart';
+import '../features/trips/presentation/trip_stats_page.dart';
 import '../features/trips/presentation/vehicle_confirmation_page.dart';
 import 'app_shell.dart';
 import 'providers.dart';
@@ -136,6 +137,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             VehicleConfirmationPage(tripId: state.pathParameters['id']!),
       ),
+      GoRoute(path: '/stats', builder: (_, _) => const TripStatsPage()),
       GoRoute(path: '/profile', builder: (_, _) => const ProfilePage()),
       GoRoute(
         path: '/settings/permissions',

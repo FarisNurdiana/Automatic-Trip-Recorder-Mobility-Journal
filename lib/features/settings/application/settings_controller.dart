@@ -17,6 +17,7 @@ class SettingsState {
     this.onboardingCompleted = false,
     this.localMode = false,
     this.fuelProfile = const FuelProfile(),
+    this.keepScreenOn = true,
   });
 
   final bool autoDetectionEnabled;
@@ -34,6 +35,9 @@ class SettingsState {
   /// User-entered km/L + fuel price for per-trip fuel estimates.
   final FuelProfile fuelProfile;
 
+  /// Keep the screen awake while a trip is recording (holder use).
+  final bool keepScreenOn;
+
   SettingsState copyWith({
     bool? autoDetectionEnabled,
     SensorSamplingConfig? sensorConfig,
@@ -44,6 +48,7 @@ class SettingsState {
     bool? onboardingCompleted,
     bool? localMode,
     FuelProfile? fuelProfile,
+    bool? keepScreenOn,
   }) => SettingsState(
     autoDetectionEnabled: autoDetectionEnabled ?? this.autoDetectionEnabled,
     sensorConfig: sensorConfig ?? this.sensorConfig,
@@ -53,6 +58,7 @@ class SettingsState {
     onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
     localMode: localMode ?? this.localMode,
     fuelProfile: fuelProfile ?? this.fuelProfile,
+    keepScreenOn: keepScreenOn ?? this.keepScreenOn,
   );
 }
 
@@ -86,7 +92,13 @@ class SettingsController extends StateNotifier<SettingsState> {
         carKmPerLiter: prefs.getDouble('fuelKmPerLiterCar'),
         fuelPricePerLiter: prefs.getDouble('fuelPricePerLiter'),
       ),
+      keepScreenOn: prefs.getBool('keepScreenOn') ?? true,
     );
+  }
+
+  Future<void> setKeepScreenOn(bool value) async {
+    await _prefs.setBool('keepScreenOn', value);
+    state = state.copyWith(keepScreenOn: value);
   }
 
   /// Stores one fuel-profile field; null clears it (no estimate shown).

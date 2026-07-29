@@ -24,12 +24,24 @@ android {
         versionName = flutter.versionName
     }
 
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+    signingConfigs {
+        // Stable test-distribution key committed to the repo so every CI
+        // build carries the SAME signature — without this, each CI runner
+        // generated a fresh debug key and Android refused to install the
+        // new APK over the old one (users had to uninstall and lost data).
+        // This key is for test builds only; a Play Store release must use
+        // its own private keystore.
+        create("stable") {
+            storeFile = file("ruteku-ci.jks")
+            storePassword = "rutekudebug"
+            keyAlias = "ruteku"
+            keyPassword = "rutekudebug"
         }
+    }
+
+    buildTypes {
+        getByName("debug") { signingConfig = signingConfigs.getByName("stable") }
+        release { signingConfig = signingConfigs.getByName("stable") }
     }
 }
 

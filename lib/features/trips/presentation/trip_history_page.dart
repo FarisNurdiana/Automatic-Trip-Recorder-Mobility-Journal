@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +22,16 @@ class TripHistoryPage extends ConsumerWidget {
     final trips = ref.watch(tripsStreamProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.historyTitle)),
+      appBar: AppBar(
+        title: Text(l10n.historyTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.insert_chart_outlined),
+            tooltip: l10n.statsTitle,
+            onPressed: () => context.push('/stats'),
+          ),
+        ],
+      ),
       body: trips.when(
         loading: () => LoadingView(message: l10n.commonLoading),
         error: (e, _) => ErrorView(message: l10n.commonError),
@@ -28,6 +39,15 @@ class TripHistoryPage extends ConsumerWidget {
           final finished = list
               .where((t) => t.status == TripRecordingState.finished.name)
               .toList();
+          // Backfill missing place labels for the most recent trips (best
+          // effort, serialized, deduped inside the resolver).
+          final resolver = ref.read(tripAddressResolverProvider);
+          for (final t
+              in finished
+                  .where((t) => t.startAddress == null || t.endAddress == null)
+                  .take(5)) {
+            unawaited(resolver.ensure(t));
+          }
           if (finished.isEmpty) {
             return EmptyStateView(
               message: l10n.historyEmpty,
@@ -137,6 +157,17 @@ class _TripCard extends StatelessWidget {
   final Trip trip;
   final String locale;
 
+  /// "Jl. A, Gedebage" + "Jl. B, Cimahi" -> "Jl. A → Jl. B"; null while
+  /// either address is still unknown.
+  String? _routeLabel(Trip t) {
+    final start = t.startAddress?.split(',').first.trim();
+    final end = t.endAddress?.split(',').first.trim();
+    if (start == null || start.isEmpty || end == null || end.isEmpty) {
+      return null;
+    }
+    return '$start → $end';
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -173,14 +204,25 @@ class _TripCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          Formatters.dateTime(trip.startedAt, locale: locale),
+                          _routeLabel(trip) ??
+                              Formatters.dateTime(
+                                trip.startedAt,
+                                locale: locale,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          vehicleLabel(l10n, vehicle),
+                          _routeLabel(trip) == null
+                              ? vehicleLabel(l10n, vehicle)
+                              : '${Formatters.dateTime(trip.startedAt, locale: locale)} • '
+                                    '${vehicleLabel(l10n, vehicle)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),

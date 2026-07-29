@@ -936,6 +936,23 @@ class AppLocalizationsId extends AppLocalizations {
   String get homeGreetingAnon => 'Halo 👋';
 
   @override
+  String get settingsKeepScreenOn => 'Layar tetap menyala saat merekam';
+
+  @override
+  String get settingsKeepScreenOnDesc =>
+      'Berguna saat HP terpasang di holder. Sedikit menambah pemakaian baterai.';
+
+  @override
+  String get statsTitle => 'Rekap';
+
+  @override
+  String get statsExportCsv => 'Ekspor CSV (semua perjalanan)';
+
+  @override
+  String get statsExportCsvDesc =>
+      'File CSV bisa dibuka di Excel/Google Sheets untuk klaim atau pembukuan.';
+
+  @override
   String get fuelSectionTitle => 'Konsumsi BBM';
 
   @override

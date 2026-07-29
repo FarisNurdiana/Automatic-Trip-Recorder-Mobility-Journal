@@ -12,3 +12,6 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Stable test-signing key must be committed (consistent APK updates).
+!app/ruteku-ci.jks

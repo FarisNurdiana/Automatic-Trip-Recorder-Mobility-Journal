@@ -345,6 +345,11 @@
     }
   },
   "homeGreetingAnon": "Hi 👋",
+  "settingsKeepScreenOn": "Keep screen on while recording",
+  "settingsKeepScreenOnDesc": "Useful with a phone holder. Slightly increases battery use.",
+  "statsTitle": "Recap",
+  "statsExportCsv": "Export CSV (all trips)",
+  "statsExportCsvDesc": "The CSV opens in Excel/Google Sheets for claims or bookkeeping.",
   "fuelSectionTitle": "Fuel consumption",
   "fuelSectionDesc": "Enter your vehicle's typical consumption (e.g. 1 liter per 40 km means 40 km/L). Ruteku uses it to estimate fuel and cost per trip from the GPS distance.",
   "fuelMotorcycleKmPerLiter": "Motorcycle consumption (km per liter)",

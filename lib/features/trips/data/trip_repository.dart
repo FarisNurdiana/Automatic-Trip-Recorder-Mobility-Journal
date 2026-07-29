@@ -77,6 +77,14 @@ abstract interface class TripRepository {
   /// User corrects the arrival time after an automatic finish.
   Future<void> correctArrivalTime(String tripId, DateTime arrival);
 
+  /// Stores reverse-geocoded start/end labels (either may be null to keep
+  /// the existing value).
+  Future<void> setTripAddresses(
+    String tripId, {
+    String? startAddress,
+    String? endAddress,
+  });
+
   Future<void> confirmVehicle({
     required String tripId,
     required VehicleType confirmed,
@@ -311,6 +319,31 @@ class DefaultTripRepository implements TripRepository {
                 ? Value(elapsed)
                 : const Value.absent(),
             arrivalCorrectedByUser: const Value(true),
+            syncStatus: const Value('pending'),
+            updatedAt: Value(DateTime.now().toUtc()),
+          ),
+    );
+  }
+
+  @override
+  Future<void> setTripAddresses(
+    String tripId, {
+    String? startAddress,
+    String? endAddress,
+  }) async {
+    if (startAddress == null && endAddress == null) return;
+    final trip = await local.getTrip(tripId);
+    if (trip == null) return;
+    await local.upsertTrip(
+      trip
+          .toCompanion(false)
+          .copyWith(
+            startAddress: startAddress == null
+                ? const Value.absent()
+                : Value(startAddress),
+            endAddress: endAddress == null
+                ? const Value.absent()
+                : Value(endAddress),
             syncStatus: const Value('pending'),
             updatedAt: Value(DateTime.now().toUtc()),
           ),

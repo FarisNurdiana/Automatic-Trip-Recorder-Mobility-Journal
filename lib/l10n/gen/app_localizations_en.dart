@@ -933,6 +933,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeGreetingAnon => 'Hi 👋';
 
   @override
+  String get settingsKeepScreenOn => 'Keep screen on while recording';
+
+  @override
+  String get settingsKeepScreenOnDesc =>
+      'Useful with a phone holder. Slightly increases battery use.';
+
+  @override
+  String get statsTitle => 'Recap';
+
+  @override
+  String get statsExportCsv => 'Export CSV (all trips)';
+
+  @override
+  String get statsExportCsvDesc =>
+      'The CSV opens in Excel/Google Sheets for claims or bookkeeping.';
+
+  @override
   String get fuelSectionTitle => 'Fuel consumption';
 
   @override

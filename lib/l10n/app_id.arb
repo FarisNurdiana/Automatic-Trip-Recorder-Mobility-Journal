@@ -345,6 +345,11 @@
     }
   },
   "homeGreetingAnon": "Halo 👋",
+  "settingsKeepScreenOn": "Layar tetap menyala saat merekam",
+  "settingsKeepScreenOnDesc": "Berguna saat HP terpasang di holder. Sedikit menambah pemakaian baterai.",
+  "statsTitle": "Rekap",
+  "statsExportCsv": "Ekspor CSV (semua perjalanan)",
+  "statsExportCsvDesc": "File CSV bisa dibuka di Excel/Google Sheets untuk klaim atau pembukuan.",
   "fuelSectionTitle": "Konsumsi BBM",
   "fuelSectionDesc": "Masukkan konsumsi khas kendaraanmu (mis. 1 liter untuk 40 km berarti 40 km/L). Ruteku memakai angka ini untuk memperkirakan BBM dan biaya tiap perjalanan dari jarak tempuh GPS.",
   "fuelMotorcycleKmPerLiter": "Konsumsi motor (km per liter)",

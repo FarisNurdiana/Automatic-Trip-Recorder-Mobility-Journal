@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import '../core/activity/activity_recognition_service.dart';
 import '../core/activity/method_channel_activity_service.dart';
 import '../core/config/env.dart';
+import '../core/geo/reverse_geocoder.dart';
 import '../core/location/location_tracking_service.dart';
 import '../core/poi/nearby_poi_service.dart';
 import '../core/location/method_channel_location_service.dart';
@@ -18,6 +19,7 @@ import '../features/auth/data/auth_repository.dart';
 import '../features/recording/application/trip_recording_controller.dart';
 import '../features/recording/domain/trip_state_machine.dart';
 import '../features/settings/application/permissions_service.dart';
+import '../features/trips/application/trip_address_resolver.dart';
 import '../features/settings/application/settings_controller.dart';
 import '../features/trips/data/local_trip_data_source.dart';
 import '../features/trips/data/remote_trip_data_source.dart';
@@ -100,6 +102,14 @@ final permissionsServiceProvider = Provider<PermissionsService>(
 /// On-demand nearby fuel-station / repair-shop lookup (Overpass API).
 final nearbyPoiServiceProvider = Provider<OverpassPoiService>(
   (ref) => OverpassPoiService(),
+);
+
+/// Fills trip start/end address labels via Nominatim (best effort).
+final tripAddressResolverProvider = Provider<TripAddressResolver>(
+  (ref) => TripAddressResolver(
+    repository: ref.watch(tripRepositoryProvider),
+    geocoder: NominatimReverseGeocoder(),
+  ),
 );
 
 final permissionsSnapshotProvider = FutureProvider<PermissionsSnapshot>(

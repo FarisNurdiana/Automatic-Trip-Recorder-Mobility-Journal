@@ -85,6 +85,12 @@ class SettingsPage extends ConsumerWidget {
             onChanged: controller.setAutoDetection,
           ),
           SwitchListTile(
+            title: Text(l10n.settingsKeepScreenOn),
+            subtitle: Text(l10n.settingsKeepScreenOnDesc),
+            value: settings.keepScreenOn,
+            onChanged: controller.setKeepScreenOn,
+          ),
+          SwitchListTile(
             title: Text(l10n.settingsSensorLogging),
             subtitle: Text(
               '${l10n.settingsSensorLoggingDesc}\n⚠ ${l10n.settingsSensorLoggingWarning}',
