@@ -348,6 +348,32 @@
   "settingsKeepScreenOn": "Layar tetap menyala saat merekam",
   "settingsKeepScreenOnDesc": "Berguna saat HP terpasang di holder. Sedikit menambah pemakaian baterai.",
   "statsTitle": "Rekap",
+  "drivingSectionTitle": "Berkendara",
+  "settingsSpeedLimit": "Peringatan batas kecepatan",
+  "settingsSpeedLimitOff": "Nonaktif — ketuk untuk mengatur",
+  "serviceIntervalMotorcycle": "Interval servis motor",
+  "serviceIntervalCar": "Interval servis mobil",
+  "serviceIntervalOff": "Nonaktif — ketuk untuk mengatur",
+  "serviceIntervalEvery": "Setiap {km} km",
+  "@serviceIntervalEvery": {
+    "placeholders": {
+      "km": {"type": "String"}
+    }
+  },
+  "serviceDueTitle": "Waktunya servis {vehicle}",
+  "@serviceDueTitle": {
+    "placeholders": {
+      "vehicle": {"type": "String"}
+    }
+  },
+  "serviceDueBody": "Sudah ±{km} km tercatat sejak servis terakhir.",
+  "@serviceDueBody": {
+    "placeholders": {
+      "km": {"type": "int"}
+    }
+  },
+  "serviceMarkDone": "Sudah servis",
+  "serviceMarked": "Dicatat — pengingat dihitung ulang dari sekarang.",
   "statsExportCsv": "Ekspor CSV (semua perjalanan)",
   "statsExportCsvDesc": "File CSV bisa dibuka di Excel/Google Sheets untuk klaim atau pembukuan.",
   "fuelSectionTitle": "Konsumsi BBM",

@@ -943,6 +943,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsTitle => 'Recap';
 
   @override
+  String get drivingSectionTitle => 'Driving';
+
+  @override
+  String get settingsSpeedLimit => 'Speed limit warning';
+
+  @override
+  String get settingsSpeedLimitOff => 'Off — tap to set';
+
+  @override
+  String get serviceIntervalMotorcycle => 'Motorcycle service interval';
+
+  @override
+  String get serviceIntervalCar => 'Car service interval';
+
+  @override
+  String get serviceIntervalOff => 'Off — tap to set';
+
+  @override
+  String serviceIntervalEvery(String km) {
+    return 'Every $km km';
+  }
+
+  @override
+  String serviceDueTitle(String vehicle) {
+    return 'Time to service your $vehicle';
+  }
+
+  @override
+  String serviceDueBody(int km) {
+    return 'About $km km recorded since the last service.';
+  }
+
+  @override
+  String get serviceMarkDone => 'Serviced';
+
+  @override
+  String get serviceMarked => 'Recorded — the reminder now counts from today.';
+
+  @override
   String get statsExportCsv => 'Export CSV (all trips)';
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -174,6 +175,24 @@ class _CurrentTripPageState extends ConsumerState<CurrentTripPage> {
         : null;
     final speed = state.currentSpeedKmh;
 
+    // Speed-limit warning: red speed chip + one strong vibration when the
+    // limit is first exceeded (visual works because the screen stays on).
+    final speedLimit = ref.watch(
+      settingsControllerProvider.select((s) => s.speedLimitKmh),
+    );
+    final overLimit = speed != null && speedLimit != null && speed > speedLimit;
+    ref.listen(
+      tripRecordingControllerProvider.select((s) => s.currentSpeedKmh),
+      (previous, next) {
+        final limit = ref.read(settingsControllerProvider).speedLimitKmh;
+        if (limit == null || next == null) return;
+        final wasOver = (previous ?? 0) > limit;
+        if (next > limit && !wasOver) {
+          HapticFeedback.heavyImpact();
+        }
+      },
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.tripCurrentTitle),
@@ -269,7 +288,9 @@ class _CurrentTripPageState extends ConsumerState<CurrentTripPage> {
                                   vertical: 8,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: scheme.surface.withValues(alpha: 0.9),
+                                  color: overLimit
+                                      ? const Color(0xFFD32F2F)
+                                      : scheme.surface.withValues(alpha: 0.9),
                                   borderRadius: BorderRadius.circular(14),
                                   boxShadow: const [
                                     BoxShadow(
@@ -284,14 +305,24 @@ class _CurrentTripPageState extends ConsumerState<CurrentTripPage> {
                                   textBaseline: TextBaseline.alphabetic,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
+                                    if (overLimit) ...[
+                                      const Icon(
+                                        Icons.warning_amber_rounded,
+                                        size: 20,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 6),
+                                    ],
                                     Text(
                                       speed == null
-                                          ? '—'
+                                          ? '0'
                                           : speed.toStringAsFixed(0),
                                       style: theme.textTheme.headlineMedium
                                           ?.copyWith(
                                             fontWeight: FontWeight.w800,
-                                            color: scheme.primary,
+                                            color: overLimit
+                                                ? Colors.white
+                                                : scheme.primary,
                                           ),
                                     ),
                                     const SizedBox(width: 4),
@@ -299,7 +330,9 @@ class _CurrentTripPageState extends ConsumerState<CurrentTripPage> {
                                       'km/j',
                                       style: theme.textTheme.labelMedium
                                           ?.copyWith(
-                                            color: scheme.onSurfaceVariant,
+                                            color: overLimit
+                                                ? Colors.white70
+                                                : scheme.onSurfaceVariant,
                                           ),
                                     ),
                                   ],

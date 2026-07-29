@@ -31,8 +31,33 @@ class HomePage extends ConsumerWidget {
     final permissions = ref.watch(permissionsSnapshotProvider);
     final syncState = ref.watch(syncStateProvider);
     final auth = ref.watch(authControllerProvider);
+    final settings = ref.watch(settingsControllerProvider);
 
     final isActive = recording.machineState.isActiveTrip;
+
+    // Service reminders: total recorded km per vehicle type vs the interval.
+    final finishedTrips = (trips.valueOrNull ?? const <Trip>[])
+        .where((t) => t.status == TripRecordingState.finished.name)
+        .toList();
+    double kmFor(VehicleType type) =>
+        finishedTrips
+            .where(
+              (t) =>
+                  VehicleType.fromName(
+                    t.confirmedVehicleType ?? t.detectedVehicleType,
+                  ) ==
+                  type,
+            )
+            .fold<double>(0, (sum, t) => sum + t.distanceMeters) /
+        1000;
+    final serviceDue = <(VehicleType, double, double)>[];
+    for (final type in [VehicleType.motorcycle, VehicleType.car]) {
+      final interval = settings.serviceProfile.intervalFor(type);
+      if (interval == null) continue;
+      final total = kmFor(type);
+      final since = total - settings.serviceProfile.baseFor(type);
+      if (since >= interval) serviceDue.add((type, since, total));
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -111,6 +136,65 @@ class HomePage extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
 
+            // --- service reminders ---
+            for (final (type, sinceKm, totalKm) in serviceDue) ...[
+              Card(
+                color: Theme.of(context).colorScheme.tertiaryContainer,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.build,
+                            size: 20,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onTertiaryContainer,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              l10n.serviceDueTitle(
+                                vehicleLabel(l10n, type).toLowerCase(),
+                              ),
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.serviceDueBody(sinceKm.round()),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: FilledButton.tonal(
+                          onPressed: () async {
+                            await ref
+                                .read(settingsControllerProvider.notifier)
+                                .markServiced(type, totalKm);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(l10n.serviceMarked)),
+                              );
+                            }
+                          },
+                          child: Text(l10n.serviceMarkDone),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
             // --- totals ---
             Row(
               children: [
@@ -188,6 +272,19 @@ class HomePage extends ConsumerWidget {
             Card(
               child: Column(
                 children: [
+                  ListTile(
+                    leading: const _LeadingBadge(icon: Icons.local_gas_station),
+                    title: Text(l10n.poiSheetTitle),
+                    subtitle: Text(l10n.poiDisclaimer),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/nearby'),
+                  ),
+                  Divider(
+                    height: 1,
+                    indent: 16,
+                    endIndent: 16,
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
                   ListTile(
                     leading: permissions.maybeWhen(
                       data: (p) => _LeadingBadge(

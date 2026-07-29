@@ -10,6 +10,7 @@ import '../features/auth/presentation/onboarding_page.dart';
 import '../features/auth/presentation/register_page.dart';
 import '../features/auth/presentation/reset_password_page.dart';
 import '../features/home/presentation/home_page.dart';
+import '../features/nearby/presentation/nearby_page.dart';
 import '../features/home/presentation/splash_page.dart';
 import '../features/profile/presentation/profile_page.dart';
 import '../features/recording/presentation/current_trip_page.dart';
@@ -138,6 +139,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             VehicleConfirmationPage(tripId: state.pathParameters['id']!),
       ),
       GoRoute(path: '/stats', builder: (_, _) => const TripStatsPage()),
+      GoRoute(path: '/nearby', builder: (_, _) => const NearbyPage()),
       GoRoute(path: '/profile', builder: (_, _) => const ProfilePage()),
       GoRoute(
         path: '/settings/permissions',

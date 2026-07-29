@@ -6,6 +6,34 @@ import '../../../core/config/sensor_config.dart';
 import '../../../core/constants/enums.dart';
 import '../../../core/utils/fuel_estimator.dart';
 
+/// Per-vehicle-type service reminder settings: how often (km) and the
+/// odometer reading (total recorded km) at the last service.
+class ServiceProfile {
+  const ServiceProfile({
+    this.intervalKmMotorcycle,
+    this.intervalKmCar,
+    this.baseKmMotorcycle = 0,
+    this.baseKmCar = 0,
+  });
+
+  final double? intervalKmMotorcycle;
+  final double? intervalKmCar;
+  final double baseKmMotorcycle;
+  final double baseKmCar;
+
+  double? intervalFor(VehicleType type) => switch (type) {
+    VehicleType.motorcycle => intervalKmMotorcycle,
+    VehicleType.car => intervalKmCar,
+    _ => null,
+  };
+
+  double baseFor(VehicleType type) => switch (type) {
+    VehicleType.motorcycle => baseKmMotorcycle,
+    VehicleType.car => baseKmCar,
+    _ => 0,
+  };
+}
+
 /// User preferences persisted in SharedPreferences.
 class SettingsState {
   const SettingsState({
@@ -18,6 +46,8 @@ class SettingsState {
     this.localMode = false,
     this.fuelProfile = const FuelProfile(),
     this.keepScreenOn = true,
+    this.speedLimitKmh,
+    this.serviceProfile = const ServiceProfile(),
   });
 
   final bool autoDetectionEnabled;
@@ -38,6 +68,12 @@ class SettingsState {
   /// Keep the screen awake while a trip is recording (holder use).
   final bool keepScreenOn;
 
+  /// Warn (visual + vibration) above this speed; null disables the warning.
+  final double? speedLimitKmh;
+
+  /// Service reminder configuration per vehicle type.
+  final ServiceProfile serviceProfile;
+
   SettingsState copyWith({
     bool? autoDetectionEnabled,
     SensorSamplingConfig? sensorConfig,
@@ -49,6 +85,9 @@ class SettingsState {
     bool? localMode,
     FuelProfile? fuelProfile,
     bool? keepScreenOn,
+    double? speedLimitKmh,
+    bool clearSpeedLimit = false,
+    ServiceProfile? serviceProfile,
   }) => SettingsState(
     autoDetectionEnabled: autoDetectionEnabled ?? this.autoDetectionEnabled,
     sensorConfig: sensorConfig ?? this.sensorConfig,
@@ -59,6 +98,10 @@ class SettingsState {
     localMode: localMode ?? this.localMode,
     fuelProfile: fuelProfile ?? this.fuelProfile,
     keepScreenOn: keepScreenOn ?? this.keepScreenOn,
+    speedLimitKmh: clearSpeedLimit
+        ? null
+        : (speedLimitKmh ?? this.speedLimitKmh),
+    serviceProfile: serviceProfile ?? this.serviceProfile,
   );
 }
 
@@ -93,6 +136,66 @@ class SettingsController extends StateNotifier<SettingsState> {
         fuelPricePerLiter: prefs.getDouble('fuelPricePerLiter'),
       ),
       keepScreenOn: prefs.getBool('keepScreenOn') ?? true,
+      speedLimitKmh: prefs.getDouble('speedLimitKmh'),
+      serviceProfile: ServiceProfile(
+        intervalKmMotorcycle: prefs.getDouble('serviceIntervalKmMotorcycle'),
+        intervalKmCar: prefs.getDouble('serviceIntervalKmCar'),
+        baseKmMotorcycle: prefs.getDouble('serviceBaseKmMotorcycle') ?? 0,
+        baseKmCar: prefs.getDouble('serviceBaseKmCar') ?? 0,
+      ),
+    );
+  }
+
+  Future<void> setSpeedLimit(double? value) async {
+    if (value == null || value <= 0) {
+      await _prefs.remove('speedLimitKmh');
+      state = state.copyWith(clearSpeedLimit: true);
+    } else {
+      await _prefs.setDouble('speedLimitKmh', value);
+      state = state.copyWith(speedLimitKmh: value);
+    }
+  }
+
+  Future<void> setServiceInterval(VehicleType type, double? value) async {
+    final key = type == VehicleType.motorcycle
+        ? 'serviceIntervalKmMotorcycle'
+        : 'serviceIntervalKmCar';
+    if (value == null || value <= 0) {
+      await _prefs.remove(key);
+    } else {
+      await _prefs.setDouble(key, value);
+    }
+    final p = state.serviceProfile;
+    state = state.copyWith(
+      serviceProfile: ServiceProfile(
+        intervalKmMotorcycle: type == VehicleType.motorcycle
+            ? (value != null && value > 0 ? value : null)
+            : p.intervalKmMotorcycle,
+        intervalKmCar: type == VehicleType.car
+            ? (value != null && value > 0 ? value : null)
+            : p.intervalKmCar,
+        baseKmMotorcycle: p.baseKmMotorcycle,
+        baseKmCar: p.baseKmCar,
+      ),
+    );
+  }
+
+  /// Records "serviced now": the reminder counts from this odometer value.
+  Future<void> markServiced(VehicleType type, double odometerKm) async {
+    final key = type == VehicleType.motorcycle
+        ? 'serviceBaseKmMotorcycle'
+        : 'serviceBaseKmCar';
+    await _prefs.setDouble(key, odometerKm);
+    final p = state.serviceProfile;
+    state = state.copyWith(
+      serviceProfile: ServiceProfile(
+        intervalKmMotorcycle: p.intervalKmMotorcycle,
+        intervalKmCar: p.intervalKmCar,
+        baseKmMotorcycle: type == VehicleType.motorcycle
+            ? odometerKm
+            : p.baseKmMotorcycle,
+        baseKmCar: type == VehicleType.car ? odometerKm : p.baseKmCar,
+      ),
     );
   }
 

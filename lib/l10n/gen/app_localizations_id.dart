@@ -946,6 +946,46 @@ class AppLocalizationsId extends AppLocalizations {
   String get statsTitle => 'Rekap';
 
   @override
+  String get drivingSectionTitle => 'Berkendara';
+
+  @override
+  String get settingsSpeedLimit => 'Peringatan batas kecepatan';
+
+  @override
+  String get settingsSpeedLimitOff => 'Nonaktif — ketuk untuk mengatur';
+
+  @override
+  String get serviceIntervalMotorcycle => 'Interval servis motor';
+
+  @override
+  String get serviceIntervalCar => 'Interval servis mobil';
+
+  @override
+  String get serviceIntervalOff => 'Nonaktif — ketuk untuk mengatur';
+
+  @override
+  String serviceIntervalEvery(String km) {
+    return 'Setiap $km km';
+  }
+
+  @override
+  String serviceDueTitle(String vehicle) {
+    return 'Waktunya servis $vehicle';
+  }
+
+  @override
+  String serviceDueBody(int km) {
+    return 'Sudah ±$km km tercatat sejak servis terakhir.';
+  }
+
+  @override
+  String get serviceMarkDone => 'Sudah servis';
+
+  @override
+  String get serviceMarked =>
+      'Dicatat — pengingat dihitung ulang dari sekarang.';
+
+  @override
   String get statsExportCsv => 'Ekspor CSV (semua perjalanan)';
 
   @override

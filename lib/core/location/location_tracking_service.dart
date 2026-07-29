@@ -34,4 +34,9 @@ abstract interface class LocationTrackingService {
 
   /// Stops tracking and removes the foreground service/notification.
   Future<void> stop();
+
+  /// One-shot "where am I now" fix without starting the tracker (e.g. the
+  /// nearby fuel/workshop lookup from the home tab). Null when no fix is
+  /// available or the platform does not support it.
+  Future<RecordedLocation?> currentPosition();
 }

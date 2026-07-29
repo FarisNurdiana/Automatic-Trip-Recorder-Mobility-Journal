@@ -100,4 +100,28 @@ class MethodChannelLocationTrackingService implements LocationTrackingService {
   Future<void> stop() async {
     await _channel.invokeMethod('stopTracking');
   }
+
+  @override
+  Future<RecordedLocation?> currentPosition() async {
+    try {
+      final map = await _channel.invokeMethod<Map<Object?, Object?>>(
+        'currentPosition',
+      );
+      if (map == null) return null;
+      return RecordedLocation(
+        recordedAt: DateTime.fromMillisecondsSinceEpoch(
+          (map['timestamp'] as num?)?.toInt() ??
+              DateTime.now().millisecondsSinceEpoch,
+          isUtc: true,
+        ),
+        latitude: (map['latitude']! as num).toDouble(),
+        longitude: (map['longitude']! as num).toDouble(),
+        horizontalAccuracy: (map['accuracy'] as num?)?.toDouble(),
+        source: 'oneShot',
+      );
+    } on PlatformException catch (e) {
+      _log.warning('currentPosition failed', e);
+      return null;
+    }
+  }
 }

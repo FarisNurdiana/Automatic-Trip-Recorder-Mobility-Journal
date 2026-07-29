@@ -1832,6 +1832,72 @@ abstract class AppLocalizations {
   /// **'Rekap'**
   String get statsTitle;
 
+  /// No description provided for @drivingSectionTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Berkendara'**
+  String get drivingSectionTitle;
+
+  /// No description provided for @settingsSpeedLimit.
+  ///
+  /// In id, this message translates to:
+  /// **'Peringatan batas kecepatan'**
+  String get settingsSpeedLimit;
+
+  /// No description provided for @settingsSpeedLimitOff.
+  ///
+  /// In id, this message translates to:
+  /// **'Nonaktif — ketuk untuk mengatur'**
+  String get settingsSpeedLimitOff;
+
+  /// No description provided for @serviceIntervalMotorcycle.
+  ///
+  /// In id, this message translates to:
+  /// **'Interval servis motor'**
+  String get serviceIntervalMotorcycle;
+
+  /// No description provided for @serviceIntervalCar.
+  ///
+  /// In id, this message translates to:
+  /// **'Interval servis mobil'**
+  String get serviceIntervalCar;
+
+  /// No description provided for @serviceIntervalOff.
+  ///
+  /// In id, this message translates to:
+  /// **'Nonaktif — ketuk untuk mengatur'**
+  String get serviceIntervalOff;
+
+  /// No description provided for @serviceIntervalEvery.
+  ///
+  /// In id, this message translates to:
+  /// **'Setiap {km} km'**
+  String serviceIntervalEvery(String km);
+
+  /// No description provided for @serviceDueTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Waktunya servis {vehicle}'**
+  String serviceDueTitle(String vehicle);
+
+  /// No description provided for @serviceDueBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Sudah ±{km} km tercatat sejak servis terakhir.'**
+  String serviceDueBody(int km);
+
+  /// No description provided for @serviceMarkDone.
+  ///
+  /// In id, this message translates to:
+  /// **'Sudah servis'**
+  String get serviceMarkDone;
+
+  /// No description provided for @serviceMarked.
+  ///
+  /// In id, this message translates to:
+  /// **'Dicatat — pengingat dihitung ulang dari sekarang.'**
+  String get serviceMarked;
+
   /// No description provided for @statsExportCsv.
   ///
   /// In id, this message translates to:

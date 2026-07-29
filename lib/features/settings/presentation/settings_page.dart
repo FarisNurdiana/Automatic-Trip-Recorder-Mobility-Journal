@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../app/providers.dart';
 import '../../../core/constants/enums.dart';
 import '../../../l10n/gen/app_localizations.dart';
-import '../application/settings_controller.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -16,14 +15,13 @@ class SettingsPage extends ConsumerWidget {
     return text.replaceAll('.', ',');
   }
 
-  /// Numeric input dialog for one fuel-profile value. Empty input clears it.
-  static Future<void> _editFuelValue(
-    BuildContext context,
-    SettingsController controller, {
+  /// Numeric input dialog for a settings value. Empty input clears it.
+  static Future<void> _editNumber(
+    BuildContext context, {
     required String title,
     required String suffix,
     required double? current,
-    required String prefsKey,
+    required Future<void> Function(double?) onSave,
   }) async {
     final l10n = AppLocalizations.of(context);
     final input = TextEditingController(
@@ -55,8 +53,7 @@ class SettingsPage extends ConsumerWidget {
       ),
     );
     if (result == null) return;
-    final value = double.tryParse(result.trim().replaceAll(',', '.'));
-    await controller.setFuelProfileValue(prefsKey, value);
+    await onSave(double.tryParse(result.trim().replaceAll(',', '.')));
   }
 
   @override
@@ -142,13 +139,13 @@ class SettingsPage extends ConsumerWidget {
                   : '${_trimNumber(settings.fuelProfile.motorcycleKmPerLiter!)} km/L',
             ),
             trailing: const Icon(Icons.edit_outlined, size: 20),
-            onTap: () => _editFuelValue(
+            onTap: () => _editNumber(
               context,
-              controller,
               title: l10n.fuelMotorcycleKmPerLiter,
               suffix: 'km/L',
               current: settings.fuelProfile.motorcycleKmPerLiter,
-              prefsKey: 'fuelKmPerLiterMotorcycle',
+              onSave: (v) =>
+                  controller.setFuelProfileValue('fuelKmPerLiterMotorcycle', v),
             ),
           ),
           ListTile(
@@ -160,13 +157,13 @@ class SettingsPage extends ConsumerWidget {
                   : '${_trimNumber(settings.fuelProfile.carKmPerLiter!)} km/L',
             ),
             trailing: const Icon(Icons.edit_outlined, size: 20),
-            onTap: () => _editFuelValue(
+            onTap: () => _editNumber(
               context,
-              controller,
               title: l10n.fuelCarKmPerLiter,
               suffix: 'km/L',
               current: settings.fuelProfile.carKmPerLiter,
-              prefsKey: 'fuelKmPerLiterCar',
+              onSave: (v) =>
+                  controller.setFuelProfileValue('fuelKmPerLiterCar', v),
             ),
           ),
           ListTile(
@@ -178,13 +175,83 @@ class SettingsPage extends ConsumerWidget {
                   : 'Rp ${_trimNumber(settings.fuelProfile.fuelPricePerLiter!)} / L',
             ),
             trailing: const Icon(Icons.edit_outlined, size: 20),
-            onTap: () => _editFuelValue(
+            onTap: () => _editNumber(
               context,
-              controller,
               title: l10n.fuelPricePerLiter,
               suffix: 'Rp/L',
               current: settings.fuelProfile.fuelPricePerLiter,
-              prefsKey: 'fuelPricePerLiter',
+              onSave: (v) =>
+                  controller.setFuelProfileValue('fuelPricePerLiter', v),
+            ),
+          ),
+          const Divider(),
+          // --- driving: speed warning + service reminders ---
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Text(
+              l10n.drivingSectionTitle,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.speed),
+            title: Text(l10n.settingsSpeedLimit),
+            subtitle: Text(
+              settings.speedLimitKmh == null
+                  ? l10n.settingsSpeedLimitOff
+                  : '${_trimNumber(settings.speedLimitKmh!)} km/j',
+            ),
+            trailing: const Icon(Icons.edit_outlined, size: 20),
+            onTap: () => _editNumber(
+              context,
+              title: l10n.settingsSpeedLimit,
+              suffix: 'km/j',
+              current: settings.speedLimitKmh,
+              onSave: controller.setSpeedLimit,
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.build_outlined),
+            title: Text(l10n.serviceIntervalMotorcycle),
+            subtitle: Text(
+              settings.serviceProfile.intervalKmMotorcycle == null
+                  ? l10n.serviceIntervalOff
+                  : l10n.serviceIntervalEvery(
+                      _trimNumber(
+                        settings.serviceProfile.intervalKmMotorcycle!,
+                      ),
+                    ),
+            ),
+            trailing: const Icon(Icons.edit_outlined, size: 20),
+            onTap: () => _editNumber(
+              context,
+              title: l10n.serviceIntervalMotorcycle,
+              suffix: 'km',
+              current: settings.serviceProfile.intervalKmMotorcycle,
+              onSave: (v) =>
+                  controller.setServiceInterval(VehicleType.motorcycle, v),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.car_repair_outlined),
+            title: Text(l10n.serviceIntervalCar),
+            subtitle: Text(
+              settings.serviceProfile.intervalKmCar == null
+                  ? l10n.serviceIntervalOff
+                  : l10n.serviceIntervalEvery(
+                      _trimNumber(settings.serviceProfile.intervalKmCar!),
+                    ),
+            ),
+            trailing: const Icon(Icons.edit_outlined, size: 20),
+            onTap: () => _editNumber(
+              context,
+              title: l10n.serviceIntervalCar,
+              suffix: 'km',
+              current: settings.serviceProfile.intervalKmCar,
+              onSave: (v) => controller.setServiceInterval(VehicleType.car, v),
             ),
           ),
           const Divider(),

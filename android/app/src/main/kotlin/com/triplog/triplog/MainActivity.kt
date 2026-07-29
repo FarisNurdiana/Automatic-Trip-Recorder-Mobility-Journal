@@ -10,6 +10,9 @@ import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionRequest
 import com.google.android.gms.location.DetectedActivity
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -17,8 +20,26 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
 
+    companion object {
+        const val EXTRA_ACTION = "ruteku_action"
+
+        /** Action delivered by the Quick Settings tile, consumed by Dart. */
+        @JvmStatic
+        var pendingAction: String? = null
+    }
+
     private var transitionPendingIntent: PendingIntent? = null
     private var samplingPendingIntent: PendingIntent? = null
+
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        intent?.getStringExtra(EXTRA_ACTION)?.let { pendingAction = it }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intent.getStringExtra(EXTRA_ACTION)?.let { pendingAction = it }
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -68,6 +89,47 @@ class MainActivity : FlutterActivity() {
                         lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                             lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
                     )
+                }
+                // One-shot fix for features that need "where am I now"
+                // without starting the foreground tracking service.
+                "currentPosition" -> {
+                    try {
+                        LocationServices.getFusedLocationProviderClient(this)
+                            .getCurrentLocation(
+                                Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+                                CancellationTokenSource().token,
+                            )
+                            .addOnSuccessListener { location ->
+                                if (location == null) {
+                                    result.success(null)
+                                } else {
+                                    result.success(
+                                        mapOf(
+                                            "latitude" to location.latitude,
+                                            "longitude" to location.longitude,
+                                            "accuracy" to location.accuracy.toDouble(),
+                                            "timestamp" to location.time,
+                                        ),
+                                    )
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                result.error("UNAVAILABLE", e.message, null)
+                            }
+                    } catch (e: SecurityException) {
+                        result.error("PERMISSION_DENIED", e.message, null)
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        }
+
+        // ---- quick-actions (Quick Settings tile, shortcuts) ----
+        MethodChannel(messenger, "triplog/shortcuts").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "consumePendingAction" -> {
+                    result.success(pendingAction)
+                    pendingAction = null
                 }
                 else -> result.notImplemented()
             }

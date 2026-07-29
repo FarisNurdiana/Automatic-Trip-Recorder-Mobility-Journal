@@ -348,6 +348,32 @@
   "settingsKeepScreenOn": "Keep screen on while recording",
   "settingsKeepScreenOnDesc": "Useful with a phone holder. Slightly increases battery use.",
   "statsTitle": "Recap",
+  "drivingSectionTitle": "Driving",
+  "settingsSpeedLimit": "Speed limit warning",
+  "settingsSpeedLimitOff": "Off — tap to set",
+  "serviceIntervalMotorcycle": "Motorcycle service interval",
+  "serviceIntervalCar": "Car service interval",
+  "serviceIntervalOff": "Off — tap to set",
+  "serviceIntervalEvery": "Every {km} km",
+  "@serviceIntervalEvery": {
+    "placeholders": {
+      "km": {"type": "String"}
+    }
+  },
+  "serviceDueTitle": "Time to service your {vehicle}",
+  "@serviceDueTitle": {
+    "placeholders": {
+      "vehicle": {"type": "String"}
+    }
+  },
+  "serviceDueBody": "About {km} km recorded since the last service.",
+  "@serviceDueBody": {
+    "placeholders": {
+      "km": {"type": "int"}
+    }
+  },
+  "serviceMarkDone": "Serviced",
+  "serviceMarked": "Recorded — the reminder now counts from today.",
   "statsExportCsv": "Export CSV (all trips)",
   "statsExportCsvDesc": "The CSV opens in Excel/Google Sheets for claims or bookkeeping.",
   "fuelSectionTitle": "Fuel consumption",

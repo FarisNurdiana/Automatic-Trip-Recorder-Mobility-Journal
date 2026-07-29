@@ -15,8 +15,11 @@ class SimulatedLocationTrackingService implements LocationTrackingService {
   String? lastNotificationBody;
   bool lastNotificationQuestion = false;
 
+  RecordedLocation? _lastEmitted;
+
   /// Push a fix into the stream (used by simulator playback and tests).
   void emit(RecordedLocation location) {
+    _lastEmitted = location;
     if (started) _locations.add(location);
   }
 
@@ -59,6 +62,9 @@ class SimulatedLocationTrackingService implements LocationTrackingService {
   Future<void> stop() async {
     started = false;
   }
+
+  @override
+  Future<RecordedLocation?> currentPosition() async => _lastEmitted;
 
   void dispose() {
     _locations.close();

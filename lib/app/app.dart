@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -108,9 +109,64 @@ class TripLogApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       routerConfig: router,
-      builder: (context, child) => _ConnectivityWrapper(child: child),
+      builder: (context, child) =>
+          _QuickActionHandler(child: _ConnectivityWrapper(child: child)),
     );
   }
+}
+
+/// Consumes pending quick actions (Quick Settings tile) from the platform:
+/// checked at startup and every time the app returns to the foreground.
+class _QuickActionHandler extends ConsumerStatefulWidget {
+  const _QuickActionHandler({required this.child});
+
+  final Widget child;
+
+  @override
+  ConsumerState<_QuickActionHandler> createState() =>
+      _QuickActionHandlerState();
+}
+
+class _QuickActionHandlerState extends ConsumerState<_QuickActionHandler>
+    with WidgetsBindingObserver {
+  static const _channel = MethodChannel('triplog/shortcuts');
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Give the router/auth a moment to settle before acting on a cold start.
+    Future<void>.delayed(const Duration(milliseconds: 600), _consume);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _consume();
+  }
+
+  Future<void> _consume() async {
+    String? action;
+    try {
+      action = await _channel.invokeMethod<String>('consumePendingAction');
+    } catch (_) {
+      return; // Not supported on this platform.
+    }
+    if (action != 'start_trip' || !mounted) return;
+    final recording = ref.read(tripRecordingControllerProvider);
+    if (!recording.machineState.isActiveTrip) {
+      await ref.read(tripRecordingControllerProvider.notifier).startManual();
+    }
+    if (mounted) ref.read(routerProvider).push('/current-trip');
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// Shows a persistent offline banner above every page.
