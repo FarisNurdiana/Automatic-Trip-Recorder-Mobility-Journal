@@ -872,6 +872,28 @@ class AppLocalizationsId extends AppLocalizations {
   String get sharePoster => 'Poster rute (PNG)';
 
   @override
+  String get sharePhotoOverlay => 'Foto + statistik';
+
+  @override
+  String get sharePhotoOverlayDesc =>
+      'Pilih foto dari galeri, statistik & rute ditimpakan di atasnya';
+
+  @override
+  String get shareSticker => 'Stiker statistik (PNG transparan)';
+
+  @override
+  String get shareStickerDesc =>
+      'Tempelkan ke video/story lewat CapCut, Instagram, dll.';
+
+  @override
+  String get historyThisMonth => 'Bulan ini';
+
+  @override
+  String historyTripsCount(int count) {
+    return '$count perjalanan';
+  }
+
+  @override
   String get poiButton => 'Cari SPBU & bengkel terdekat';
 
   @override

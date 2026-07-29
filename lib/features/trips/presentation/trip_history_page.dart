@@ -34,14 +34,98 @@ class TripHistoryPage extends ConsumerWidget {
               icon: Icons.route_outlined,
             );
           }
+          final now = DateTime.now();
+          final thisMonth = finished
+              .where(
+                (t) =>
+                    t.startedAt.toLocal().year == now.year &&
+                    t.startedAt.toLocal().month == now.month,
+              )
+              .toList();
+          final monthMeters = thisMonth.fold<double>(
+            0,
+            (sum, t) => sum + t.distanceMeters,
+          );
           return ListView.separated(
             padding: const EdgeInsets.all(16),
-            itemCount: finished.length,
+            itemCount: finished.length + 1,
             separatorBuilder: (_, _) => const SizedBox(height: 10),
-            itemBuilder: (context, index) =>
-                _TripCard(trip: finished[index], locale: locale),
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return _MonthSummaryCard(
+                  distanceLabel: Formatters.distanceKm(
+                    monthMeters,
+                    locale: locale,
+                  ),
+                  tripsLabel: l10n.historyTripsCount(thisMonth.length),
+                );
+              }
+              return _TripCard(trip: finished[index - 1], locale: locale);
+            },
           );
         },
+      ),
+    );
+  }
+}
+
+/// Gradient banner summarizing the current month.
+class _MonthSummaryCard extends StatelessWidget {
+  const _MonthSummaryCard({
+    required this.distanceLabel,
+    required this.tripsLabel,
+  });
+
+  final String distanceLabel;
+  final String tripsLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            scheme.primary,
+            Color.lerp(scheme.primary, scheme.secondary, 0.55)!,
+          ],
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.calendar_month, color: Colors.white, size: 28),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.historyThisMonth,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$distanceLabel • $tripsLabel',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

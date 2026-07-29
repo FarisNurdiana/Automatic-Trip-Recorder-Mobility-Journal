@@ -869,6 +869,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sharePoster => 'Route poster (PNG)';
 
   @override
+  String get sharePhotoOverlay => 'Photo + stats';
+
+  @override
+  String get sharePhotoOverlayDesc =>
+      'Pick a photo from the gallery; stats & route are overlaid on it';
+
+  @override
+  String get shareSticker => 'Stats sticker (transparent PNG)';
+
+  @override
+  String get shareStickerDesc =>
+      'Paste onto videos/stories via CapCut, Instagram, etc.';
+
+  @override
+  String get historyThisMonth => 'This month';
+
+  @override
+  String historyTripsCount(int count) {
+    return '$count trips';
+  }
+
+  @override
   String get poiButton => 'Find nearby fuel & repair shops';
 
   @override

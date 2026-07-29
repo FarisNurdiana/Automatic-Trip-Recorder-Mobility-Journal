@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
@@ -256,7 +257,27 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
       final accuracyOk =
           location.horizontalAccuracy == null ||
           location.horizontalAccuracy! <= config.maxHorizontalAccuracyMeters;
-      if (accuracyOk) {
+      // Stationary jitter guard: at walking-or-slower speeds, a displacement
+      // smaller than the fix accuracy is GPS noise — storing it would draw
+      // zigzags at stops and inflate the distance.
+      var jitter = false;
+      if (accuracyOk && _lastStoredPoint != null) {
+        final speedKmh = location.speedKmh ?? 0;
+        if (speedKmh < config.stationarySpeedCeilingKmh) {
+          final displacement = GeoUtils.haversineMeters(
+            _lastStoredPoint!.latitude,
+            _lastStoredPoint!.longitude,
+            location.latitude,
+            location.longitude,
+          );
+          final threshold = math.max(
+            location.horizontalAccuracy ?? 0,
+            config.minimumJitterDisplacementMeters,
+          );
+          jitter = displacement < threshold;
+        }
+      }
+      if (accuracyOk && !jitter) {
         try {
           await repository.appendPoint(trip.id, location);
         } catch (e) {

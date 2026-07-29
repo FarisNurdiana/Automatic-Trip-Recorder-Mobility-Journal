@@ -1706,6 +1706,42 @@ abstract class AppLocalizations {
   /// **'Poster rute (PNG)'**
   String get sharePoster;
 
+  /// No description provided for @sharePhotoOverlay.
+  ///
+  /// In id, this message translates to:
+  /// **'Foto + statistik'**
+  String get sharePhotoOverlay;
+
+  /// No description provided for @sharePhotoOverlayDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Pilih foto dari galeri, statistik & rute ditimpakan di atasnya'**
+  String get sharePhotoOverlayDesc;
+
+  /// No description provided for @shareSticker.
+  ///
+  /// In id, this message translates to:
+  /// **'Stiker statistik (PNG transparan)'**
+  String get shareSticker;
+
+  /// No description provided for @shareStickerDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Tempelkan ke video/story lewat CapCut, Instagram, dll.'**
+  String get shareStickerDesc;
+
+  /// No description provided for @historyThisMonth.
+  ///
+  /// In id, this message translates to:
+  /// **'Bulan ini'**
+  String get historyThisMonth;
+
+  /// No description provided for @historyTripsCount.
+  ///
+  /// In id, this message translates to:
+  /// **'{count} perjalanan'**
+  String historyTripsCount(int count);
+
   /// No description provided for @poiButton.
   ///
   /// In id, this message translates to:

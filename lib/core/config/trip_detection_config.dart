@@ -17,8 +17,10 @@ class TripDetectionConfig {
     this.possibleTripTimeout = const Duration(minutes: 5),
     // --- GPS acceptance ---
     this.maximumAcceptedAccuracyMeters = 40,
-    this.maxHorizontalAccuracyMeters = 50,
+    this.maxHorizontalAccuracyMeters = 35,
     this.maxRealisticSpeedKmh = 220,
+    this.stationarySpeedCeilingKmh = 4,
+    this.minimumJitterDisplacementMeters = 12,
     this.maxSpeedSpikeFactor = 3.0,
     this.gpsWarmupPoints = 2,
     // --- stop lifecycle ---
@@ -89,6 +91,15 @@ class TripDetectionConfig {
 
   /// Fixes worse than this are dropped from STORAGE/summary.
   final double maxHorizontalAccuracyMeters;
+
+  /// Below this speed a small displacement is treated as GPS jitter, not
+  /// movement — the fix is not stored, which keeps stationary periods from
+  /// drawing zigzags and inflating distance.
+  final double stationarySpeedCeilingKmh;
+
+  /// Minimum displacement (or the fix accuracy, whichever is larger) needed
+  /// to store a new point while at stationary speeds.
+  final double minimumJitterDisplacementMeters;
 
   /// Implied/reported speeds above this are impossible: treated as GPS jump.
   final double maxRealisticSpeedKmh;

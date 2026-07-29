@@ -168,13 +168,21 @@ class TripSharePoster extends StatelessWidget {
   );
 }
 
-/// Draws the route as a bold white polyline scaled to fit the canvas, with a
-/// start dot (white) and end dot (cyan). Longitude is corrected by the
-/// cosine of the mid latitude so shapes keep their real proportions.
+/// Draws the route as a bold polyline scaled to fit the canvas, optionally
+/// with a start dot (white) and end dot (cyan). Longitude is corrected by
+/// the cosine of the mid latitude so shapes keep their real proportions.
 class RoutePosterPainter extends CustomPainter {
-  const RoutePosterPainter(this.points);
+  const RoutePosterPainter(
+    this.points, {
+    this.strokeColor = Colors.white,
+    this.showEndDots = true,
+    this.shadowed = true,
+  });
 
   final List<LatLng> points;
+  final Color strokeColor;
+  final bool showEndDots;
+  final bool shadowed;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -216,17 +224,19 @@ class RoutePosterPainter extends CustomPainter {
       path.lineTo(o.dx, o.dy);
     }
 
-    // Soft shadow pass, then the white route line.
-    canvas.drawPath(
-      path,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 7
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round
-        ..color = Colors.black.withValues(alpha: 0.25)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
-    );
+    // Soft shadow pass, then the route line.
+    if (shadowed) {
+      canvas.drawPath(
+        path,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 7
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round
+          ..color = Colors.black.withValues(alpha: 0.25)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+      );
+    }
     canvas.drawPath(
       path,
       Paint()
@@ -234,15 +244,17 @@ class RoutePosterPainter extends CustomPainter {
         ..strokeWidth = 4.5
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round
-        ..color = Colors.white,
+        ..color = strokeColor,
     );
 
-    final start = project(points.first);
-    final end = project(points.last);
-    canvas.drawCircle(start, 7, Paint()..color = Colors.white);
-    canvas.drawCircle(start, 4, Paint()..color = TripSharePoster._bg);
-    canvas.drawCircle(end, 7, Paint()..color = Colors.white);
-    canvas.drawCircle(end, 4.5, Paint()..color = TripSharePoster._accent);
+    if (showEndDots) {
+      final start = project(points.first);
+      final end = project(points.last);
+      canvas.drawCircle(start, 7, Paint()..color = Colors.white);
+      canvas.drawCircle(start, 4, Paint()..color = TripSharePoster._bg);
+      canvas.drawCircle(end, 7, Paint()..color = Colors.white);
+      canvas.drawCircle(end, 4.5, Paint()..color = TripSharePoster._accent);
+    }
   }
 
   @override

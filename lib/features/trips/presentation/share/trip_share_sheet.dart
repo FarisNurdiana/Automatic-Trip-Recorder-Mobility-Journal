@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -22,8 +23,12 @@ import '../../domain/gpx_exporter.dart';
 import '../../domain/share_privacy.dart';
 import '../trip_detail_page.dart';
 import '../widgets/trip_map.dart';
-import 'trip_share_poster.dart';
 import '../widgets/vehicle_ui.dart';
+import 'trip_photo_overlay.dart';
+import 'trip_share_poster.dart';
+
+/// Which PNG layout to render and capture.
+enum ShareImageMode { card, poster, photo, sticker }
 
 /// Entry point: "Bagikan perjalanan" bottom sheet with PNG / GPX / GeoJSON /
 /// copy-summary options. PNG goes through the privacy dialog first.
@@ -65,7 +70,30 @@ Future<void> showTripShareSheet(
             title: Text(l10n.sharePoster),
             onTap: () {
               Navigator.pop(ctx);
-              _sharePng(context, data, user: user, poster: true);
+              _sharePng(context, data, user: user, mode: ShareImageMode.poster);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.add_a_photo_outlined),
+            title: Text(l10n.sharePhotoOverlay),
+            subtitle: Text(l10n.sharePhotoOverlayDesc),
+            onTap: () {
+              Navigator.pop(ctx);
+              _sharePng(context, data, user: user, mode: ShareImageMode.photo);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.sticky_note_2_outlined),
+            title: Text(l10n.shareSticker),
+            subtitle: Text(l10n.shareStickerDesc),
+            onTap: () {
+              Navigator.pop(ctx);
+              _sharePng(
+                context,
+                data,
+                user: user,
+                mode: ShareImageMode.sticker,
+              );
             },
           ),
           ListTile(
@@ -192,8 +220,20 @@ Future<void> _sharePng(
   BuildContext context,
   TripDetailData data, {
   AppUser? user,
-  bool poster = false,
+  ShareImageMode mode = ShareImageMode.card,
 }) async {
+  // Photo overlay needs the user's photo first; cancelling the picker
+  // cancels the whole export.
+  File? photo;
+  if (mode == ShareImageMode.photo) {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 2160,
+    );
+    if (picked == null) return;
+    photo = File(picked.path);
+  }
+  if (!context.mounted) return;
   final options = await _askPrivacyOptions(context);
   if (options == null || !context.mounted) return;
   await Navigator.of(context).push(
@@ -202,7 +242,8 @@ Future<void> _sharePng(
       builder: (_) => _ShareCapturePage(
         data: data,
         options: options,
-        poster: poster,
+        mode: mode,
+        photo: photo,
         userName: options.showUserName ? user?.displayName : null,
       ),
     ),
@@ -298,15 +339,17 @@ class _ShareCapturePage extends ConsumerStatefulWidget {
   const _ShareCapturePage({
     required this.data,
     required this.options,
-    this.poster = false,
+    this.mode = ShareImageMode.card,
+    this.photo,
     this.userName,
   });
 
   final TripDetailData data;
   final SharePrivacyOptions options;
+  final ShareImageMode mode;
 
-  /// True renders the tile-free poster instead of the map card.
-  final bool poster;
+  /// User photo for [ShareImageMode.photo].
+  final File? photo;
   final String? userName;
 
   @override
@@ -328,12 +371,12 @@ class _ShareCapturePageState extends ConsumerState<_ShareCapturePage> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
-      // Give the map tiles time to load before the snapshot; the poster has
-      // no tiles so it only needs a frame to settle.
+      // Give the map tiles time to load before the snapshot; tile-free
+      // layouts only need a frame to settle.
       await Future<void>.delayed(
-        widget.poster
-            ? const Duration(milliseconds: 400)
-            : const Duration(milliseconds: 2500),
+        widget.mode == ShareImageMode.card
+            ? const Duration(milliseconds: 2500)
+            : const Duration(milliseconds: 400),
       );
       await WidgetsBinding.instance.endOfFrame;
       final boundary =
@@ -370,21 +413,30 @@ class _ShareCapturePageState extends ConsumerState<_ShareCapturePage> {
             child: SingleChildScrollView(
               child: RepaintBoundary(
                 key: _boundaryKey,
-                child: widget.poster
-                    ? TripSharePoster(
-                        data: widget.data,
-                        options: widget.options,
-                        points: _shareDisplayPoints(
-                          widget.data,
-                          widget.options,
-                        ),
-                        userName: widget.userName,
-                      )
-                    : TripShareCard(
-                        data: widget.data,
-                        options: widget.options,
-                        userName: widget.userName,
-                      ),
+                child: switch (widget.mode) {
+                  ShareImageMode.card => TripShareCard(
+                    data: widget.data,
+                    options: widget.options,
+                    userName: widget.userName,
+                  ),
+                  ShareImageMode.poster => TripSharePoster(
+                    data: widget.data,
+                    options: widget.options,
+                    points: _shareDisplayPoints(widget.data, widget.options),
+                    userName: widget.userName,
+                  ),
+                  ShareImageMode.photo => TripPhotoShareCard(
+                    photo: widget.photo!,
+                    data: widget.data,
+                    points: _shareDisplayPoints(widget.data, widget.options),
+                    showMaxSpeed: widget.options.showMaxSpeed,
+                  ),
+                  ShareImageMode.sticker => TripStickerCard(
+                    data: widget.data,
+                    points: _shareDisplayPoints(widget.data, widget.options),
+                    showMaxSpeed: widget.options.showMaxSpeed,
+                  ),
+                },
               ),
             ),
           ),

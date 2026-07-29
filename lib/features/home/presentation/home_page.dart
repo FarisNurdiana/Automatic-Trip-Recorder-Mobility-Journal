@@ -285,6 +285,7 @@ class _HeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         gradient: LinearGradient(
@@ -303,65 +304,90 @@ class _HeroCard extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Row(
-            children: [
-              if (isActive)
-                const _PulsingDot()
-              else
-                Icon(
-                  Icons.radar,
-                  size: 18,
-                  color: Colors.white.withValues(alpha: 0.9),
+          // Oversized brand watermark peeking from the corner.
+          Positioned(
+            right: -18,
+            bottom: -26,
+            child: Opacity(
+              opacity: 0.14,
+              child: ColorFiltered(
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcATop,
                 ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  statusLabel,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.2,
-                  ),
-                ),
+                child: const RutekuLogo(size: 140),
               ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.85),
-              fontSize: 13,
             ),
           ),
-          if (isActive) ...[
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                _HeroStat(icon: Icons.straighten, value: distance),
-                const SizedBox(width: 16),
-                _HeroStat(icon: Icons.schedule, value: duration),
-              ],
-            ),
-          ],
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: scheme.primary,
-              minimumSize: const Size.fromHeight(48),
-            ),
-            onPressed: onPressed,
-            icon: Icon(isActive ? Icons.navigation : Icons.play_arrow),
-            label: Text(buttonLabel),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: _heroContent(context, scheme),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _heroContent(BuildContext context, ColorScheme scheme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            if (isActive)
+              const _PulsingDot()
+            else
+              Icon(
+                Icons.radar,
+                size: 18,
+                color: Colors.white.withValues(alpha: 0.9),
+              ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                statusLabel,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.85),
+            fontSize: 13,
+          ),
+        ),
+        if (isActive) ...[
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              _HeroStat(icon: Icons.straighten, value: distance),
+              const SizedBox(width: 16),
+              _HeroStat(icon: Icons.schedule, value: duration),
+            ],
+          ),
+        ],
+        const SizedBox(height: 16),
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: scheme.primary,
+            minimumSize: const Size.fromHeight(48),
+          ),
+          onPressed: onPressed,
+          icon: Icon(isActive ? Icons.navigation : Icons.play_arrow),
+          label: Text(buttonLabel),
+        ),
+      ],
     );
   }
 }

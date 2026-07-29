@@ -317,6 +317,17 @@
   "homeQuickMenu": "Quick menu",
   "mapPlayAnimation": "Play trip animation",
   "sharePoster": "Route poster (PNG)",
+  "sharePhotoOverlay": "Photo + stats",
+  "sharePhotoOverlayDesc": "Pick a photo from the gallery; stats & route are overlaid on it",
+  "shareSticker": "Stats sticker (transparent PNG)",
+  "shareStickerDesc": "Paste onto videos/stories via CapCut, Instagram, etc.",
+  "historyThisMonth": "This month",
+  "historyTripsCount": "{count} trips",
+  "@historyTripsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "poiButton": "Find nearby fuel & repair shops",
   "poiSheetTitle": "Nearby fuel & repair shops",
   "poiDisclaimer": "OpenStreetMap data. Your position is sent to the Overpass server only when you tap the search button.",

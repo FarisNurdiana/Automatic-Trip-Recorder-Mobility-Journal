@@ -317,6 +317,17 @@
   "homeQuickMenu": "Menu cepat",
   "mapPlayAnimation": "Putar animasi perjalanan",
   "sharePoster": "Poster rute (PNG)",
+  "sharePhotoOverlay": "Foto + statistik",
+  "sharePhotoOverlayDesc": "Pilih foto dari galeri, statistik & rute ditimpakan di atasnya",
+  "shareSticker": "Stiker statistik (PNG transparan)",
+  "shareStickerDesc": "Tempelkan ke video/story lewat CapCut, Instagram, dll.",
+  "historyThisMonth": "Bulan ini",
+  "historyTripsCount": "{count} perjalanan",
+  "@historyTripsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "poiButton": "Cari SPBU & bengkel terdekat",
   "poiSheetTitle": "SPBU & bengkel terdekat",
   "poiDisclaimer": "Data OpenStreetMap. Posisi Anda dikirim ke server Overpass hanya saat menekan tombol pencarian.",
