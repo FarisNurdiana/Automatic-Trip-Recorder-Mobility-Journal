@@ -15,6 +15,12 @@ import '../../trips/presentation/widgets/vehicle_ui.dart';
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
+  static String _greeting(AppLocalizations l10n, String? displayName) {
+    final name = displayName?.trim();
+    if (name == null || name.isEmpty) return l10n.homeGreetingAnon;
+    return l10n.homeGreetingNamed(name.split(' ').first);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -52,6 +58,29 @@ class HomePage extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
           children: [
+            // --- greeting ---
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12, left: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _greeting(l10n, auth.user?.displayName),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    Formatters.date(DateTime.now(), locale: locale),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             _HeroCard(
               isActive: isActive,
               statusLabel: tripStateLabel(l10n, recording.machineState),

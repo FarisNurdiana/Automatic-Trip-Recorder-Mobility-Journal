@@ -30,6 +30,8 @@ class RecordingUiState {
     this.liveElapsed = Duration.zero,
     this.currentSpeedKmh,
     this.currentAccuracyMeters,
+    this.currentLatitude,
+    this.currentLongitude,
     this.lastActivity,
     this.finishedTripId,
     this.recoveredTrip = false,
@@ -47,6 +49,10 @@ class RecordingUiState {
   /// Last GPS horizontal accuracy — the UI shows it as a GPS quality
   /// indicator.
   final double? currentAccuracyMeters;
+
+  /// Last known position for the live map (null until the first fix).
+  final double? currentLatitude;
+  final double? currentLongitude;
   final DetectedActivity? lastActivity;
 
   /// Set right after a trip finishes, so the UI can navigate to the vehicle
@@ -73,6 +79,8 @@ class RecordingUiState {
     Duration? liveElapsed,
     double? currentSpeedKmh,
     double? currentAccuracyMeters,
+    double? currentLatitude,
+    double? currentLongitude,
     DetectedActivity? lastActivity,
     String? finishedTripId,
     bool clearFinishedTrip = false,
@@ -91,6 +99,8 @@ class RecordingUiState {
       currentSpeedKmh: currentSpeedKmh ?? this.currentSpeedKmh,
       currentAccuracyMeters:
           currentAccuracyMeters ?? this.currentAccuracyMeters,
+      currentLatitude: currentLatitude ?? this.currentLatitude,
+      currentLongitude: currentLongitude ?? this.currentLongitude,
       lastActivity: lastActivity ?? this.lastActivity,
       finishedTripId: clearFinishedTrip
           ? null
@@ -231,6 +241,8 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     state = state.copyWith(
       currentSpeedKmh: location.speedKmh,
       currentAccuracyMeters: location.horizontalAccuracy,
+      currentLatitude: location.latitude,
+      currentLongitude: location.longitude,
     );
     sensorService.updateSpeed(location.speed);
 

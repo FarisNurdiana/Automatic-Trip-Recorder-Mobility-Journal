@@ -7,6 +7,7 @@ import '../core/activity/activity_recognition_service.dart';
 import '../core/activity/method_channel_activity_service.dart';
 import '../core/config/env.dart';
 import '../core/location/location_tracking_service.dart';
+import '../core/poi/nearby_poi_service.dart';
 import '../core/location/method_channel_location_service.dart';
 import '../core/sensors/sensor_collection_service.dart';
 import '../core/sensors/sensors_plus_collection_service.dart';
@@ -94,6 +95,11 @@ final settingsControllerProvider =
 
 final permissionsServiceProvider = Provider<PermissionsService>(
   (ref) => PermissionsService(),
+);
+
+/// On-demand nearby fuel-station / repair-shop lookup (Overpass API).
+final nearbyPoiServiceProvider = Provider<OverpassPoiService>(
+  (ref) => OverpassPoiService(),
 );
 
 final permissionsSnapshotProvider = FutureProvider<PermissionsSnapshot>(

@@ -317,6 +317,23 @@
   "homeQuickMenu": "Menu cepat",
   "mapPlayAnimation": "Putar animasi perjalanan",
   "sharePoster": "Poster rute (PNG)",
+  "poiButton": "Cari SPBU & bengkel terdekat",
+  "poiSheetTitle": "SPBU & bengkel terdekat",
+  "poiDisclaimer": "Data OpenStreetMap. Posisi Anda dikirim ke server Overpass hanya saat menekan tombol pencarian.",
+  "poiFuel": "SPBU",
+  "poiWorkshop": "Bengkel",
+  "poiNone": "Tidak ada SPBU atau bengkel dalam radius 3 km.",
+  "poiError": "Gagal mencari lokasi sekitar. Periksa koneksi internet.",
+  "followPosition": "Ikuti posisi saya",
+  "liveMapWaitingFix": "Menunggu sinyal GPS... Peta akan muncul setelah posisi ditemukan.",
+  "liveMapIdleHint": "Mulai perjalanan untuk melihat posisi Anda secara realtime di peta.",
+  "homeGreetingNamed": "Halo, {name} 👋",
+  "@homeGreetingNamed": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "homeGreetingAnon": "Halo 👋",
   "shareTripHeading": "Perjalanan {date}",
   "@shareTripHeading": {
     "placeholders": {

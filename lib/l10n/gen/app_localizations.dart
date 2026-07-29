@@ -1706,6 +1706,78 @@ abstract class AppLocalizations {
   /// **'Poster rute (PNG)'**
   String get sharePoster;
 
+  /// No description provided for @poiButton.
+  ///
+  /// In id, this message translates to:
+  /// **'Cari SPBU & bengkel terdekat'**
+  String get poiButton;
+
+  /// No description provided for @poiSheetTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'SPBU & bengkel terdekat'**
+  String get poiSheetTitle;
+
+  /// No description provided for @poiDisclaimer.
+  ///
+  /// In id, this message translates to:
+  /// **'Data OpenStreetMap. Posisi Anda dikirim ke server Overpass hanya saat menekan tombol pencarian.'**
+  String get poiDisclaimer;
+
+  /// No description provided for @poiFuel.
+  ///
+  /// In id, this message translates to:
+  /// **'SPBU'**
+  String get poiFuel;
+
+  /// No description provided for @poiWorkshop.
+  ///
+  /// In id, this message translates to:
+  /// **'Bengkel'**
+  String get poiWorkshop;
+
+  /// No description provided for @poiNone.
+  ///
+  /// In id, this message translates to:
+  /// **'Tidak ada SPBU atau bengkel dalam radius 3 km.'**
+  String get poiNone;
+
+  /// No description provided for @poiError.
+  ///
+  /// In id, this message translates to:
+  /// **'Gagal mencari lokasi sekitar. Periksa koneksi internet.'**
+  String get poiError;
+
+  /// No description provided for @followPosition.
+  ///
+  /// In id, this message translates to:
+  /// **'Ikuti posisi saya'**
+  String get followPosition;
+
+  /// No description provided for @liveMapWaitingFix.
+  ///
+  /// In id, this message translates to:
+  /// **'Menunggu sinyal GPS... Peta akan muncul setelah posisi ditemukan.'**
+  String get liveMapWaitingFix;
+
+  /// No description provided for @liveMapIdleHint.
+  ///
+  /// In id, this message translates to:
+  /// **'Mulai perjalanan untuk melihat posisi Anda secara realtime di peta.'**
+  String get liveMapIdleHint;
+
+  /// No description provided for @homeGreetingNamed.
+  ///
+  /// In id, this message translates to:
+  /// **'Halo, {name} 👋'**
+  String homeGreetingNamed(String name);
+
+  /// No description provided for @homeGreetingAnon.
+  ///
+  /// In id, this message translates to:
+  /// **'Halo 👋'**
+  String get homeGreetingAnon;
+
   /// No description provided for @shareTripHeading.
   ///
   /// In id, this message translates to:

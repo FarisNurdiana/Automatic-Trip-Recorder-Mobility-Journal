@@ -869,6 +869,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sharePoster => 'Route poster (PNG)';
 
   @override
+  String get poiButton => 'Find nearby fuel & repair shops';
+
+  @override
+  String get poiSheetTitle => 'Nearby fuel & repair shops';
+
+  @override
+  String get poiDisclaimer =>
+      'OpenStreetMap data. Your position is sent to the Overpass server only when you tap the search button.';
+
+  @override
+  String get poiFuel => 'Fuel station';
+
+  @override
+  String get poiWorkshop => 'Repair shop';
+
+  @override
+  String get poiNone => 'No fuel stations or repair shops within 3 km.';
+
+  @override
+  String get poiError =>
+      'Could not fetch nearby places. Check your connection.';
+
+  @override
+  String get followPosition => 'Follow my position';
+
+  @override
+  String get liveMapWaitingFix =>
+      'Waiting for a GPS fix... The map appears once your position is found.';
+
+  @override
+  String get liveMapIdleHint =>
+      'Start a trip to see your position on the map in realtime.';
+
+  @override
+  String homeGreetingNamed(String name) {
+    return 'Hi, $name 👋';
+  }
+
+  @override
+  String get homeGreetingAnon => 'Hi 👋';
+
+  @override
   String shareTripHeading(String date) {
     return 'Trip on $date';
   }

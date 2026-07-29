@@ -317,6 +317,23 @@
   "homeQuickMenu": "Quick menu",
   "mapPlayAnimation": "Play trip animation",
   "sharePoster": "Route poster (PNG)",
+  "poiButton": "Find nearby fuel & repair shops",
+  "poiSheetTitle": "Nearby fuel & repair shops",
+  "poiDisclaimer": "OpenStreetMap data. Your position is sent to the Overpass server only when you tap the search button.",
+  "poiFuel": "Fuel station",
+  "poiWorkshop": "Repair shop",
+  "poiNone": "No fuel stations or repair shops within 3 km.",
+  "poiError": "Could not fetch nearby places. Check your connection.",
+  "followPosition": "Follow my position",
+  "liveMapWaitingFix": "Waiting for a GPS fix... The map appears once your position is found.",
+  "liveMapIdleHint": "Start a trip to see your position on the map in realtime.",
+  "homeGreetingNamed": "Hi, {name} 👋",
+  "@homeGreetingNamed": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "homeGreetingAnon": "Hi 👋",
   "shareTripHeading": "Trip on {date}",
   "@shareTripHeading": {
     "placeholders": {

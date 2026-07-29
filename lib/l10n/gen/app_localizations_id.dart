@@ -872,6 +872,48 @@ class AppLocalizationsId extends AppLocalizations {
   String get sharePoster => 'Poster rute (PNG)';
 
   @override
+  String get poiButton => 'Cari SPBU & bengkel terdekat';
+
+  @override
+  String get poiSheetTitle => 'SPBU & bengkel terdekat';
+
+  @override
+  String get poiDisclaimer =>
+      'Data OpenStreetMap. Posisi Anda dikirim ke server Overpass hanya saat menekan tombol pencarian.';
+
+  @override
+  String get poiFuel => 'SPBU';
+
+  @override
+  String get poiWorkshop => 'Bengkel';
+
+  @override
+  String get poiNone => 'Tidak ada SPBU atau bengkel dalam radius 3 km.';
+
+  @override
+  String get poiError =>
+      'Gagal mencari lokasi sekitar. Periksa koneksi internet.';
+
+  @override
+  String get followPosition => 'Ikuti posisi saya';
+
+  @override
+  String get liveMapWaitingFix =>
+      'Menunggu sinyal GPS... Peta akan muncul setelah posisi ditemukan.';
+
+  @override
+  String get liveMapIdleHint =>
+      'Mulai perjalanan untuk melihat posisi Anda secara realtime di peta.';
+
+  @override
+  String homeGreetingNamed(String name) {
+    return 'Halo, $name 👋';
+  }
+
+  @override
+  String get homeGreetingAnon => 'Halo 👋';
+
+  @override
   String shareTripHeading(String date) {
     return 'Perjalanan $date';
   }

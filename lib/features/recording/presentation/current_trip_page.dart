@@ -1,28 +1,164 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart' hide Path;
 
 import '../../../app/providers.dart';
 import '../../../core/constants/enums.dart';
+import '../../../core/poi/nearby_poi_service.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../application/trip_recording_controller.dart';
 import '../domain/trip_state_machine.dart';
 import 'state_labels.dart';
+import 'widgets/live_trip_map.dart';
 
-/// Live view of the ongoing trip: big speed readout, live stats and manual
-/// controls (pause / resume / finish / cancel).
-class CurrentTripPage extends ConsumerWidget {
+/// Route recorded so far for the active trip, refreshed every few seconds
+/// so the live map draws the polyline without hammering the database.
+final _activeTripPointsProvider = StreamProvider.autoDispose<List<LatLng>>((
+  ref,
+) async* {
+  final tripId = ref.watch(
+    tripRecordingControllerProvider.select((s) => s.activeTrip?.id),
+  );
+  if (tripId == null) {
+    yield const [];
+    return;
+  }
+  final repo = ref.watch(tripRepositoryProvider);
+  while (true) {
+    final points = await repo.pointsForTrip(tripId);
+    yield [for (final p in points) LatLng(p.latitude, p.longitude)];
+    await Future<void>.delayed(const Duration(seconds: 4));
+  }
+});
+
+/// Driving-assistant view of the ongoing trip: realtime map with the live
+/// position and route, speed overlay, nearby fuel/workshop lookup, live
+/// stats and manual controls (pause / resume / finish / cancel).
+class CurrentTripPage extends ConsumerStatefulWidget {
   const CurrentTripPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CurrentTripPage> createState() => _CurrentTripPageState();
+}
+
+class _CurrentTripPageState extends ConsumerState<CurrentTripPage> {
+  final _mapController = MapController();
+  var _follow = true;
+  var _loadingPois = false;
+  List<NearbyPoi> _pois = const [];
+
+  Future<void> _findPois() async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final state = ref.read(tripRecordingControllerProvider);
+    final lat = state.currentLatitude;
+    final lon = state.currentLongitude;
+    if (lat == null || lon == null || _loadingPois) return;
+    setState(() => _loadingPois = true);
+    try {
+      final pois = await ref
+          .read(nearbyPoiServiceProvider)
+          .findNearby(lat, lon);
+      if (!mounted) return;
+      setState(() => _pois = pois);
+      if (pois.isEmpty) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.poiNone)));
+      } else {
+        _showPoiSheet(pois);
+      }
+    } catch (_) {
+      if (mounted) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.poiError)));
+      }
+    } finally {
+      if (mounted) setState(() => _loadingPois = false);
+    }
+  }
+
+  void _focusPoi(NearbyPoi poi) {
+    setState(() => _follow = false);
+    _mapController.move(LatLng(poi.latitude, poi.longitude), 16.5);
+  }
+
+  void _showPoiSheet(List<NearbyPoi> pois) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).languageCode;
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+              child: Text(
+                l10n.poiSheetTitle,
+                style: Theme.of(ctx).textTheme.titleLarge,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                l10n.poiDisclaimer,
+                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: pois.length,
+                itemBuilder: (ctx, i) {
+                  final poi = pois[i];
+                  final fuel = poi.type == PoiType.fuel;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: fuel
+                          ? Colors.orange.shade700
+                          : Colors.teal.shade600,
+                      child: Icon(
+                        fuel ? Icons.local_gas_station : Icons.build,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                    title: Text(poi.name),
+                    subtitle: Text(
+                      '${fuel ? l10n.poiFuel : l10n.poiWorkshop} • '
+                      '${Formatters.distanceKm(poi.distanceMeters, locale: locale)}',
+                    ),
+                    trailing: const Icon(Icons.map_outlined),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _focusPoi(poi);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final state = ref.watch(tripRecordingControllerProvider);
     final controller = ref.read(tripRecordingControllerProvider.notifier);
+    final livePoints =
+        ref.watch(_activeTripPointsProvider).valueOrNull ?? const <LatLng>[];
 
     final statusLabel = tripStateLabel(l10n, state.machineState);
     final isRecording =
@@ -33,6 +169,9 @@ class CurrentTripPage extends ConsumerWidget {
         state.machineState != TripRecordingState.shortStop;
     final hasActive = state.machineState.isActiveTrip;
 
+    final current = (state.currentLatitude != null)
+        ? LatLng(state.currentLatitude!, state.currentLongitude!)
+        : null;
     final speed = state.currentSpeedKmh;
 
     return Scaffold(
@@ -48,7 +187,7 @@ class CurrentTripPage extends ConsumerWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -100,31 +239,100 @@ class CurrentTripPage extends ConsumerWidget {
               ],
               const SizedBox(height: 12),
 
-              // --- big speed readout ---
+              // --- live map (assistant view) or idle placeholder ---
               Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        speed == null ? '—' : speed.toStringAsFixed(0),
-                        style: theme.textTheme.displayLarge?.copyWith(
-                          fontSize: 88,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -2,
-                          color: hasActive
-                              ? scheme.primary
-                              : scheme.onSurfaceVariant,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: current == null
+                      ? _IdlePlaceholder(hasActive: hasActive)
+                      : Stack(
+                          children: [
+                            Positioned.fill(
+                              child: LiveTripMap(
+                                controller: _mapController,
+                                points: livePoints,
+                                current: current,
+                                pois: _pois,
+                                follow: _follow,
+                                onPoiTap: (poi) => _showPoiSheet(
+                                  _pois.isEmpty ? [poi] : _pois,
+                                ),
+                              ),
+                            ),
+                            // Speed overlay.
+                            Positioned(
+                              left: 12,
+                              top: 12,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: scheme.surface.withValues(alpha: 0.9),
+                                  borderRadius: BorderRadius.circular(14),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 6,
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      speed == null
+                                          ? '—'
+                                          : speed.toStringAsFixed(0),
+                                      style: theme.textTheme.headlineMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                            color: scheme.primary,
+                                          ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'km/j',
+                                      style: theme.textTheme.labelMedium
+                                          ?.copyWith(
+                                            color: scheme.onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // Map action buttons.
+                            Positioned(
+                              right: 12,
+                              bottom: 12,
+                              child: Column(
+                                children: [
+                                  _MapActionButton(
+                                    icon: Icons.local_gas_station,
+                                    tooltip: l10n.poiButton,
+                                    loading: _loadingPois,
+                                    onTap: _findPois,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _MapActionButton(
+                                    icon: _follow
+                                        ? Icons.my_location
+                                        : Icons.location_searching,
+                                    tooltip: l10n.followPosition,
+                                    active: _follow,
+                                    onTap: () =>
+                                        setState(() => _follow = !_follow),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      Text(
-                        'km/j',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -174,7 +382,7 @@ class CurrentTripPage extends ConsumerWidget {
                   onAnswer: controller.answerStopQuestion,
                 ),
               ],
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
 
               // --- controls ---
               if (!hasActive)
@@ -252,6 +460,90 @@ class CurrentTripPage extends ConsumerWidget {
     if (accuracy <= 15) return l10n.gpsGood;
     if (accuracy <= 40) return l10n.gpsFair;
     return l10n.gpsPoor;
+  }
+}
+
+/// Shown before the first GPS fix arrives.
+class _IdlePlaceholder extends StatelessWidget {
+  const _IdlePlaceholder({required this.hasActive});
+
+  final bool hasActive;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      color: scheme.surfaceContainerLow,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              hasActive ? Icons.gps_not_fixed : Icons.map_outlined,
+              size: 56,
+              color: scheme.outline,
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                hasActive ? l10n.liveMapWaitingFix : l10n.liveMapIdleHint,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MapActionButton extends StatelessWidget {
+  const _MapActionButton({
+    required this.icon,
+    required this.onTap,
+    this.tooltip,
+    this.active = false,
+    this.loading = false,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final String? tooltip;
+  final bool active;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final button = Material(
+      color: active ? scheme.primary : scheme.surface.withValues(alpha: 0.92),
+      shape: const CircleBorder(),
+      elevation: 3,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: loading ? null : onTap,
+        child: SizedBox(
+          width: 42,
+          height: 42,
+          child: loading
+              ? const Padding(
+                  padding: EdgeInsets.all(11),
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                )
+              : Icon(
+                  icon,
+                  size: 22,
+                  color: active ? scheme.onPrimary : scheme.onSurface,
+                ),
+        ),
+      ),
+    );
+    return tooltip == null ? button : Tooltip(message: tooltip!, child: button);
   }
 }
 
