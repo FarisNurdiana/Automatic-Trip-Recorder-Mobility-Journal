@@ -30,11 +30,20 @@ class NearbyPoi {
 /// when the user explicitly taps the lookup button — never automatically.
 /// The public instance is rate-limited, so lookups are on-demand and small.
 class OverpassPoiService {
-  OverpassPoiService({
-    this.endpoint = 'https://overpass-api.de/api/interpreter',
-  });
+  OverpassPoiService({List<String>? endpoints})
+    : endpoints =
+          endpoints ??
+          const [
+            'https://overpass-api.de/api/interpreter',
+            'https://overpass.kumi.systems/api/interpreter',
+            'https://overpass.private.coffee/api/interpreter',
+          ];
 
-  final String endpoint;
+  /// Public Overpass instances, tried in order — a single instance being
+  /// down or rate-limited must not kill the feature.
+  final List<String> endpoints;
+
+  static const _userAgent = 'Motivox/1.0 (mobility journal app)';
 
   Future<List<NearbyPoi>> findNearby(
     double latitude,
@@ -43,31 +52,66 @@ class OverpassPoiService {
     int limit = 40,
   }) async {
     final query =
-        '[out:json][timeout:10];'
+        '[out:json][timeout:25];'
         '(node["amenity"="fuel"](around:$radiusMeters,$latitude,$longitude);'
         'node["shop"~"car_repair|motorcycle_repair"]'
         '(around:$radiusMeters,$latitude,$longitude););'
-        'out center 60;';
+        'out center 80;';
 
+    Object? lastError;
+    for (final endpoint in endpoints) {
+      // Some networks/proxies mishandle chunked POSTs; try a plain POST with
+      // an explicit Content-Length first, then a GET on the same instance.
+      for (final useGet in [false, true]) {
+        try {
+          final json = await _fetch(endpoint, query, useGet: useGet);
+          return parse(json, latitude, longitude, limit: limit);
+        } catch (e) {
+          lastError = e;
+        }
+      }
+    }
+    throw Exception('all overpass endpoints failed: $lastError');
+  }
+
+  Future<Map<String, dynamic>> _fetch(
+    String endpoint,
+    String query, {
+    required bool useGet,
+  }) async {
     final client = HttpClient()
-      ..connectionTimeout = const Duration(seconds: 10);
+      ..connectionTimeout = const Duration(seconds: 12);
     try {
-      final request = await client.postUrl(Uri.parse(endpoint));
-      request.headers.contentType = ContentType(
-        'application',
-        'x-www-form-urlencoded',
-        charset: 'utf-8',
-      );
-      request.write('data=${Uri.encodeQueryComponent(query)}');
+      final HttpClientRequest request;
+      if (useGet) {
+        final uri = Uri.parse(
+          '$endpoint?data=${Uri.encodeQueryComponent(query)}',
+        );
+        request = await client.getUrl(uri);
+        request.headers.set(HttpHeaders.userAgentHeader, _userAgent);
+      } else {
+        request = await client.postUrl(Uri.parse(endpoint));
+        final body = utf8.encode('data=${Uri.encodeQueryComponent(query)}');
+        request.headers.set(HttpHeaders.userAgentHeader, _userAgent);
+        request.headers.contentType = ContentType(
+          'application',
+          'x-www-form-urlencoded',
+          charset: 'utf-8',
+        );
+        request.contentLength = body.length;
+        request.add(body);
+      }
       final response = await request.close().timeout(
-        const Duration(seconds: 15),
+        const Duration(seconds: 30),
       );
       if (response.statusCode != 200) {
         throw HttpException('overpass status ${response.statusCode}');
       }
-      final body = await response.transform(utf8.decoder).join();
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      return parse(json, latitude, longitude, limit: limit);
+      final body = await response
+          .transform(utf8.decoder)
+          .join()
+          .timeout(const Duration(seconds: 30));
+      return jsonDecode(body) as Map<String, dynamic>;
     } finally {
       client.close(force: true);
     }

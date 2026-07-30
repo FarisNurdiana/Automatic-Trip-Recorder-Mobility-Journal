@@ -45,20 +45,11 @@ class TripSharePoster extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Brand chip + wordmark.
+          // Brand mark + wordmark (mark shown as-is, no chip).
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 34,
-                height: 34,
-                padding: const EdgeInsets.all(5),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: const BrandLogo(size: 24),
-              ),
+              const BrandLogo(size: 34),
               const SizedBox(width: 10),
               const Text(
                 'MOTIVOX',

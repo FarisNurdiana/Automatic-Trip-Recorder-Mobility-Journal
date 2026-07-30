@@ -551,20 +551,10 @@ class TripShareCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Avatar + name + date, like a Strava activity header.
+                // Brand mark + name + date, like a Strava activity header.
                 Row(
                   children: [
-                    Container(
-                      width: 38,
-                      height: 38,
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFFE5E7EB)),
-                      ),
-                      child: const BrandLogo(size: 26),
-                    ),
+                    const BrandLogo(size: 34),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(

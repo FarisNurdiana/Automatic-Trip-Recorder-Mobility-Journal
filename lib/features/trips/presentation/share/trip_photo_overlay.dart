@@ -82,18 +82,9 @@ class TripStatsOverlay extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 24,
-              height: 24,
-              padding: const EdgeInsets.all(3.5),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Colors.black38, blurRadius: 6)],
-              ),
-              child: const BrandLogo(size: 17),
-            ),
-            const SizedBox(width: 7),
+            // The brand mark by itself — no chip behind it.
+            const BrandLogo(size: 30),
+            const SizedBox(width: 8),
             const Text(
               'MOTIVOX',
               style: TextStyle(
