@@ -37,7 +37,7 @@ class TripStatsPage extends ConsumerWidget {
           .replaceAll(':', '-')
           .split('.')
           .first;
-      final file = File(p.join(dir.path, 'ruteku_rekap_$stamp.csv'));
+      final file = File(p.join(dir.path, 'motivox_rekap_$stamp.csv'));
       await file.writeAsString('﻿$csv');
       await Share.shareXFiles([XFile(file.path, mimeType: 'text/csv')]);
     } catch (_) {

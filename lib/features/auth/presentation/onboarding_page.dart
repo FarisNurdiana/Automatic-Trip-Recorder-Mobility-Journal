@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/providers.dart';
 import '../../../l10n/gen/app_localizations.dart';
-import '../../../shared/widgets/ruteku_logo.dart';
+import '../../../shared/widgets/brand_logo.dart';
 
 /// Staged permission onboarding: every permission is explained before it is
 /// requested, one at a time — never all at once.
@@ -154,7 +154,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 class _IntroStep extends StatelessWidget {
   const _IntroStep({this.icon, required this.title, required this.description});
 
-  /// Material icon for the step; null shows the Ruteku logo instead.
+  /// Material icon for the step; null shows the Motivox logo instead.
   final IconData? icon;
   final String title;
   final String description;
@@ -168,7 +168,7 @@ class _IntroStep extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (icon == null)
-            const RutekuLogo(size: 96)
+            const BrandLogo(size: 96)
           else
             Icon(icon, size: 80, color: theme.colorScheme.primary),
           const SizedBox(height: 24),

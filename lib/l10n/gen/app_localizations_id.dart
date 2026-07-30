@@ -9,7 +9,7 @@ class AppLocalizationsId extends AppLocalizations {
   AppLocalizationsId([String locale = 'id']) : super(locale);
 
   @override
-  String get appTitle => 'Ruteku';
+  String get appTitle => 'Motivox';
 
   @override
   String get commonRetry => 'Coba lagi';
@@ -482,18 +482,18 @@ class AppLocalizationsId extends AppLocalizations {
   String get permOpenSettings => 'Buka pengaturan';
 
   @override
-  String get onboardingWelcomeTitle => 'Selamat datang di Ruteku';
+  String get onboardingWelcomeTitle => 'Selamat datang di Motivox';
 
   @override
   String get onboardingWelcomeDesc =>
-      'Catat perjalanan Anda secara otomatis. Ruteku mendeteksi saat Anda menggunakan kendaraan, merekam rute, dan membuat ringkasan perjalanan.';
+      'Catat perjalanan Anda secara otomatis. Motivox mendeteksi saat Anda menggunakan kendaraan, merekam rute, dan membuat ringkasan perjalanan.';
 
   @override
   String get onboardingPermissionsTitle => 'Izin yang dibutuhkan';
 
   @override
   String get onboardingPermissionsDesc =>
-      'Agar perekaman otomatis berfungsi, Ruteku membutuhkan beberapa izin. Setiap izin dijelaskan sebelum diminta.';
+      'Agar perekaman otomatis berfungsi, Motivox membutuhkan beberapa izin. Setiap izin dijelaskan sebelum diminta.';
 
   @override
   String get onboardingStart => 'Mulai';
@@ -685,7 +685,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get vehiclePredictionInfo =>
-      'Prediksi Ruteku berdasarkan pola perjalanan.';
+      'Prediksi Motivox berdasarkan pola perjalanan.';
 
   @override
   String vehicleConfidenceLabel(String percent) {
@@ -910,7 +910,23 @@ class AppLocalizationsId extends AppLocalizations {
   String get poiWorkshop => 'Bengkel';
 
   @override
-  String get poiNone => 'Tidak ada SPBU atau bengkel dalam radius 3 km.';
+  String get poiNone => 'Tidak ada SPBU atau bengkel dalam radius 5 km.';
+
+  @override
+  String get congestionLikely =>
+      'Kemungkinan macet — kecepatan rendah cukup lama';
+
+  @override
+  String get congestionLabel => 'Perkiraan macet';
+
+  @override
+  String get congestionNote =>
+      'Perkiraan dari pola kecepatan (merayap 3–15 km/j), bukan data lalu lintas resmi.';
+
+  @override
+  String tripFromTo(String from, String to) {
+    return '$from → $to';
+  }
 
   @override
   String get poiError =>
@@ -997,7 +1013,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get fuelSectionDesc =>
-      'Masukkan konsumsi khas kendaraanmu (mis. 1 liter untuk 40 km berarti 40 km/L). Ruteku memakai angka ini untuk memperkirakan BBM dan biaya tiap perjalanan dari jarak tempuh GPS.';
+      'Masukkan konsumsi khas kendaraanmu (mis. 1 liter untuk 40 km berarti 40 km/L). Motivox memakai angka ini untuk memperkirakan BBM dan biaya tiap perjalanan dari jarak tempuh GPS.';
 
   @override
   String get fuelMotorcycleKmPerLiter => 'Konsumsi motor (km per liter)';

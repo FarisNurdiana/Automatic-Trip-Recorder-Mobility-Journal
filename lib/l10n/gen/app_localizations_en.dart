@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Ruteku';
+  String get appTitle => 'Motivox';
 
   @override
   String get commonRetry => 'Retry';
@@ -479,18 +479,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get permOpenSettings => 'Open settings';
 
   @override
-  String get onboardingWelcomeTitle => 'Welcome to Ruteku';
+  String get onboardingWelcomeTitle => 'Welcome to Motivox';
 
   @override
   String get onboardingWelcomeDesc =>
-      'Record your trips automatically. Ruteku detects when you are in a vehicle, records the route, and creates a trip summary.';
+      'Record your trips automatically. Motivox detects when you are in a vehicle, records the route, and creates a trip summary.';
 
   @override
   String get onboardingPermissionsTitle => 'Required permissions';
 
   @override
   String get onboardingPermissionsDesc =>
-      'For automatic recording to work, Ruteku needs a few permissions. Each one is explained before it is requested.';
+      'For automatic recording to work, Motivox needs a few permissions. Each one is explained before it is requested.';
 
   @override
   String get onboardingStart => 'Get started';
@@ -682,7 +682,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vehiclePredictionInfo =>
-      'Ruteku\'s prediction based on the trip pattern.';
+      'Motivox\'s prediction based on the trip pattern.';
 
   @override
   String vehicleConfidenceLabel(String percent) {
@@ -907,7 +907,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get poiWorkshop => 'Repair shop';
 
   @override
-  String get poiNone => 'No fuel stations or repair shops within 3 km.';
+  String get poiNone => 'No fuel stations or repair shops within 5 km.';
+
+  @override
+  String get congestionLikely => 'Likely traffic jam — sustained low speed';
+
+  @override
+  String get congestionLabel => 'Estimated congestion';
+
+  @override
+  String get congestionNote =>
+      'Estimated from the speed pattern (crawling 3–15 km/h), not official traffic data.';
+
+  @override
+  String tripFromTo(String from, String to) {
+    return '$from → $to';
+  }
 
   @override
   String get poiError =>
@@ -993,7 +1008,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fuelSectionDesc =>
-      'Enter your vehicle\'s typical consumption (e.g. 1 liter per 40 km means 40 km/L). Ruteku uses it to estimate fuel and cost per trip from the GPS distance.';
+      'Enter your vehicle\'s typical consumption (e.g. 1 liter per 40 km means 40 km/L). Motivox uses it to estimate fuel and cost per trip from the GPS distance.';
 
   @override
   String get fuelMotorcycleKmPerLiter =>

@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In id, this message translates to:
-  /// **'Ruteku'**
+  /// **'Motivox'**
   String get appTitle;
 
   /// No description provided for @commonRetry.
@@ -995,13 +995,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingWelcomeTitle.
   ///
   /// In id, this message translates to:
-  /// **'Selamat datang di Ruteku'**
+  /// **'Selamat datang di Motivox'**
   String get onboardingWelcomeTitle;
 
   /// No description provided for @onboardingWelcomeDesc.
   ///
   /// In id, this message translates to:
-  /// **'Catat perjalanan Anda secara otomatis. Ruteku mendeteksi saat Anda menggunakan kendaraan, merekam rute, dan membuat ringkasan perjalanan.'**
+  /// **'Catat perjalanan Anda secara otomatis. Motivox mendeteksi saat Anda menggunakan kendaraan, merekam rute, dan membuat ringkasan perjalanan.'**
   String get onboardingWelcomeDesc;
 
   /// No description provided for @onboardingPermissionsTitle.
@@ -1013,7 +1013,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingPermissionsDesc.
   ///
   /// In id, this message translates to:
-  /// **'Agar perekaman otomatis berfungsi, Ruteku membutuhkan beberapa izin. Setiap izin dijelaskan sebelum diminta.'**
+  /// **'Agar perekaman otomatis berfungsi, Motivox membutuhkan beberapa izin. Setiap izin dijelaskan sebelum diminta.'**
   String get onboardingPermissionsDesc;
 
   /// No description provided for @onboardingStart.
@@ -1367,7 +1367,7 @@ abstract class AppLocalizations {
   /// No description provided for @vehiclePredictionInfo.
   ///
   /// In id, this message translates to:
-  /// **'Prediksi Ruteku berdasarkan pola perjalanan.'**
+  /// **'Prediksi Motivox berdasarkan pola perjalanan.'**
   String get vehiclePredictionInfo;
 
   /// No description provided for @vehicleConfidenceLabel.
@@ -1775,8 +1775,32 @@ abstract class AppLocalizations {
   /// No description provided for @poiNone.
   ///
   /// In id, this message translates to:
-  /// **'Tidak ada SPBU atau bengkel dalam radius 3 km.'**
+  /// **'Tidak ada SPBU atau bengkel dalam radius 5 km.'**
   String get poiNone;
+
+  /// No description provided for @congestionLikely.
+  ///
+  /// In id, this message translates to:
+  /// **'Kemungkinan macet — kecepatan rendah cukup lama'**
+  String get congestionLikely;
+
+  /// No description provided for @congestionLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Perkiraan macet'**
+  String get congestionLabel;
+
+  /// No description provided for @congestionNote.
+  ///
+  /// In id, this message translates to:
+  /// **'Perkiraan dari pola kecepatan (merayap 3–15 km/j), bukan data lalu lintas resmi.'**
+  String get congestionNote;
+
+  /// No description provided for @tripFromTo.
+  ///
+  /// In id, this message translates to:
+  /// **'{from} → {to}'**
+  String tripFromTo(String from, String to);
 
   /// No description provided for @poiError.
   ///
@@ -1919,7 +1943,7 @@ abstract class AppLocalizations {
   /// No description provided for @fuelSectionDesc.
   ///
   /// In id, this message translates to:
-  /// **'Masukkan konsumsi khas kendaraanmu (mis. 1 liter untuk 40 km berarti 40 km/L). Ruteku memakai angka ini untuk memperkirakan BBM dan biaya tiap perjalanan dari jarak tempuh GPS.'**
+  /// **'Masukkan konsumsi khas kendaraanmu (mis. 1 liter untuk 40 km berarti 40 km/L). Motivox memakai angka ini untuk memperkirakan BBM dan biaya tiap perjalanan dari jarak tempuh GPS.'**
   String get fuelSectionDesc;
 
   /// No description provided for @fuelMotorcycleKmPerLiter.

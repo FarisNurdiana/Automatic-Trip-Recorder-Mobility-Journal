@@ -1,6 +1,6 @@
 {
   "@@locale": "id",
-  "appTitle": "Ruteku",
+  "appTitle": "Motivox",
   "commonRetry": "Coba lagi",
   "commonCancel": "Batal",
   "commonSave": "Simpan",
@@ -163,10 +163,10 @@
   "permInactive": "Tidak aktif",
   "permRequest": "Minta izin",
   "permOpenSettings": "Buka pengaturan",
-  "onboardingWelcomeTitle": "Selamat datang di Ruteku",
-  "onboardingWelcomeDesc": "Catat perjalanan Anda secara otomatis. Ruteku mendeteksi saat Anda menggunakan kendaraan, merekam rute, dan membuat ringkasan perjalanan.",
+  "onboardingWelcomeTitle": "Selamat datang di Motivox",
+  "onboardingWelcomeDesc": "Catat perjalanan Anda secara otomatis. Motivox mendeteksi saat Anda menggunakan kendaraan, merekam rute, dan membuat ringkasan perjalanan.",
   "onboardingPermissionsTitle": "Izin yang dibutuhkan",
-  "onboardingPermissionsDesc": "Agar perekaman otomatis berfungsi, Ruteku membutuhkan beberapa izin. Setiap izin dijelaskan sebelum diminta.",
+  "onboardingPermissionsDesc": "Agar perekaman otomatis berfungsi, Motivox membutuhkan beberapa izin. Setiap izin dijelaskan sebelum diminta.",
   "onboardingStart": "Mulai",
   "errorPermissionDenied": "Izin ditolak. Beberapa fitur tidak akan berfungsi.",
   "errorGpsDisabled": "GPS tidak aktif. Aktifkan layanan lokasi untuk merekam perjalanan.",
@@ -239,7 +239,7 @@
       }
     }
   },
-  "vehiclePredictionInfo": "Prediksi Ruteku berdasarkan pola perjalanan.",
+  "vehiclePredictionInfo": "Prediksi Motivox berdasarkan pola perjalanan.",
   "vehicleConfidenceLabel": "Keyakinan: {percent}%",
   "@vehicleConfidenceLabel": {
     "placeholders": {
@@ -333,7 +333,17 @@
   "poiDisclaimer": "Data OpenStreetMap. Posisi Anda dikirim ke server Overpass hanya saat menekan tombol pencarian.",
   "poiFuel": "SPBU",
   "poiWorkshop": "Bengkel",
-  "poiNone": "Tidak ada SPBU atau bengkel dalam radius 3 km.",
+  "poiNone": "Tidak ada SPBU atau bengkel dalam radius 5 km.",
+  "congestionLikely": "Kemungkinan macet — kecepatan rendah cukup lama",
+  "congestionLabel": "Perkiraan macet",
+  "congestionNote": "Perkiraan dari pola kecepatan (merayap 3–15 km/j), bukan data lalu lintas resmi.",
+  "tripFromTo": "{from} → {to}",
+  "@tripFromTo": {
+    "placeholders": {
+      "from": {"type": "String"},
+      "to": {"type": "String"}
+    }
+  },
   "poiError": "Gagal mencari lokasi sekitar. Periksa koneksi internet.",
   "followPosition": "Ikuti posisi saya",
   "liveMapWaitingFix": "Menunggu sinyal GPS... Peta akan muncul setelah posisi ditemukan.",
@@ -377,7 +387,7 @@
   "statsExportCsv": "Ekspor CSV (semua perjalanan)",
   "statsExportCsvDesc": "File CSV bisa dibuka di Excel/Google Sheets untuk klaim atau pembukuan.",
   "fuelSectionTitle": "Konsumsi BBM",
-  "fuelSectionDesc": "Masukkan konsumsi khas kendaraanmu (mis. 1 liter untuk 40 km berarti 40 km/L). Ruteku memakai angka ini untuk memperkirakan BBM dan biaya tiap perjalanan dari jarak tempuh GPS.",
+  "fuelSectionDesc": "Masukkan konsumsi khas kendaraanmu (mis. 1 liter untuk 40 km berarti 40 km/L). Motivox memakai angka ini untuk memperkirakan BBM dan biaya tiap perjalanan dari jarak tempuh GPS.",
   "fuelMotorcycleKmPerLiter": "Konsumsi motor (km per liter)",
   "fuelCarKmPerLiter": "Konsumsi mobil (km per liter)",
   "fuelPricePerLiter": "Harga BBM per liter",

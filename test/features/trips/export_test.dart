@@ -14,7 +14,7 @@ void main() {
       intervalSeconds: 10,
     );
     final geojson = const GeoJsonExporter().build(
-      name: 'Ruteku test',
+      name: 'Motivox test',
       points: track,
       properties: {'distance_meters': 1234.5},
     );

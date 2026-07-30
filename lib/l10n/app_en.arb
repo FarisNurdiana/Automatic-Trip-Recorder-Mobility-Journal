@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "Ruteku",
+  "appTitle": "Motivox",
   "commonRetry": "Retry",
   "commonCancel": "Cancel",
   "commonSave": "Save",
@@ -163,10 +163,10 @@
   "permInactive": "Inactive",
   "permRequest": "Request permission",
   "permOpenSettings": "Open settings",
-  "onboardingWelcomeTitle": "Welcome to Ruteku",
-  "onboardingWelcomeDesc": "Record your trips automatically. Ruteku detects when you are in a vehicle, records the route, and creates a trip summary.",
+  "onboardingWelcomeTitle": "Welcome to Motivox",
+  "onboardingWelcomeDesc": "Record your trips automatically. Motivox detects when you are in a vehicle, records the route, and creates a trip summary.",
   "onboardingPermissionsTitle": "Required permissions",
-  "onboardingPermissionsDesc": "For automatic recording to work, Ruteku needs a few permissions. Each one is explained before it is requested.",
+  "onboardingPermissionsDesc": "For automatic recording to work, Motivox needs a few permissions. Each one is explained before it is requested.",
   "onboardingStart": "Get started",
   "errorPermissionDenied": "Permission denied. Some features will not work.",
   "errorGpsDisabled": "GPS is off. Enable location services to record trips.",
@@ -239,7 +239,7 @@
       }
     }
   },
-  "vehiclePredictionInfo": "Ruteku's prediction based on the trip pattern.",
+  "vehiclePredictionInfo": "Motivox's prediction based on the trip pattern.",
   "vehicleConfidenceLabel": "Confidence: {percent}%",
   "@vehicleConfidenceLabel": {
     "placeholders": {
@@ -333,7 +333,17 @@
   "poiDisclaimer": "OpenStreetMap data. Your position is sent to the Overpass server only when you tap the search button.",
   "poiFuel": "Fuel station",
   "poiWorkshop": "Repair shop",
-  "poiNone": "No fuel stations or repair shops within 3 km.",
+  "poiNone": "No fuel stations or repair shops within 5 km.",
+  "congestionLikely": "Likely traffic jam — sustained low speed",
+  "congestionLabel": "Estimated congestion",
+  "congestionNote": "Estimated from the speed pattern (crawling 3–15 km/h), not official traffic data.",
+  "tripFromTo": "{from} → {to}",
+  "@tripFromTo": {
+    "placeholders": {
+      "from": {"type": "String"},
+      "to": {"type": "String"}
+    }
+  },
   "poiError": "Could not fetch nearby places. Check your connection.",
   "followPosition": "Follow my position",
   "liveMapWaitingFix": "Waiting for a GPS fix... The map appears once your position is found.",
@@ -377,7 +387,7 @@
   "statsExportCsv": "Export CSV (all trips)",
   "statsExportCsvDesc": "The CSV opens in Excel/Google Sheets for claims or bookkeeping.",
   "fuelSectionTitle": "Fuel consumption",
-  "fuelSectionDesc": "Enter your vehicle's typical consumption (e.g. 1 liter per 40 km means 40 km/L). Ruteku uses it to estimate fuel and cost per trip from the GPS distance.",
+  "fuelSectionDesc": "Enter your vehicle's typical consumption (e.g. 1 liter per 40 km means 40 km/L). Motivox uses it to estimate fuel and cost per trip from the GPS distance.",
   "fuelMotorcycleKmPerLiter": "Motorcycle consumption (km per liter)",
   "fuelCarKmPerLiter": "Car consumption (km per liter)",
   "fuelPricePerLiter": "Fuel price per liter",

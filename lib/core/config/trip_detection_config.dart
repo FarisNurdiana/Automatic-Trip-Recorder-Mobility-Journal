@@ -17,10 +17,11 @@ class TripDetectionConfig {
     this.possibleTripTimeout = const Duration(minutes: 5),
     // --- GPS acceptance ---
     this.maximumAcceptedAccuracyMeters = 40,
-    this.maxHorizontalAccuracyMeters = 35,
+    this.maxHorizontalAccuracyMeters = 60,
     this.maxRealisticSpeedKmh = 220,
     this.stationarySpeedCeilingKmh = 4,
     this.minimumJitterDisplacementMeters = 12,
+    this.maximumJitterDisplacementMeters = 30,
     this.maxSpeedSpikeFactor = 3.0,
     this.gpsWarmupPoints = 2,
     // --- stop lifecycle ---
@@ -100,6 +101,10 @@ class TripDetectionConfig {
   /// Minimum displacement (or the fix accuracy, whichever is larger) needed
   /// to store a new point while at stationary speeds.
   final double minimumJitterDisplacementMeters;
+
+  /// Upper cap on the jitter threshold so poor-accuracy (cellular) fixes can
+  /// never suppress real slow movement, e.g. creeping through traffic.
+  final double maximumJitterDisplacementMeters;
 
   /// Implied/reported speeds above this are impossible: treated as GPS jump.
   final double maxRealisticSpeedKmh;

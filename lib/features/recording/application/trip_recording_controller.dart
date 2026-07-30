@@ -260,19 +260,36 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
       // Stationary jitter guard: at walking-or-slower speeds, a displacement
       // smaller than the fix accuracy is GPS noise — storing it would draw
       // zigzags at stops and inflate the distance.
+      //
+      // Cellular/network fixes often report NO speed at all; treating that
+      // as "stationary" once silently discarded whole trips, so when speed
+      // is unknown the implied speed (displacement over time) decides, and
+      // the noise threshold is capped so poor accuracy can never swallow
+      // real slow movement (creeping through traffic).
       var jitter = false;
       if (accuracyOk && _lastStoredPoint != null) {
-        final speedKmh = location.speedKmh ?? 0;
+        final displacement = GeoUtils.haversineMeters(
+          _lastStoredPoint!.latitude,
+          _lastStoredPoint!.longitude,
+          location.latitude,
+          location.longitude,
+        );
+        final dtSeconds =
+            location.recordedAt
+                .difference(_lastStoredPoint!.recordedAt)
+                .inMilliseconds /
+            1000.0;
+        final impliedKmh = dtSeconds > 0
+            ? GeoUtils.msToKmh(displacement / dtSeconds)
+            : double.infinity;
+        final speedKmh = location.speedKmh ?? impliedKmh;
         if (speedKmh < config.stationarySpeedCeilingKmh) {
-          final displacement = GeoUtils.haversineMeters(
-            _lastStoredPoint!.latitude,
-            _lastStoredPoint!.longitude,
-            location.latitude,
-            location.longitude,
-          );
-          final threshold = math.max(
-            location.horizontalAccuracy ?? 0,
-            config.minimumJitterDisplacementMeters,
+          final threshold = math.min(
+            math.max(
+              location.horizontalAccuracy ?? 0,
+              config.minimumJitterDisplacementMeters,
+            ),
+            config.maximumJitterDisplacementMeters,
           );
           jitter = displacement < threshold;
         }

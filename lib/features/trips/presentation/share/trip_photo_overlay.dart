@@ -5,7 +5,7 @@ import 'package:latlong2/latlong.dart' hide Path;
 
 import '../../../../core/utils/formatters.dart';
 import '../../../../l10n/gen/app_localizations.dart';
-import '../../../../shared/widgets/ruteku_logo.dart';
+import '../../../../shared/widgets/brand_logo.dart';
 import '../trip_detail_page.dart';
 import 'trip_share_poster.dart' show RoutePosterPainter;
 
@@ -91,11 +91,11 @@ class TripStatsOverlay extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [BoxShadow(color: Colors.black38, blurRadius: 6)],
               ),
-              child: const RutekuLogo(size: 17),
+              child: const BrandLogo(size: 17),
             ),
             const SizedBox(width: 7),
             const Text(
-              'RUTEKU',
+              'MOTIVOX',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w800,

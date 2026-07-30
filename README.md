@@ -1,6 +1,6 @@
-# Ruteku — Catat Perjalanan Otomatis
+# Motivox — Know your route. Master your fuel.
 
-Ruteku (sebelumnya TripLog) adalah aplikasi Flutter (Android & iOS) yang
+Motivox (sebelumnya Ruteku/TripLog) adalah aplikasi Flutter (Android & iOS) yang
 mendeteksi ketika Anda sedang menggunakan kendaraan, merekam rute perjalanan
 dari titik A ke titik B di latar belakang, lalu menghasilkan ringkasan
 perjalanan secara otomatis — lengkap dengan peta rute, statistik, klasifikasi

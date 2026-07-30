@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/widgets/ruteku_logo.dart';
+import '../../../shared/widgets/brand_logo.dart';
 
 /// Simple splash shown while the router decides where to go.
 class SplashPage extends StatelessWidget {
@@ -13,10 +13,10 @@ class SplashPage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const RutekuLogo(size: 96),
+            const BrandLogo(size: 96),
             const SizedBox(height: 16),
             Text(
-              'Ruteku',
+              'Motivox',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,

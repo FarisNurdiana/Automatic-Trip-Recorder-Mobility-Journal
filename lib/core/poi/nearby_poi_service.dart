@@ -39,8 +39,8 @@ class OverpassPoiService {
   Future<List<NearbyPoi>> findNearby(
     double latitude,
     double longitude, {
-    int radiusMeters = 3000,
-    int limit = 25,
+    int radiusMeters = 5000,
+    int limit = 40,
   }) async {
     final query =
         '[out:json][timeout:10];'

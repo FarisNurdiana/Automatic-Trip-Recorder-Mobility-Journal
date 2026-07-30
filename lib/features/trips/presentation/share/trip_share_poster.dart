@@ -5,7 +5,7 @@ import 'package:latlong2/latlong.dart' hide Path;
 
 import '../../../../core/utils/formatters.dart';
 import '../../../../l10n/gen/app_localizations.dart';
-import '../../../../shared/widgets/ruteku_logo.dart';
+import '../../../../shared/widgets/brand_logo.dart';
 import '../trip_detail_page.dart';
 import '../../domain/share_privacy.dart';
 
@@ -21,8 +21,8 @@ class TripSharePoster extends StatelessWidget {
     this.userName,
   });
 
-  static const _bg = Color(0xFF0D47A1);
-  static const _accent = Color(0xFF00B8D4);
+  static const _bg = Color(0xFF0A1F2E);
+  static const _accent = Color(0xFF00E5CC);
 
   final TripDetailData data;
   final SharePrivacyOptions options;
@@ -57,11 +57,11 @@ class TripSharePoster extends StatelessWidget {
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
-                child: const RutekuLogo(size: 24),
+                child: const BrandLogo(size: 24),
               ),
               const SizedBox(width: 10),
               const Text(
-                'RUTEKU',
+                'MOTIVOX',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
@@ -128,7 +128,7 @@ class TripSharePoster extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            'ruteku • catat perjalanan otomatis',
+            'motivox • know your route, master your fuel',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.6),

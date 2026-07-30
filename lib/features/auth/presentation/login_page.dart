@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/providers.dart';
 import '../../../l10n/gen/app_localizations.dart';
-import '../../../shared/widgets/ruteku_logo.dart';
+import '../../../shared/widgets/brand_logo.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -66,7 +66,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const RutekuLogo(size: 72),
+                    const BrandLogo(size: 72),
                     const SizedBox(height: 12),
                     Text(
                       l10n.appTitle,

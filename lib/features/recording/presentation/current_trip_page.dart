@@ -51,6 +51,27 @@ class _CurrentTripPageState extends ConsumerState<CurrentTripPage> {
   var _loadingPois = false;
   List<NearbyPoi> _pois = const [];
 
+  /// Rolling speed samples of the last ~2.5 minutes for the live
+  /// congestion hint.
+  final _speedSamples = <(DateTime, double)>[];
+
+  /// Sustained crawling (2–15 km/h for ≥2 minutes with some distance
+  /// covered) reads as a traffic jam. Rule-based hint, not traffic data.
+  bool _likelyCongested(double liveDistanceMeters) {
+    final now = DateTime.now();
+    _speedSamples.removeWhere(
+      (s) => now.difference(s.$1) > const Duration(seconds: 150),
+    );
+    final window = _speedSamples
+        .where((s) => now.difference(s.$1) <= const Duration(seconds: 120))
+        .toList();
+    if (window.length < 10 || liveDistanceMeters < 200) return false;
+    final speeds = window.map((s) => s.$2).toList();
+    final avg = speeds.reduce((a, b) => a + b) / speeds.length;
+    final max = speeds.reduce((a, b) => a > b ? a : b);
+    return avg >= 2 && avg <= 12 && max <= 15;
+  }
+
   Future<void> _findPois() async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
@@ -184,6 +205,7 @@ class _CurrentTripPageState extends ConsumerState<CurrentTripPage> {
     ref.listen(
       tripRecordingControllerProvider.select((s) => s.currentSpeedKmh),
       (previous, next) {
+        if (next != null) _speedSamples.add((DateTime.now(), next));
         final limit = ref.read(settingsControllerProvider).speedLimitKmh;
         if (limit == null || next == null) return;
         final wasOver = (previous ?? 0) > limit;
@@ -192,6 +214,7 @@ class _CurrentTripPageState extends ConsumerState<CurrentTripPage> {
         }
       },
     );
+    final congested = hasActive && _likelyCongested(state.liveDistanceMeters);
 
     return Scaffold(
       appBar: AppBar(
@@ -254,6 +277,40 @@ class _CurrentTripPageState extends ConsumerState<CurrentTripPage> {
                   l10n.recoveredTripMessage,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall,
+                ),
+              ],
+              if (congested) ...[
+                const SizedBox(height: 8),
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade800,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.traffic,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          l10n.congestionLikely,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
               const SizedBox(height: 12),

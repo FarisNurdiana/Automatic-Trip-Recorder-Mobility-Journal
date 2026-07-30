@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -14,6 +16,7 @@ import '../../../core/utils/fuel_estimator.dart';
 import '../../../core/utils/polyline_simplifier.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../shared/widgets/status_widgets.dart';
+import '../domain/congestion_estimator.dart';
 import '../domain/gps_point_filter.dart';
 import 'share/trip_share_sheet.dart';
 import 'widgets/trip_map.dart';
@@ -45,6 +48,10 @@ final tripDetailProvider = FutureProvider.family<TripDetailData?, String>((
   final repo = ref.watch(tripRepositoryProvider);
   final trip = await repo.getTrip(tripId);
   if (trip == null) return null;
+  if (trip.startAddress == null || trip.endAddress == null) {
+    // Backfill place labels in the background; visible on the next open.
+    unawaited(ref.read(tripAddressResolverProvider).ensure(trip));
+  }
   final raw = await repo.pointsForTrip(tripId);
   final filtered = GpsPointFilter().filter(raw);
   final display = PolylineSimplifier.simplify(
@@ -216,6 +223,8 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
       vehicleType: vehicle,
       profile: ref.watch(settingsControllerProvider).fuelProfile,
     );
+    // Crawling time (3–15 km/h): a rule-based congestion indication.
+    final congestion = const CongestionEstimator().estimate(data.rawPoints);
 
     return ListView(
       children: [
@@ -399,7 +408,45 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
                   ),
                 ),
               ],
+              if (congestion.inMinutes >= 2) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: StatTile(
+                        label: l10n.congestionLabel,
+                        icon: Icons.traffic_outlined,
+                        value: Formatters.duration(congestion, locale: locale),
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, left: 4),
+                  child: Text(
+                    l10n.congestionNote,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 12),
+              // Where the trip went: "area A → area B" once the reverse
+              // geocoder has filled the labels.
+              if (trip.startAddress != null && trip.endAddress != null) ...[
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.place_outlined),
+                    title: Text(
+                      l10n.tripFromTo(trip.startAddress!, trip.endAddress!),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
               Card(
                 child: ListTile(
                   leading: const Icon(Icons.schedule),

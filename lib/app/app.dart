@@ -95,7 +95,7 @@ class TripLogApp extends ConsumerWidget {
 
     return MaterialApp.router(
       scaffoldMessengerKey: _messengerKey,
-      title: 'Ruteku',
+      title: 'Motivox',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),

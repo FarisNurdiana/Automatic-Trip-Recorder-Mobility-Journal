@@ -16,7 +16,7 @@ import '../../../../core/constants/enums.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/utils/polyline_simplifier.dart';
 import '../../../../l10n/gen/app_localizations.dart';
-import '../../../../shared/widgets/ruteku_logo.dart';
+import '../../../../shared/widgets/brand_logo.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../domain/geojson_exporter.dart';
 import '../../domain/gpx_exporter.dart';
@@ -135,7 +135,7 @@ String _summaryText(BuildContext context, TripDetailData data) {
     trip.confirmedVehicleType ?? trip.detectedVehicleType,
   );
   return [
-    'Ruteku — ${Formatters.date(trip.startedAt, locale: locale)}',
+    'Motivox — ${Formatters.date(trip.startedAt, locale: locale)}',
     '${l10n.tripDistance}: ${Formatters.distanceKm(trip.distanceMeters, locale: locale)}',
     '${l10n.tripDuration}: ${Formatters.duration(Duration(seconds: trip.elapsedDurationSeconds), locale: locale)}',
     '${l10n.tripMovingTime}: ${Formatters.duration(Duration(seconds: trip.movingDurationSeconds), locale: locale)}',
@@ -161,12 +161,12 @@ Future<void> _shareGpx(BuildContext context, TripDetailData data) async {
   final summary = _summaryText(context, data);
   try {
     final gpx = const GpxExporter().build(
-      name: 'Ruteku ${_stamp(data.trip.startedAt)}',
+      name: 'Motivox ${_stamp(data.trip.startedAt)}',
       description: summary,
       points: data.rawPoints,
     );
     final file = await _writeTempFile(
-      'ruteku_${_stamp(data.trip.startedAt)}.gpx',
+      'motivox_${_stamp(data.trip.startedAt)}.gpx',
       gpx,
     );
     await Share.shareXFiles([
@@ -183,7 +183,7 @@ Future<void> _shareGeoJson(BuildContext context, TripDetailData data) async {
   final summary = _summaryText(context, data);
   try {
     final geojson = const GeoJsonExporter().build(
-      name: 'Ruteku ${_stamp(data.trip.startedAt)}',
+      name: 'Motivox ${_stamp(data.trip.startedAt)}',
       points: data.rawPoints,
       properties: {
         'distance_meters': data.trip.distanceMeters,
@@ -191,7 +191,7 @@ Future<void> _shareGeoJson(BuildContext context, TripDetailData data) async {
       },
     );
     final file = await _writeTempFile(
-      'ruteku_${_stamp(data.trip.startedAt)}.geojson',
+      'motivox_${_stamp(data.trip.startedAt)}.geojson',
       geojson,
     );
     await Share.shareXFiles([
@@ -388,7 +388,7 @@ class _ShareCapturePageState extends ConsumerState<_ShareCapturePage> {
       if (bytes == null) throw StateError('png encode failed');
       final dir = await getTemporaryDirectory();
       final file = File(
-        p.join(dir.path, 'ruteku_${_stamp(widget.data.trip.startedAt)}.png'),
+        p.join(dir.path, 'motivox_${_stamp(widget.data.trip.startedAt)}.png'),
       );
       await file.writeAsBytes(bytes.buffer.asUint8List());
       await Share.shareXFiles([XFile(file.path, mimeType: 'image/png')]);
@@ -563,7 +563,7 @@ class TripShareCard extends StatelessWidget {
                         shape: BoxShape.circle,
                         border: Border.all(color: const Color(0xFFE5E7EB)),
                       ),
-                      child: const RutekuLogo(size: 26),
+                      child: const BrandLogo(size: 26),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -571,7 +571,7 @@ class TripShareCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            userName ?? 'Ruteku',
+                            userName ?? 'Motivox',
                             style: const TextStyle(
                               color: _ink,
                               fontWeight: FontWeight.w700,
@@ -632,7 +632,7 @@ class TripShareCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 const Center(
                   child: Text(
-                    'ruteku • catat perjalanan otomatis',
+                    'motivox • know your route, master your fuel',
                     style: TextStyle(
                       color: _inkSoft,
                       fontSize: 11,

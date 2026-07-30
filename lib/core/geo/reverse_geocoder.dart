@@ -35,7 +35,7 @@ class NominatimReverseGeocoder implements ReverseGeocoder {
       final request = await client.getUrl(uri);
       request.headers.set(
         HttpHeaders.userAgentHeader,
-        'Ruteku/1.0 (mobility journal; contact via app repository)',
+        'Motivox/1.0 (mobility journal; contact via app repository)',
       );
       final response = await request.close().timeout(
         const Duration(seconds: 12),

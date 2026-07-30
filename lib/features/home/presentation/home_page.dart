@@ -7,7 +7,7 @@ import '../../../core/constants/enums.dart';
 import '../../../core/storage/app_database.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/gen/app_localizations.dart';
-import '../../../shared/widgets/ruteku_logo.dart';
+import '../../../shared/widgets/brand_logo.dart';
 import '../../../shared/widgets/status_widgets.dart';
 import '../../recording/presentation/state_labels.dart';
 import '../../trips/presentation/widgets/vehicle_ui.dart';
@@ -63,7 +63,7 @@ class HomePage extends ConsumerWidget {
       appBar: AppBar(
         title: Row(
           children: [
-            const RutekuLogo(size: 28),
+            const BrandLogo(size: 28),
             const SizedBox(width: 8),
             Text(l10n.appTitle),
           ],
@@ -414,7 +414,7 @@ class _HeroCard extends StatelessWidget {
                   Colors.white,
                   BlendMode.srcATop,
                 ),
-                child: const RutekuLogo(size: 140),
+                child: const BrandLogo(size: 140),
               ),
             ),
           ),
