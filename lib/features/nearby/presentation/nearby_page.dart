@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 
 import '../../../app/providers.dart';
+import '../../../core/geo/reverse_geocoder.dart';
 import '../../../core/poi/nearby_poi_service.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/gen/app_localizations.dart';
@@ -25,6 +28,28 @@ class _NearbyPageState extends ConsumerState<NearbyPage> {
   List<NearbyPoi> _pois = const [];
   var _loading = true;
   String? _errorKey; // 'gps' | 'network'
+
+  /// Bumped on every reload so stale address lookups stop themselves.
+  var _generation = 0;
+
+  /// Fills missing street lines for the nearest results via Nominatim,
+  /// serially (usage policy) and abandoned when the page reloads/closes.
+  Future<void> _fillAddresses(int generation) async {
+    final geocoder = NominatimReverseGeocoder();
+    for (var i = 0; i < _pois.length && i < 8; i++) {
+      if (!mounted || generation != _generation) return;
+      final poi = _pois[i];
+      if (poi.address != null) continue;
+      final label = await geocoder.shortLabel(poi.latitude, poi.longitude);
+      if (!mounted || generation != _generation) return;
+      if (label != null) {
+        setState(() {
+          _pois = List.of(_pois)..[i] = poi.withAddress(label);
+        });
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 1100));
+    }
+  }
 
   @override
   void initState() {
@@ -59,6 +84,7 @@ class _NearbyPageState extends ConsumerState<NearbyPage> {
         _pois = pois;
         _loading = false;
       });
+      unawaited(_fillAddresses(++_generation));
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -128,9 +154,13 @@ class _NearbyPageState extends ConsumerState<NearbyPage> {
                               ),
                               title: Text(poi.name),
                               subtitle: Text(
-                                '${fuel ? l10n.poiFuel : l10n.poiWorkshop} • '
-                                '${Formatters.distanceKm(poi.distanceMeters, locale: locale)}',
+                                [
+                                  if (poi.address != null) poi.address!,
+                                  '${fuel ? l10n.poiFuel : l10n.poiWorkshop} • '
+                                      '${Formatters.distanceKm(poi.distanceMeters, locale: locale)}',
+                                ].join('\n'),
                               ),
+                              isThreeLine: poi.address != null,
                               trailing: const Icon(Icons.map_outlined),
                               onTap: () => _mapController.move(
                                 LatLng(poi.latitude, poi.longitude),

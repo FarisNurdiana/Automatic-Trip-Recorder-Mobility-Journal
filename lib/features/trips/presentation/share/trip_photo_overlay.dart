@@ -79,24 +79,8 @@ class TripStatsOverlay extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 10),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // The brand mark by itself — no chip behind it.
-            const BrandLogo(size: 30),
-            const SizedBox(width: 8),
-            const Text(
-              'MOTIVOX',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
-                letterSpacing: 3,
-                shadows: _shadows,
-              ),
-            ),
-          ],
-        ),
+        // The brand mark by itself — no chip, no wordmark text.
+        const BrandLogo(size: 44),
       ],
     );
   }

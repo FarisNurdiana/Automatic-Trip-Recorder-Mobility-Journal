@@ -14,6 +14,7 @@ class NearbyPoi {
     required this.latitude,
     required this.longitude,
     required this.distanceMeters,
+    this.address,
   });
 
   final String name;
@@ -21,6 +22,19 @@ class NearbyPoi {
   final double latitude;
   final double longitude;
   final double distanceMeters;
+
+  /// Street/area line ("Jl. Soekarno-Hatta 402, Gedebage") from OSM addr
+  /// tags, or reverse geocoding as a fallback; null when unknown.
+  final String? address;
+
+  NearbyPoi withAddress(String? value) => NearbyPoi(
+    name: name,
+    type: type,
+    latitude: latitude,
+    longitude: longitude,
+    distanceMeters: distanceMeters,
+    address: value ?? address,
+  );
 }
 
 /// Looks up nearby fuel stations (amenity=fuel) and vehicle repair shops
@@ -161,10 +175,32 @@ class OverpassPoiService {
             lat,
             lon,
           ),
+          address: _addressFromTags(tags),
         ),
       );
     }
     pois.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
     return pois.take(limit).toList();
+  }
+
+  /// "Jl. X 402, Kelurahan" from OSM addr:* tags; null when absent.
+  static String? _addressFromTags(Map<String, dynamic> tags) {
+    String? tag(String key) {
+      final value = (tags[key] as String?)?.trim();
+      return (value == null || value.isEmpty) ? null : value;
+    }
+
+    final street = tag('addr:street');
+    final number = tag('addr:housenumber');
+    final area =
+        tag('addr:subdistrict') ??
+        tag('addr:village') ??
+        tag('addr:suburb') ??
+        tag('addr:city');
+    final first = street == null
+        ? null
+        : (number == null ? street : '$street $number');
+    if (first != null && area != null) return '$first, $area';
+    return first ?? area;
   }
 }

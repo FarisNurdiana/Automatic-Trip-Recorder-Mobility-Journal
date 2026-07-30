@@ -153,9 +153,13 @@ class _CurrentTripPageState extends ConsumerState<CurrentTripPage> {
                     ),
                     title: Text(poi.name),
                     subtitle: Text(
-                      '${fuel ? l10n.poiFuel : l10n.poiWorkshop} • '
-                      '${Formatters.distanceKm(poi.distanceMeters, locale: locale)}',
+                      [
+                        if (poi.address != null) poi.address!,
+                        '${fuel ? l10n.poiFuel : l10n.poiWorkshop} • '
+                            '${Formatters.distanceKm(poi.distanceMeters, locale: locale)}',
+                      ].join('\n'),
                     ),
+                    isThreeLine: poi.address != null,
                     trailing: const Icon(Icons.map_outlined),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -384,7 +388,7 @@ class _CurrentTripPageState extends ConsumerState<CurrentTripPage> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      'km/j',
+                                      locale == 'id' ? 'km/jam' : 'km/h',
                                       style: theme.textTheme.labelMedium
                                           ?.copyWith(
                                             color: overLimit
