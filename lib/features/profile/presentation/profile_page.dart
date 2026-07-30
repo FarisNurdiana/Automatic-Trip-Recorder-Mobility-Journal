@@ -78,7 +78,10 @@ class ProfilePage extends ConsumerWidget {
             leading: const Icon(Icons.settings_outlined),
             title: Text(l10n.settingsTitle),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/settings'),
+            // The settings tab lives inside the bottom-nav shell — switching
+            // branch with go() is required; push() would mount the same
+            // shell page twice and crash the Navigator.
+            onTap: () => context.go('/settings'),
           ),
           ListTile(
             leading: const Icon(Icons.lock_outline),

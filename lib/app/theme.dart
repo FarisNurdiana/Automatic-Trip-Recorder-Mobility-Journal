@@ -20,25 +20,24 @@ class AppTheme {
 
   static ThemeData _base(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
+    // Let Material derive harmonious tonal palettes from the brand hues and
+    // only re-anchor the dark surfaces on deep navy — hand-picking accent
+    // containers clashed ("nabrak") with the generated tones.
     var scheme = ColorScheme.fromSeed(
-      seedColor: _teal,
+      seedColor: isDark ? _cyan : _teal,
       brightness: brightness,
-    ).copyWith(secondary: _cyan, tertiary: _aqua);
+    ).copyWith(tertiary: _aqua);
     if (isDark) {
       scheme = scheme.copyWith(
-        primary: _aqua,
-        onPrimary: _navy,
         surface: _navy,
-        surfaceContainerLowest: const Color(0xFF071823),
+        surfaceContainerLowest: const Color(0xFF081A26),
         surfaceContainerLow: _navyCard,
-        surfaceContainer: const Color(0xFF15303F),
-        surfaceContainerHigh: const Color(0xFF1A3846),
-        surfaceContainerHighest: const Color(0xFF20404F),
-        primaryContainer: const Color(0xFF0F3A3F),
-        onPrimaryContainer: _aqua,
-        secondaryContainer: const Color(0xFF0E3644),
-        onSecondaryContainer: const Color(0xFF9BE8F5),
+        surfaceContainer: const Color(0xFF142C3C),
+        surfaceContainerHigh: const Color(0xFF183345),
+        surfaceContainerHighest: const Color(0xFF1D3B4E),
       );
+    } else {
+      scheme = scheme.copyWith(secondary: _cyan);
     }
     return ThemeData(
       useMaterial3: true,

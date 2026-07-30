@@ -49,7 +49,7 @@ class _VehicleConfirmationPageState
           confirmedAt: DateTime.now().toUtc(),
         );
     ref.invalidate(tripDetailProvider(widget.tripId));
-    if (mounted) context.go('/trips/${widget.tripId}');
+    if (mounted) context.pushReplacement('/trips/${widget.tripId}');
   }
 
   @override
@@ -93,7 +93,8 @@ class _VehicleConfirmationPageState
                 content,
                 const SizedBox(height: 24),
                 TextButton(
-                  onPressed: () => context.go('/trips/${widget.tripId}'),
+                  onPressed: () =>
+                      context.pushReplacement('/trips/${widget.tripId}'),
                   child: Text(l10n.commonSkip),
                 ),
               ],
