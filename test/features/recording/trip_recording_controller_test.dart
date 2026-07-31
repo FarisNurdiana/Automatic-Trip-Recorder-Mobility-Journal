@@ -5,6 +5,7 @@ import 'package:triplog/core/config/sensor_config.dart';
 import 'package:triplog/core/constants/enums.dart';
 import 'package:triplog/core/location/location_models.dart';
 import 'package:triplog/core/location/simulated_location_service.dart';
+import 'package:triplog/core/platform/speed_alarm.dart';
 import 'package:triplog/core/sensors/sensor_collection_service.dart';
 import 'package:triplog/core/sensors/sensor_models.dart';
 import 'package:triplog/core/storage/app_database.dart';
@@ -45,6 +46,8 @@ void main() {
   late SimulatedLocationTrackingService location;
   late SimulatedActivityRecognitionService activityService;
   late TripRecordingController controller;
+  late RecordingSpeedAlarm alarm;
+  double? speedLimit;
 
   setUp(() {
     db = AppDatabase(NativeDatabase.memory());
@@ -54,6 +57,8 @@ void main() {
     );
     location = SimulatedLocationTrackingService();
     activityService = SimulatedActivityRecognitionService();
+    alarm = RecordingSpeedAlarm();
+    speedLimit = null;
     controller = TripRecordingController(
       stateMachine: DefaultTripStateMachine(),
       locationService: location,
@@ -61,6 +66,8 @@ void main() {
       sensorService: FakeSensorService(),
       repository: repo,
       userIdProvider: () => 'user-1',
+      speedLimitKmhProvider: () => speedLimit,
+      speedAlarm: alarm,
       tickInterval: const Duration(hours: 1), // ticks driven manually in tests
     );
   });
@@ -210,6 +217,86 @@ void main() {
       final all = await db.select(db.activityEvents).get();
       expect(all.length, 1);
       expect(all.single.activityType, 'vehicle');
+    });
+  });
+
+  group('speed-limit alarm', () {
+    test('fires once above the limit, with a cooldown', () async {
+      speedLimit = 80;
+      await controller.init();
+      await controller.startManual();
+      await pump();
+      location.emit(loc(secondsFromStart: 0, speedKmh: 70));
+      await pump();
+      expect(alarm.startCount, 0, reason: 'below the limit');
+      location.emit(loc(secondsFromStart: 10, lat: -6.201, speedKmh: 95));
+      await pump();
+      expect(alarm.startCount, 1);
+      expect(alarm.lastDuration, const Duration(seconds: 10));
+      // Still speeding moments later: cooldown suppresses a re-trigger.
+      location.emit(loc(secondsFromStart: 20, lat: -6.202, speedKmh: 96));
+      await pump();
+      expect(alarm.startCount, 1);
+    });
+
+    test('never fires without an active trip or configured limit', () async {
+      await controller.init();
+      await controller.startManual();
+      await pump();
+      // No limit configured.
+      location.emit(loc(secondsFromStart: 0, speedKmh: 120));
+      await pump();
+      expect(alarm.startCount, 0);
+      await controller.cancel();
+      await pump();
+      // Limit set but no active trip.
+      speedLimit = 80;
+      location.emit(loc(secondsFromStart: 10, speedKmh: 120));
+      await pump();
+      expect(alarm.startCount, 0);
+    });
+  });
+
+  group('background auto-start adoption', () {
+    test('init adopts a native background recording as a trip', () async {
+      location.backgroundStartedAt = t0;
+      await controller.init();
+      await pump();
+      expect(controller.state.machineState, TripRecordingState.recording);
+      expect(controller.state.activeTrip, isNotNull);
+      // Drift round-trips DateTimes without the isUtc flag; compare epoch.
+      expect(
+        controller.state.activeTrip!.startedAt.millisecondsSinceEpoch,
+        t0.millisecondsSinceEpoch,
+      );
+      expect(controller.state.recoveredTrip, isTrue);
+      expect(location.started, isTrue);
+    });
+
+    test('init without background tracking stays idle', () async {
+      await controller.init();
+      await pump();
+      expect(controller.state.machineState, TripRecordingState.idle);
+      expect(controller.state.activeTrip, isNull);
+    });
+
+    test('signed-out adoption stops the orphan service instead', () async {
+      final other = TripRecordingController(
+        stateMachine: DefaultTripStateMachine(),
+        locationService: location,
+        activityService: activityService,
+        sensorService: FakeSensorService(),
+        repository: repo,
+        userIdProvider: () => '',
+        tickInterval: const Duration(hours: 1),
+      );
+      location.backgroundStartedAt = t0;
+      location.started = true;
+      await other.init();
+      await pump();
+      expect(other.state.activeTrip, isNull);
+      expect(location.started, isFalse);
+      other.dispose();
     });
   });
 

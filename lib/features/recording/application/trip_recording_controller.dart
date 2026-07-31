@@ -11,6 +11,7 @@ import '../../../core/config/trip_detection_config.dart';
 import '../../../core/constants/enums.dart';
 import '../../../core/location/location_models.dart';
 import '../../../core/location/location_tracking_service.dart';
+import '../../../core/platform/speed_alarm.dart';
 import '../../../core/sensors/sensor_collection_service.dart';
 import '../../../core/sensors/sensor_models.dart';
 import '../../../core/storage/app_database.dart';
@@ -134,6 +135,8 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     this.mountPositionProvider,
     this.autoDetectionEnabledProvider,
     this.sensorConfigProvider,
+    this.speedLimitKmhProvider,
+    this.speedAlarm,
     DateTime Function()? clock,
     this.tickInterval = const Duration(seconds: 5),
   }) : _clock = clock ?? (() => DateTime.now().toUtc()),
@@ -153,6 +156,12 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
   final bool Function()? autoDetectionEnabledProvider;
   final SensorSamplingConfig Function()? sensorConfigProvider;
 
+  /// Current speed-limit setting in km/h; null disables the loud alarm.
+  final double? Function()? speedLimitKmhProvider;
+
+  /// Loud sound + vibration warning fired when the limit is exceeded.
+  final SpeedAlarm? speedAlarm;
+
   final DateTime Function() _clock;
   final Duration tickInterval;
   final _log = Logger('TripRecordingController');
@@ -167,6 +176,11 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
   LocationSamplingProfile? _currentProfile;
   final _pendingSensorSamples = <CollectedSensorSample>[];
 
+  /// Last time the loud over-speed alarm fired, for the re-arm cooldown.
+  DateTime? _lastSpeedAlarmAt;
+  static const _speedAlarmDuration = Duration(seconds: 10);
+  static const _speedAlarmCooldown = Duration(seconds: 30);
+
   bool get _autoDetectionEnabled =>
       autoDetectionEnabledProvider?.call() ?? true;
 
@@ -174,6 +188,7 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
   /// listening to activity recognition.
   Future<void> init() async {
     await _recoverIfNeeded();
+    await _adoptBackgroundTracking();
     _actionSub = locationService.notificationActions.listen(_onAction);
     if (_autoDetectionEnabled && await activityService.isAvailable()) {
       try {
@@ -219,6 +234,36 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     await _startSensorsIfEnabled(trip.id);
   }
 
+  /// When activity recognition auto-started the native tracker while the
+  /// app was closed, no Dart trip exists yet — create one dated to the
+  /// native start time and attach to the stream. The native bridge buffered
+  /// every GPS point since the start, and subscribing drains that buffer
+  /// through [_onLocation], so nothing recorded in the background is lost.
+  Future<void> _adoptBackgroundTracking() async {
+    if (state.activeTrip != null ||
+        state.machineState != TripRecordingState.idle) {
+      return;
+    }
+    DateTime? startedAt;
+    try {
+      startedAt = await locationService.backgroundTrackingStartedAt();
+    } catch (e) {
+      _log.warning('backgroundTrackingStartedAt failed', e);
+    }
+    if (startedAt == null) return;
+    if (userIdProvider().isEmpty) {
+      // Nobody to attribute the trip to: shut the orphan service down
+      // instead of draining the battery.
+      try {
+        await locationService.stop();
+      } catch (_) {}
+      return;
+    }
+    _log.info('adopting background tracking started at $startedAt');
+    await _applyTransitions(stateMachine.manualStart(startedAt));
+    state = state.copyWith(recoveredTrip: true);
+  }
+
   // ---------------------------------------------------------------------
   // Event plumbing
   // ---------------------------------------------------------------------
@@ -246,6 +291,7 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
       currentLongitude: location.longitude,
     );
     sensorService.updateSpeed(location.speed);
+    _maybeFireSpeedAlarm(location);
 
     final transitions = stateMachine.onLocation(location);
 
@@ -330,6 +376,28 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     }
 
     await _applyTransitions(transitions);
+  }
+
+  /// Fires the loud 10-second alarm + vibration when the driver exceeds the
+  /// configured speed limit during an active trip. A cooldown keeps it from
+  /// re-triggering continuously while the speed stays above the limit.
+  void _maybeFireSpeedAlarm(RecordedLocation location) {
+    final alarm = speedAlarm;
+    final limit = speedLimitKmhProvider?.call();
+    final speed = location.speedKmh;
+    if (alarm == null || limit == null || limit <= 0 || speed == null) return;
+    if (state.activeTrip == null ||
+        state.machineState != TripRecordingState.recording) {
+      return;
+    }
+    if (speed <= limit) return;
+    final now = _clock();
+    if (_lastSpeedAlarmAt != null &&
+        now.difference(_lastSpeedAlarmAt!) < _speedAlarmCooldown) {
+      return;
+    }
+    _lastSpeedAlarmAt = now;
+    unawaited(alarm.start(duration: _speedAlarmDuration));
   }
 
   Future<void> _onTick() async {
@@ -521,6 +589,7 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
       return;
     }
     await repository.setTripStatus(trip.id, TripRecordingState.finishing);
+    unawaited(speedAlarm?.stop() ?? Future.value());
     await _stopSensors(trip.id);
     // Automatic finishes use the moment the vehicle first stopped as the
     // arrival candidate — not the moment the rule fired hours later.
@@ -564,6 +633,7 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
   }
 
   Future<void> _cancelTrip() async {
+    unawaited(speedAlarm?.stop() ?? Future.value());
     final trip = state.activeTrip;
     if (trip != null) {
       await _stopSensors(trip.id);

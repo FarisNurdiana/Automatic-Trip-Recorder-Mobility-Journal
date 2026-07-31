@@ -53,6 +53,9 @@ class TripTrackingService : Service() {
 
         @Volatile
         var isRunning = false
+
+        /** Wall-clock time tracking started; 0 when not tracking. */
+        var startedAtMillis: Long = 0
             private set
     }
 
@@ -109,6 +112,7 @@ class TripTrackingService : Service() {
                 currentProfile = intent.getStringExtra(EXTRA_PROFILE) ?: "moving"
                 startForegroundWithNotification()
                 requestUpdates()
+                if (!isRunning) startedAtMillis = System.currentTimeMillis()
                 isRunning = true
             }
             ACTION_SET_PROFILE -> {
@@ -162,6 +166,7 @@ class TripTrackingService : Service() {
 
     private fun stopTracking() {
         isRunning = false
+        startedAtMillis = 0
         fusedClient.removeLocationUpdates(locationCallback)
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -233,6 +238,7 @@ class TripTrackingService : Service() {
 
     override fun onDestroy() {
         isRunning = false
+        startedAtMillis = 0
         fusedClient.removeLocationUpdates(locationCallback)
         super.onDestroy()
     }

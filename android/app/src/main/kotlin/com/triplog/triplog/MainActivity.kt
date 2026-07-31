@@ -83,6 +83,16 @@ class MainActivity : FlutterActivity() {
                     startService(intent)
                     result.success(null)
                 }
+                // Lets Dart adopt a recording that activity recognition
+                // started while the app was closed.
+                "trackingStatus" -> {
+                    result.success(
+                        mapOf(
+                            "isTracking" to TripTrackingService.isRunning,
+                            "startedAtMillis" to TripTrackingService.startedAtMillis,
+                        ),
+                    )
+                }
                 "isLocationServiceEnabled" -> {
                     val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
                     result.success(
@@ -119,6 +129,22 @@ class MainActivity : FlutterActivity() {
                     } catch (e: SecurityException) {
                         result.error("PERMISSION_DENIED", e.message, null)
                     }
+                }
+                else -> result.notImplemented()
+            }
+        }
+
+        // ---- speed-limit alarm (loud sound + vibration) ----
+        MethodChannel(messenger, "triplog/alarm").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "start" -> {
+                    val durationMs = call.argument<Int>("durationMs") ?: 10_000
+                    SpeedAlarmPlayer.start(this, durationMs.toLong())
+                    result.success(null)
+                }
+                "stop" -> {
+                    SpeedAlarmPlayer.stop()
+                    result.success(null)
                 }
                 else -> result.notImplemented()
             }

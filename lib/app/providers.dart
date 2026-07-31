@@ -10,6 +10,7 @@ import '../core/geo/reverse_geocoder.dart';
 import '../core/location/location_tracking_service.dart';
 import '../core/poi/nearby_poi_service.dart';
 import '../core/location/method_channel_location_service.dart';
+import '../core/platform/speed_alarm.dart';
 import '../core/sensors/sensor_collection_service.dart';
 import '../core/sensors/sensors_plus_collection_service.dart';
 import '../core/storage/app_database.dart';
@@ -134,6 +135,11 @@ final tripStateMachineProvider = Provider<TripStateMachine>(
   (ref) => DefaultTripStateMachine(),
 );
 
+/// Loud over-speed warning (sound + vibration) — native on Android.
+final speedAlarmProvider = Provider<SpeedAlarm>(
+  (ref) => MethodChannelSpeedAlarm(),
+);
+
 // --- recording ---
 
 final tripRecordingControllerProvider =
@@ -152,6 +158,9 @@ final tripRecordingControllerProvider =
             ref.read(settingsControllerProvider).autoDetectionEnabled,
         sensorConfigProvider: () =>
             ref.read(settingsControllerProvider).sensorConfig,
+        speedLimitKmhProvider: () =>
+            ref.read(settingsControllerProvider).speedLimitKmh,
+        speedAlarm: ref.watch(speedAlarmProvider),
       );
       controller.init();
       return controller;

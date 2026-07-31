@@ -39,4 +39,10 @@ abstract interface class LocationTrackingService {
   /// nearby fuel/workshop lookup from the home tab). Null when no fix is
   /// available or the platform does not support it.
   Future<RecordedLocation?> currentPosition();
+
+  /// When the native tracking service is already running without Dart having
+  /// started it (activity recognition auto-started it while the app was
+  /// closed), returns the moment it started; null otherwise. Lets the
+  /// controller adopt the background recording on startup.
+  Future<DateTime?> backgroundTrackingStartedAt();
 }

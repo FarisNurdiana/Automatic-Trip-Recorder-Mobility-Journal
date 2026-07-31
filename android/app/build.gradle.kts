@@ -20,7 +20,11 @@ android {
         // modern APIs; 26 is the floor that still covers ~95% of devices.
         minSdk = maxOf(26, flutter.minSdkVersion)
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
+        // Every CI build gets a strictly increasing versionCode (the GitHub
+        // Actions run number), so Android always accepts the newer APK as an
+        // update — installing over the old version keeps all local data.
+        versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()
+            ?: flutter.versionCode
         versionName = flutter.versionName
     }
 

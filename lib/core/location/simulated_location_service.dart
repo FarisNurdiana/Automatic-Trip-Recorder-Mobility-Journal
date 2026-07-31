@@ -66,6 +66,12 @@ class SimulatedLocationTrackingService implements LocationTrackingService {
   @override
   Future<RecordedLocation?> currentPosition() async => _lastEmitted;
 
+  /// Set by tests to simulate a native auto-started background recording.
+  DateTime? backgroundStartedAt;
+
+  @override
+  Future<DateTime?> backgroundTrackingStartedAt() async => backgroundStartedAt;
+
   void dispose() {
     _locations.close();
     _actions.close();

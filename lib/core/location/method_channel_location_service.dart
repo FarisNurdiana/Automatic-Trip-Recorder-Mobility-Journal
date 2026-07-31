@@ -124,4 +124,22 @@ class MethodChannelLocationTrackingService implements LocationTrackingService {
       return null;
     }
   }
+
+  @override
+  Future<DateTime?> backgroundTrackingStartedAt() async {
+    try {
+      final map = await _channel.invokeMethod<Map<Object?, Object?>>(
+        'trackingStatus',
+      );
+      if (map == null || map['isTracking'] != true) return null;
+      final startedAt = (map['startedAtMillis'] as num?)?.toInt() ?? 0;
+      if (startedAt <= 0) return null;
+      return DateTime.fromMillisecondsSinceEpoch(startedAt, isUtc: true);
+    } on PlatformException catch (e) {
+      _log.warning('trackingStatus failed', e);
+      return null;
+    } on MissingPluginException {
+      return null;
+    }
+  }
 }

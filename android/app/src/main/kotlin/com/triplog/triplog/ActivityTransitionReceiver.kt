@@ -26,6 +26,33 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
         }
     }
 
+    /**
+     * Starts the tracking service directly from the receiver so recording
+     * begins even when the app process is dead. Guarded by the user's
+     * auto-detection setting (read from Flutter's SharedPreferences) and
+     * allowed from the background because the app holds
+     * ACCESS_BACKGROUND_LOCATION. GPS points are buffered by the service
+     * bridge and adopted by Dart the next time the app runs.
+     */
+    private fun autoStartTracking(context: Context) {
+        if (TripTrackingService.isRunning) return
+        val prefs = context.getSharedPreferences(
+            "FlutterSharedPreferences",
+            Context.MODE_PRIVATE,
+        )
+        if (!prefs.getBoolean("flutter.autoDetection", true)) return
+        try {
+            context.startForegroundService(
+                Intent(context, TripTrackingService::class.java)
+                    .setAction(TripTrackingService.ACTION_START)
+                    .putExtra(TripTrackingService.EXTRA_PROFILE, "moving"),
+            )
+        } catch (_: Exception) {
+            // Some OEMs still block background FGS starts; the in-app
+            // detection path keeps working regardless.
+        }
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         if (ActivityTransitionResult.hasResult(intent)) {
             val result = ActivityTransitionResult.extractResult(intent) ?: return
@@ -34,6 +61,12 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
                     ActivityTransition.ACTIVITY_TRANSITION_ENTER -> "enter"
                     ActivityTransition.ACTIVITY_TRANSITION_EXIT -> "exit"
                     else -> "sample"
+                }
+                if (event.activityType == DetectedActivity.IN_VEHICLE &&
+                    event.transitionType ==
+                        ActivityTransition.ACTIVITY_TRANSITION_ENTER
+                ) {
+                    autoStartTracking(context)
                 }
                 // elapsedRealTimeNanos is relative to boot; convert to wall time.
                 val eventUptimeMs = event.elapsedRealTimeNanos / 1_000_000
