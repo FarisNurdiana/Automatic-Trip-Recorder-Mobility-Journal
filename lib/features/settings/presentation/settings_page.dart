@@ -327,6 +327,13 @@ class SettingsPage extends ConsumerWidget {
               onSave: controller.setSpeedLimit,
             ),
           ),
+          SwitchListTile(
+            secondary: const Icon(Icons.map_outlined),
+            title: Text(l10n.settingsRoadSpeedLimit),
+            subtitle: Text(l10n.settingsRoadSpeedLimitDesc),
+            value: settings.roadSpeedLimitEnabled,
+            onChanged: controller.setRoadSpeedLimitEnabled,
+          ),
           ListTile(
             leading: const Icon(Icons.build_outlined),
             title: Text(l10n.serviceIntervalMotorcycle),

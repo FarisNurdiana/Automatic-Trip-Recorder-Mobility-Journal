@@ -84,6 +84,8 @@ class TripTrackingService : Service() {
     private var lastPaused = false
     private var lastQuestion = false
     private var lastAlarmAtMillis = 0L
+    private var lastBackgroundLocation: android.location.Location? = null
+    private var slowFixStreak = 0
     private val autoStopHandler = android.os.Handler(Looper.getMainLooper())
     private val autoStopRunnable = Runnable {
         if (isRunning && autoStarted && EventStreams.locationSink == null) {
@@ -112,11 +114,15 @@ class TripTrackingService : Service() {
                         "batteryLevel" to battery,
                     )
                 if (EventStreams.locationSink == null) {
-                    // App closed: persist to disk (survives process death)
-                    // and run the over-speed alarm natively, since the Dart
-                    // side that normally does both is not alive.
+                    // App closed: persist to disk (survives process death),
+                    // run the over-speed alarm natively and adapt the GPS
+                    // interval — the Dart side that normally does all of
+                    // this is not alive.
                     BackgroundTrackStore.append(this@TripTrackingService, event)
-                    maybeFireBackgroundSpeedAlarm(location)
+                    val speedKmh = backgroundSpeedKmh(location)
+                    maybeFireBackgroundSpeedAlarm(speedKmh)
+                    adaptBackgroundProfile(speedKmh)
+                    lastBackgroundLocation = location
                 }
                 EventStreams.emitLocation(event)
             }
@@ -124,19 +130,56 @@ class TripTrackingService : Service() {
     }
 
     /**
+     * Speed of a background fix in km/h. Cellular fixes often carry no
+     * speed value, so displacement over time between consecutive fixes
+     * fills in — discarded above 250 km/h (GPS jump).
+     */
+    private fun backgroundSpeedKmh(location: android.location.Location): Double? {
+        if (location.hasSpeed()) return location.speed * 3.6
+        val previous = lastBackgroundLocation ?: return null
+        val dtSeconds = (location.time - previous.time) / 1000.0
+        if (dtSeconds <= 0) return null
+        val kmh = previous.distanceTo(location) / dtSeconds * 3.6
+        return if (kmh <= 250) kmh else null
+    }
+
+    /**
      * Over-speed warning for background-recorded trips. Mirrors the Dart
      * implementation: reads the user's speed-limit setting, fires the loud
      * alarm for 10 s, then stays quiet for a 30 s cooldown.
      */
-    private fun maybeFireBackgroundSpeedAlarm(location: android.location.Location) {
-        if (!location.hasSpeed()) return
+    private fun maybeFireBackgroundSpeedAlarm(speedKmh: Double?) {
+        if (speedKmh == null) return
         val limitKmh = readSpeedLimitKmh() ?: return
-        val speedKmh = location.speed * 3.6
         if (speedKmh <= limitKmh) return
         val now = System.currentTimeMillis()
         if (now - lastAlarmAtMillis < ALARM_COOLDOWN_MS) return
         lastAlarmAtMillis = now
         SpeedAlarmPlayer.start(this, ALARM_DURATION_MS)
+    }
+
+    /**
+     * Battery saver for app-closed recordings: mirrors the Dart adaptive
+     * sampling by relaxing the GPS interval while the vehicle is stopped
+     * (traffic light, warung) and tightening it again on movement. Three
+     * consecutive slow fixes are required before relaxing, so a single
+     * noisy fix can't degrade a moving recording.
+     */
+    private fun adaptBackgroundProfile(speedKmh: Double?) {
+        if (speedKmh == null) return
+        val desired: String
+        if (speedKmh <= 3) {
+            slowFixStreak++
+            if (slowFixStreak < 3) return
+            desired = "stopped"
+        } else {
+            slowFixStreak = 0
+            desired = if (speedKmh < 20) "slow" else "moving"
+        }
+        if (desired != currentProfile) {
+            currentProfile = desired
+            requestUpdates()
+        }
     }
 
     /**
@@ -264,6 +307,8 @@ class TripTrackingService : Service() {
         isRunning = false
         autoStarted = false
         startedAtMillis = 0
+        lastBackgroundLocation = null
+        slowFixStreak = 0
         autoStopHandler.removeCallbacks(autoStopRunnable)
         fusedClient.removeLocationUpdates(locationCallback)
         stopForeground(STOP_FOREGROUND_REMOVE)

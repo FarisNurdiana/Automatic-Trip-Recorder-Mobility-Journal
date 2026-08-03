@@ -1133,4 +1133,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get permAutostartDesc =>
       'Some phone brands (Xiaomi, Oppo, Vivo, Realme, Huawei) aggressively kill background apps. Open system settings and enable “Autostart” for Motivox, then exempt Motivox from battery restrictions.';
+
+  @override
+  String get settingsRoadSpeedLimit => 'Speed limit from map (OSM)';
+
+  @override
+  String get settingsRoadSpeedLimitDesc =>
+      'While recording, the legal limit of the road you\'re on is fetched from OpenStreetMap and used by the alarm (your position is sent to the OSM server). The manual limit above is the fallback.';
 }

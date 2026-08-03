@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/providers.dart';
 import '../../../core/constants/enums.dart';
@@ -32,6 +33,9 @@ class HomePage extends ConsumerWidget {
     final syncState = ref.watch(syncStateProvider);
     final auth = ref.watch(authControllerProvider);
     final settings = ref.watch(settingsControllerProvider);
+    // Startup housekeeping (weekly auto backup + daily update check) runs
+    // behind this provider; a pending update surfaces as a banner below.
+    final pendingUpdate = ref.watch(startupMaintenanceProvider).valueOrNull;
 
     final isActive = recording.machineState.isActiveTrip;
 
@@ -106,6 +110,55 @@ class HomePage extends ConsumerWidget {
                 ],
               ),
             ),
+            if (pendingUpdate != null)
+              Card(
+                color: Theme.of(context).colorScheme.tertiaryContainer,
+                margin: const EdgeInsets.only(bottom: 12),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.system_update_alt,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onTertiaryContainer,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          l10n.updateAvailable(
+                            '${pendingUpdate.latestVersionCode}',
+                          ),
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onTertiaryContainer,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => launchUrl(
+                          Uri.parse(pendingUpdate.releaseUrl),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                        child: Text(l10n.updateDownload),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 18),
+                        tooltip: l10n.commonClose,
+                        onPressed: () async {
+                          await ref
+                              .read(appMaintenanceServiceProvider)
+                              .dismissUpdate(pendingUpdate.latestVersionCode);
+                          ref.invalidate(startupMaintenanceProvider);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             _HeroCard(
               isActive: isActive,
               statusLabel: tripStateLabel(l10n, recording.machineState),

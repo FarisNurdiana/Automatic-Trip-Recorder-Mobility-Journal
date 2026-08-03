@@ -202,15 +202,23 @@ class _CurrentTripPageState extends ConsumerState<CurrentTripPage> {
 
     // Speed-limit warning: red speed chip + one strong vibration when the
     // limit is first exceeded (visual works because the screen stays on).
-    final speedLimit = ref.watch(
-      settingsControllerProvider.select((s) => s.speedLimitKmh),
-    );
+    // The controller exposes the road's own OSM limit when known; the
+    // global setting is the fallback.
+    final speedLimit =
+        ref.watch(
+          tripRecordingControllerProvider.select(
+            (s) => s.effectiveSpeedLimitKmh,
+          ),
+        ) ??
+        ref.watch(settingsControllerProvider.select((s) => s.speedLimitKmh));
     final overLimit = speed != null && speedLimit != null && speed > speedLimit;
     ref.listen(
       tripRecordingControllerProvider.select((s) => s.currentSpeedKmh),
       (previous, next) {
         if (next != null) _speedSamples.add((DateTime.now(), next));
-        final limit = ref.read(settingsControllerProvider).speedLimitKmh;
+        final limit =
+            ref.read(tripRecordingControllerProvider).effectiveSpeedLimitKmh ??
+            ref.read(settingsControllerProvider).speedLimitKmh;
         if (limit == null || next == null) return;
         final wasOver = (previous ?? 0) > limit;
         if (next > limit && !wasOver) {

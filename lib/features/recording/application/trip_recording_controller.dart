@@ -41,6 +41,7 @@ class RecordingUiState {
     this.errorKey,
     this.stopQuestion,
     this.stopQuestionSince,
+    this.effectiveSpeedLimitKmh,
   });
 
   final TripRecordingState machineState;
@@ -74,6 +75,10 @@ class RecordingUiState {
   /// When the stop that triggered the question began (arrival candidate).
   final DateTime? stopQuestionSince;
 
+  /// The speed limit currently enforced by the alarm: the road's own OSM
+  /// limit when known, otherwise the user's global setting; null = off.
+  final double? effectiveSpeedLimitKmh;
+
   RecordingUiState copyWith({
     TripRecordingState? machineState,
     Trip? activeTrip,
@@ -93,6 +98,8 @@ class RecordingUiState {
     StopQuestionKind? stopQuestion,
     DateTime? stopQuestionSince,
     bool clearStopQuestion = false,
+    double? effectiveSpeedLimitKmh,
+    bool clearEffectiveSpeedLimit = false,
   }) {
     return RecordingUiState(
       machineState: machineState ?? this.machineState,
@@ -116,6 +123,9 @@ class RecordingUiState {
       stopQuestionSince: clearStopQuestion
           ? null
           : (stopQuestionSince ?? this.stopQuestionSince),
+      effectiveSpeedLimitKmh: clearEffectiveSpeedLimit
+          ? null
+          : (effectiveSpeedLimitKmh ?? this.effectiveSpeedLimitKmh),
     );
   }
 }
@@ -137,6 +147,7 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     this.autoDetectionEnabledProvider,
     this.sensorConfigProvider,
     this.speedLimitKmhProvider,
+    this.roadSpeedLimitKmhProvider,
     this.speedAlarm,
     DateTime Function()? clock,
     this.tickInterval = const Duration(seconds: 5),
@@ -159,6 +170,11 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
 
   /// Current speed-limit setting in km/h; null disables the loud alarm.
   final double? Function()? speedLimitKmhProvider;
+
+  /// Legal limit of the road at the given position (OSM maxspeed), served
+  /// from a non-blocking cache; null when unknown. When available it takes
+  /// precedence over the global setting.
+  final double? Function(RecordedLocation location)? roadSpeedLimitKmhProvider;
 
   /// Loud sound + vibration warning fired when the limit is exceeded.
   final SpeedAlarm? speedAlarm;
@@ -495,7 +511,16 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     final previous = _lastAlarmProbe;
     _lastAlarmProbe = location;
     final alarm = speedAlarm;
-    final limit = speedLimitKmhProvider?.call();
+    // The road's own legal limit (OSM) beats the single global setting —
+    // 80 km/h may be fine on a toll road and dangerous in a kampung.
+    final roadLimit = roadSpeedLimitKmhProvider?.call(location);
+    final limit = roadLimit ?? speedLimitKmhProvider?.call();
+    if (state.effectiveSpeedLimitKmh != limit) {
+      state = state.copyWith(
+        effectiveSpeedLimitKmh: limit,
+        clearEffectiveSpeedLimit: limit == null,
+      );
+    }
     if (alarm == null || limit == null || limit <= 0) return;
     if (state.activeTrip == null ||
         state.machineState != TripRecordingState.recording) {

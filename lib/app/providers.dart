@@ -6,8 +6,15 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import '../core/activity/activity_recognition_service.dart';
 import '../core/activity/method_channel_activity_service.dart';
 import '../core/config/env.dart';
+import 'dart:io';
+
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+
 import '../core/geo/reverse_geocoder.dart';
+import '../core/geo/road_speed_limit.dart';
 import '../core/location/location_tracking_service.dart';
+import '../core/maintenance/app_maintenance.dart';
 import '../core/poi/nearby_poi_service.dart';
 import '../core/location/method_channel_location_service.dart';
 import '../core/platform/speed_alarm.dart';
@@ -115,6 +122,34 @@ final backupServiceProvider = Provider<DatabaseBackupService>(
 /// Checks the rolling GitHub release for a newer APK build.
 final updateCheckerProvider = Provider<UpdateChecker>((ref) => UpdateChecker());
 
+/// Silent startup housekeeping: weekly auto backup + daily update check.
+final appMaintenanceServiceProvider = Provider<AppMaintenanceService>(
+  (ref) => AppMaintenanceService(
+    prefs: ref.watch(sharedPreferencesProvider),
+    backup: ref.watch(backupServiceProvider),
+    updateChecker: ref.watch(updateCheckerProvider),
+    backupDirProvider: () async => Directory(
+      p.join((await getApplicationDocumentsDirectory()).path, 'backups'),
+    ),
+  ),
+);
+
+/// Runs the startup housekeeping once; resolves to an update the user has
+/// not dismissed (drives the home banner) or null.
+final startupMaintenanceProvider = FutureProvider<UpdateCheckResult?>(
+  (ref) => ref.watch(appMaintenanceServiceProvider).runStartupTasks(),
+);
+
+/// Cached "what is the speed limit of the road I'm on" lookups (OSM),
+/// respecting the settings toggle.
+final roadSpeedLimitResolverProvider = Provider<RoadSpeedLimitResolver>((ref) {
+  final service = RoadSpeedLimitService();
+  return RoadSpeedLimitResolver(
+    fetcher: service.fetchLimitKmh,
+    enabled: () => ref.read(settingsControllerProvider).roadSpeedLimitEnabled,
+  );
+});
+
 /// Fills trip start/end address labels via Nominatim (best effort).
 final tripAddressResolverProvider = Provider<TripAddressResolver>(
   (ref) => TripAddressResolver(
@@ -170,6 +205,9 @@ final tripRecordingControllerProvider =
             ref.read(settingsControllerProvider).sensorConfig,
         speedLimitKmhProvider: () =>
             ref.read(settingsControllerProvider).speedLimitKmh,
+        roadSpeedLimitKmhProvider: (location) => ref
+            .read(roadSpeedLimitResolverProvider)
+            .limitFor(location.latitude, location.longitude),
         speedAlarm: ref.watch(speedAlarmProvider),
       );
       controller.init();

@@ -2155,6 +2155,18 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Beberapa merek HP (Xiaomi, Oppo, Vivo, Realme, Huawei) menghentikan aplikasi latar belakang secara agresif. Buka pengaturan sistem dan aktifkan “Autostart” / “Mulai otomatis” untuk Motivox, lalu bebaskan Motivox dari pembatasan baterai.'**
   String get permAutostartDesc;
+
+  /// No description provided for @settingsRoadSpeedLimit.
+  ///
+  /// In id, this message translates to:
+  /// **'Batas kecepatan dari peta (OSM)'**
+  String get settingsRoadSpeedLimit;
+
+  /// No description provided for @settingsRoadSpeedLimitDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Saat merekam, batas resmi jalan yang sedang dilalui diambil dari OpenStreetMap dan dipakai alarm (posisi dikirim ke server OSM). Batas manual di atas menjadi cadangan.'**
+  String get settingsRoadSpeedLimitDesc;
 }
 
 class _AppLocalizationsDelegate

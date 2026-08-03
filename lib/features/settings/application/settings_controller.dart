@@ -47,6 +47,7 @@ class SettingsState {
     this.fuelProfile = const FuelProfile(),
     this.keepScreenOn = true,
     this.speedLimitKmh,
+    this.roadSpeedLimitEnabled = true,
     this.serviceProfile = const ServiceProfile(),
   });
 
@@ -71,6 +72,10 @@ class SettingsState {
   /// Warn (visual + vibration) above this speed; null disables the warning.
   final double? speedLimitKmh;
 
+  /// Use the current road's OSM maxspeed as the alarm limit while
+  /// recording (sends the position to the OpenStreetMap Overpass server).
+  final bool roadSpeedLimitEnabled;
+
   /// Service reminder configuration per vehicle type.
   final ServiceProfile serviceProfile;
 
@@ -87,6 +92,7 @@ class SettingsState {
     bool? keepScreenOn,
     double? speedLimitKmh,
     bool clearSpeedLimit = false,
+    bool? roadSpeedLimitEnabled,
     ServiceProfile? serviceProfile,
   }) => SettingsState(
     autoDetectionEnabled: autoDetectionEnabled ?? this.autoDetectionEnabled,
@@ -101,6 +107,7 @@ class SettingsState {
     speedLimitKmh: clearSpeedLimit
         ? null
         : (speedLimitKmh ?? this.speedLimitKmh),
+    roadSpeedLimitEnabled: roadSpeedLimitEnabled ?? this.roadSpeedLimitEnabled,
     serviceProfile: serviceProfile ?? this.serviceProfile,
   );
 }
@@ -137,6 +144,7 @@ class SettingsController extends StateNotifier<SettingsState> {
       ),
       keepScreenOn: prefs.getBool('keepScreenOn') ?? true,
       speedLimitKmh: prefs.getDouble('speedLimitKmh'),
+      roadSpeedLimitEnabled: prefs.getBool('roadSpeedLimitEnabled') ?? true,
       serviceProfile: ServiceProfile(
         intervalKmMotorcycle: prefs.getDouble('serviceIntervalKmMotorcycle'),
         intervalKmCar: prefs.getDouble('serviceIntervalKmCar'),
@@ -154,6 +162,11 @@ class SettingsController extends StateNotifier<SettingsState> {
       await _prefs.setDouble('speedLimitKmh', value);
       state = state.copyWith(speedLimitKmh: value);
     }
+  }
+
+  Future<void> setRoadSpeedLimitEnabled(bool value) async {
+    await _prefs.setBool('roadSpeedLimitEnabled', value);
+    state = state.copyWith(roadSpeedLimitEnabled: value);
   }
 
   Future<void> setServiceInterval(VehicleType type, double? value) async {

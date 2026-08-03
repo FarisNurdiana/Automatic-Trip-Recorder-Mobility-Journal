@@ -48,6 +48,7 @@ void main() {
   late TripRecordingController controller;
   late RecordingSpeedAlarm alarm;
   double? speedLimit;
+  double? roadLimit;
 
   setUp(() {
     db = AppDatabase(NativeDatabase.memory());
@@ -59,6 +60,7 @@ void main() {
     activityService = SimulatedActivityRecognitionService();
     alarm = RecordingSpeedAlarm();
     speedLimit = null;
+    roadLimit = null;
     controller = TripRecordingController(
       stateMachine: DefaultTripStateMachine(),
       locationService: location,
@@ -67,6 +69,7 @@ void main() {
       repository: repo,
       userIdProvider: () => 'user-1',
       speedLimitKmhProvider: () => speedLimit,
+      roadSpeedLimitKmhProvider: (_) => roadLimit,
       speedAlarm: alarm,
       tickInterval: const Duration(hours: 1), // ticks driven manually in tests
     );
@@ -237,6 +240,25 @@ void main() {
       location.emit(loc(secondsFromStart: 20, lat: -6.202, speedKmh: 96));
       await pump();
       expect(alarm.startCount, 1);
+    });
+
+    test('road limit (OSM) overrides the global setting', () async {
+      speedLimit = 80;
+      roadLimit = 40;
+      await controller.init();
+      await controller.startManual();
+      await pump();
+      // 60 km/h: legal under the global 80, but over this road's 40.
+      location.emit(loc(secondsFromStart: 0, speedKmh: 60));
+      await pump();
+      expect(alarm.startCount, 1);
+      expect(controller.state.effectiveSpeedLimitKmh, 40);
+      // Road limit unknown again: falls back to the global setting.
+      roadLimit = null;
+      location.emit(loc(secondsFromStart: 40, lat: -6.201, speedKmh: 60));
+      await pump();
+      expect(controller.state.effectiveSpeedLimitKmh, 80);
+      expect(alarm.startCount, 1, reason: 'under the fallback limit');
     });
 
     test('uses implied speed when the fix reports no speed', () async {
