@@ -45,11 +45,30 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
             context.startForegroundService(
                 Intent(context, TripTrackingService::class.java)
                     .setAction(TripTrackingService.ACTION_START)
-                    .putExtra(TripTrackingService.EXTRA_PROFILE, "moving"),
+                    .putExtra(TripTrackingService.EXTRA_PROFILE, "moving")
+                    .putExtra(TripTrackingService.EXTRA_AUTO_STARTED, true),
             )
         } catch (_: Exception) {
             // Some OEMs still block background FGS starts; the in-app
             // detection path keeps working regardless.
+        }
+    }
+
+    /**
+     * Auto-stop plumbing for auto-started background recordings: leaving
+     * the vehicle (still/walking) arms a delayed stop in the service;
+     * getting back in a vehicle cancels it. No-op while the app is alive —
+     * the Dart state machine owns stops then (checked inside the service).
+     */
+    private fun sendAutoStopSignal(context: Context, action: String) {
+        if (!TripTrackingService.isRunning || !TripTrackingService.autoStarted) {
+            return
+        }
+        try {
+            context.startService(
+                Intent(context, TripTrackingService::class.java).setAction(action),
+            )
+        } catch (_: Exception) {
         }
     }
 
@@ -67,6 +86,23 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
                         ActivityTransition.ACTIVITY_TRANSITION_ENTER
                 ) {
                     autoStartTracking(context)
+                    sendAutoStopSignal(
+                        context,
+                        TripTrackingService.ACTION_CANCEL_AUTO_STOP,
+                    )
+                }
+                if ((
+                        event.activityType == DetectedActivity.STILL ||
+                            event.activityType == DetectedActivity.WALKING ||
+                            event.activityType == DetectedActivity.ON_FOOT
+                        ) &&
+                    event.transitionType ==
+                        ActivityTransition.ACTIVITY_TRANSITION_ENTER
+                ) {
+                    sendAutoStopSignal(
+                        context,
+                        TripTrackingService.ACTION_SCHEDULE_AUTO_STOP,
+                    )
                 }
                 // elapsedRealTimeNanos is relative to boot; convert to wall time.
                 val eventUptimeMs = event.elapsedRealTimeNanos / 1_000_000

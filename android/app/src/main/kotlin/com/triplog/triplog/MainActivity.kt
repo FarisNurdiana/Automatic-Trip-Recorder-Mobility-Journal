@@ -93,6 +93,16 @@ class MainActivity : FlutterActivity() {
                         ),
                     )
                 }
+                // Hands the persisted background track (JSON lines) to Dart
+                // and clears it. The in-memory location buffer only ever
+                // holds a subset of the persisted lines, so it is cleared
+                // too — points arriving from now on go to the buffer and
+                // are drained when Dart subscribes to the stream.
+                "consumeBackgroundTrack" -> {
+                    val lines = BackgroundTrackStore.consume(this)
+                    EventStreams.clearLocationBuffer()
+                    result.success(lines)
+                }
                 "isLocationServiceEnabled" -> {
                     val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
                     result.success(

@@ -142,4 +142,19 @@ class MethodChannelLocationTrackingService implements LocationTrackingService {
       return null;
     }
   }
+
+  @override
+  Future<List<String>> consumeBackgroundTrackLines() async {
+    try {
+      final lines = await _channel.invokeMethod<List<Object?>>(
+        'consumeBackgroundTrack',
+      );
+      return lines?.whereType<String>().toList() ?? const [];
+    } on PlatformException catch (e) {
+      _log.warning('consumeBackgroundTrack failed', e);
+      return const [];
+    } on MissingPluginException {
+      return const [];
+    }
+  }
 }

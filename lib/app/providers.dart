@@ -14,7 +14,9 @@ import '../core/platform/speed_alarm.dart';
 import '../core/sensors/sensor_collection_service.dart';
 import '../core/sensors/sensors_plus_collection_service.dart';
 import '../core/storage/app_database.dart';
+import '../core/storage/backup_service.dart';
 import '../core/sync/sync_service.dart';
+import '../core/update/update_checker.dart';
 import '../features/auth/application/auth_controller.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/recording/application/trip_recording_controller.dart';
@@ -104,6 +106,14 @@ final permissionsServiceProvider = Provider<PermissionsService>(
 final nearbyPoiServiceProvider = Provider<OverpassPoiService>(
   (ref) => OverpassPoiService(),
 );
+
+/// Local backup & restore of the trip history (single SQLite file).
+final backupServiceProvider = Provider<DatabaseBackupService>(
+  (ref) => DatabaseBackupService(ref.watch(databaseProvider)),
+);
+
+/// Checks the rolling GitHub release for a newer APK build.
+final updateCheckerProvider = Provider<UpdateChecker>((ref) => UpdateChecker());
 
 /// Fills trip start/end address labels via Nominatim (best effort).
 final tripAddressResolverProvider = Provider<TripAddressResolver>(

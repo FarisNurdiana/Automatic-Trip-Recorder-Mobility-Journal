@@ -1,9 +1,18 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/providers.dart';
 import '../../../core/constants/enums.dart';
+import '../../../core/errors/app_logger.dart';
 import '../../../l10n/gen/app_localizations.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -54,6 +63,111 @@ class SettingsPage extends ConsumerWidget {
     );
     if (result == null) return;
     await onSave(double.tryParse(result.trim().replaceAll(',', '.')));
+  }
+
+  static void _snack(BuildContext context, String message) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// VACUUM-snapshot the database into a dated file and hand it to the
+  /// system share sheet (Drive, file manager, email, ...).
+  static Future<void> _exportBackup(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final dir = await getTemporaryDirectory();
+      final now = DateTime.now();
+      final name =
+          'motivox_backup_${now.year}'
+          '${now.month.toString().padLeft(2, '0')}'
+          '${now.day.toString().padLeft(2, '0')}.db';
+      final file = await ref
+          .read(backupServiceProvider)
+          .exportTo(p.join(dir.path, name));
+      await Share.shareXFiles([XFile(file.path)]);
+    } catch (_) {
+      if (context.mounted) _snack(context, l10n.backupError);
+    }
+  }
+
+  static Future<void> _importBackup(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final userId = ref.read(authControllerProvider).user?.id ?? '';
+    try {
+      final picked = await FilePicker.pickFiles();
+      final path = picked?.files.single.path;
+      if (path == null) return;
+      final result = await ref
+          .read(backupServiceProvider)
+          .importFrom(path, assignToUserId: userId);
+      if (!context.mounted) return;
+      _snack(
+        context,
+        result.tripsImported > 0
+            ? l10n.backupImportSuccess('${result.tripsImported}')
+            : l10n.backupImportNone,
+      );
+    } on FormatException {
+      if (context.mounted) _snack(context, l10n.backupInvalidFile);
+    } catch (_) {
+      if (context.mounted) _snack(context, l10n.backupError);
+    }
+  }
+
+  static Future<void> _checkUpdate(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final result = await ref.read(updateCheckerProvider).check();
+    if (!context.mounted) return;
+    if (result == null) {
+      _snack(context, l10n.updateCheckFailed);
+      return;
+    }
+    if (!result.hasUpdate) {
+      _snack(context, l10n.updateUpToDate);
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.updateCheck),
+        content: Text(l10n.updateAvailable('${result.latestVersionCode}')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              launchUrl(
+                Uri.parse(result.releaseUrl),
+                mode: LaunchMode.externalApplication,
+              );
+            },
+            child: Text(l10n.updateDownload),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Future<void> _shareLog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final contents = await AppLogger.instance.readLogContents();
+    if (contents == null || contents.trim().isEmpty) {
+      if (context.mounted) _snack(context, l10n.shareLogEmpty);
+      return;
+    }
+    try {
+      final dir = await getTemporaryDirectory();
+      final file = File(p.join(dir.path, 'motivox_log.txt'));
+      await file.writeAsString(contents);
+      await Share.shareXFiles([XFile(file.path)]);
+    } catch (_) {
+      if (context.mounted) _snack(context, l10n.commonError);
+    }
   }
 
   @override
@@ -290,6 +404,51 @@ class SettingsPage extends ConsumerWidget {
                 DropdownMenuItem(value: 'en', child: Text('English')),
               ],
             ),
+          ),
+          const Divider(),
+          // --- data & app: backup, restore, update, log ---
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Text(
+              l10n.settingsDataSection,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.backup_outlined),
+            title: Text(l10n.backupExport),
+            subtitle: Text(l10n.backupExportDesc),
+            onTap: () => _exportBackup(context, ref),
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings_backup_restore),
+            title: Text(l10n.backupImport),
+            subtitle: Text(l10n.backupImportDesc),
+            onTap: () => _importBackup(context, ref),
+          ),
+          FutureBuilder<PackageInfo>(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snapshot) => ListTile(
+              leading: const Icon(Icons.system_update_alt),
+              title: Text(l10n.updateCheck),
+              subtitle: snapshot.hasData
+                  ? Text(
+                      l10n.updateCurrentVersion(
+                        '${snapshot.data!.version}+${snapshot.data!.buildNumber}',
+                      ),
+                    )
+                  : null,
+              onTap: () => _checkUpdate(context, ref),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.bug_report_outlined),
+            title: Text(l10n.shareLog),
+            subtitle: Text(l10n.shareLogDesc),
+            onTap: () => _shareLog(context),
           ),
           const Divider(),
           ListTile(

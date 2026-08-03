@@ -1044,4 +1044,97 @@ class AppLocalizationsId extends AppLocalizations {
   String shareTripHeading(String date) {
     return 'Perjalanan $date';
   }
+
+  @override
+  String get settingsDataSection => 'Data & aplikasi';
+
+  @override
+  String get backupExport => 'Cadangkan riwayat';
+
+  @override
+  String get backupExportDesc =>
+      'Simpan seluruh riwayat sebagai satu file cadangan (bisa ditaruh di Google Drive dll.)';
+
+  @override
+  String get backupImport => 'Pulihkan dari cadangan';
+
+  @override
+  String get backupImportDesc => 'Gabungkan file cadangan ke riwayat di HP ini';
+
+  @override
+  String backupImportSuccess(String count) {
+    return '$count perjalanan dipulihkan dari cadangan';
+  }
+
+  @override
+  String get backupImportNone =>
+      'Tidak ada perjalanan baru di file cadangan itu';
+
+  @override
+  String get backupInvalidFile => 'File yang dipilih bukan cadangan Motivox';
+
+  @override
+  String get backupError => 'Gagal memproses cadangan';
+
+  @override
+  String get updateCheck => 'Periksa pembaruan';
+
+  @override
+  String updateCurrentVersion(String version) {
+    return 'Versi terpasang: $version';
+  }
+
+  @override
+  String updateAvailable(String build) {
+    return 'Versi baru tersedia (build $build)';
+  }
+
+  @override
+  String get updateUpToDate => 'Motivox sudah versi terbaru';
+
+  @override
+  String get updateCheckFailed =>
+      'Tidak dapat memeriksa pembaruan. Periksa koneksi lalu coba lagi.';
+
+  @override
+  String get updateDownload => 'Unduh';
+
+  @override
+  String get shareLog => 'Bagikan log aplikasi';
+
+  @override
+  String get shareLogDesc =>
+      'Membantu diagnosis masalah; tidak berisi kata sandi atau token';
+
+  @override
+  String get shareLogEmpty => 'Belum ada log untuk dibagikan';
+
+  @override
+  String get vehicleNotDriver => 'Bukan saya pengemudinya — buang perjalanan';
+
+  @override
+  String get vehicleNotDriverConfirmTitle => 'Buang perjalanan ini?';
+
+  @override
+  String get vehicleNotDriverConfirmBody =>
+      'Perjalanan saat Anda menjadi penumpang akan dihapus dari riwayat dan tidak bisa dikembalikan.';
+
+  @override
+  String get vehicleNotDriverDeleted => 'Perjalanan dibuang';
+
+  @override
+  String get commonDiscard => 'Buang';
+
+  @override
+  String get permGuideIntro =>
+      'Agar perekaman otomatis berjalan walau aplikasi tertutup, semua izin di bawah harus aktif dan izin lokasi disetel “Izinkan sepanjang waktu”.';
+
+  @override
+  String permAutostartTitle(String manufacturer) {
+    return 'Autostart merek HP ($manufacturer)';
+  }
+
+  @override
+  String get permAutostartDesc =>
+      'Beberapa merek HP (Xiaomi, Oppo, Vivo, Realme, Huawei) menghentikan aplikasi latar belakang secara agresif. Buka pengaturan sistem dan aktifkan “Autostart” / “Mulai otomatis” untuk Motivox, lalu bebaskan Motivox dari pembatasan baterai.';
 }

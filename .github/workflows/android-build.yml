@@ -46,29 +46,40 @@ jobs:
       - name: Run tests
         run: flutter test
 
-      - name: Build debug APK
-        run: flutter build apk --debug
+      # Release build: ~4x smaller and faster than debug, signed with the
+      # same stable key so it installs as an update over previous builds.
+      - name: Build release APK
+        run: flutter build apk --release
+
+      # Consumed by the in-app update checker (Pengaturan -> Periksa
+      # pembaruan): versionCode is the run number the APK was built with.
+      - name: Write version.json
+        run: |
+          echo "{\"versionCode\": ${{ github.run_number }}, \"apkUrl\": \"https://github.com/${{ github.repository }}/releases/download/debug-latest/app-release.apk\"}" > version.json
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 14
 
-      # Publish the debug APK to a rolling "debug-latest" release so it can
-      # be downloaded directly (no zip, no login) from the Releases page.
-      - name: Publish debug APK release
+      # Publish the APK to a rolling "debug-latest" release so it can be
+      # downloaded directly (no zip, no login) from the Releases page. The
+      # tag name is kept for URL stability with older instructions.
+      - name: Publish APK release
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: debug-latest
-          name: "TripLog debug APK (terbaru)"
+          name: "Motivox APK (terbaru)"
           body: |
-            APK debug terbaru, dibangun otomatis dari commit ${{ github.sha }}.
+            APK Motivox terbaru (build release, ${{ github.run_number }}), dibangun otomatis dari commit ${{ github.sha }}.
 
             Cara pakai:
-            1. Unduh `app-debug.apk` di bawah.
-            2. Tarik file tersebut ke layar emulator Android (atau instal di HP).
+            1. Unduh `app-release.apk` di bawah.
+            2. Instal di HP (atau tarik ke layar emulator Android). Instal langsung di atas versi lama — riwayat tetap aman.
           prerelease: true
-          files: build/app/outputs/flutter-apk/app-debug.apk
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            version.json

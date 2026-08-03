@@ -40,6 +40,36 @@ class _VehicleConfirmationPageState
     VehicleType.other,
   ];
 
+  /// Passenger ride recorded by mistake (ojek, bus, friend's car): discard
+  /// the trip completely so the history stays the driver's own record.
+  Future<void> _discardAsPassenger() async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.vehicleNotDriverConfirmTitle),
+        content: Text(l10n.vehicleNotDriverConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.commonDiscard),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    await ref.read(tripRepositoryProvider).deleteTrip(widget.tripId);
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.vehicleNotDriverDeleted)));
+    context.go('/');
+  }
+
   Future<void> _confirm(VehicleType type) async {
     await ref
         .read(tripRepositoryProvider)
@@ -96,6 +126,14 @@ class _VehicleConfirmationPageState
                   onPressed: () =>
                       context.pushReplacement('/trips/${widget.tripId}'),
                   child: Text(l10n.commonSkip),
+                ),
+                TextButton.icon(
+                  onPressed: _discardAsPassenger,
+                  icon: const Icon(Icons.person_off_outlined, size: 18),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                  label: Text(l10n.vehicleNotDriver),
                 ),
               ],
             ),

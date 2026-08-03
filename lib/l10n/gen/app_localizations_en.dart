@@ -1040,4 +1040,97 @@ class AppLocalizationsEn extends AppLocalizations {
   String shareTripHeading(String date) {
     return 'Trip on $date';
   }
+
+  @override
+  String get settingsDataSection => 'Data & app';
+
+  @override
+  String get backupExport => 'Back up history';
+
+  @override
+  String get backupExportDesc =>
+      'Save your entire history as a single backup file (store it on Google Drive etc.)';
+
+  @override
+  String get backupImport => 'Restore from backup';
+
+  @override
+  String get backupImportDesc =>
+      'Merge a backup file into this phone\'s history';
+
+  @override
+  String backupImportSuccess(String count) {
+    return '$count trips restored from the backup';
+  }
+
+  @override
+  String get backupImportNone => 'No new trips in that backup file';
+
+  @override
+  String get backupInvalidFile => 'The selected file is not a Motivox backup';
+
+  @override
+  String get backupError => 'Failed to process the backup';
+
+  @override
+  String get updateCheck => 'Check for updates';
+
+  @override
+  String updateCurrentVersion(String version) {
+    return 'Installed version: $version';
+  }
+
+  @override
+  String updateAvailable(String build) {
+    return 'New version available (build $build)';
+  }
+
+  @override
+  String get updateUpToDate => 'Motivox is up to date';
+
+  @override
+  String get updateCheckFailed =>
+      'Could not check for updates. Check your connection and try again.';
+
+  @override
+  String get updateDownload => 'Download';
+
+  @override
+  String get shareLog => 'Share app log';
+
+  @override
+  String get shareLogDesc =>
+      'Helps diagnose problems; contains no passwords or tokens';
+
+  @override
+  String get shareLogEmpty => 'No log to share yet';
+
+  @override
+  String get vehicleNotDriver => 'I wasn\'t the driver — discard trip';
+
+  @override
+  String get vehicleNotDriverConfirmTitle => 'Discard this trip?';
+
+  @override
+  String get vehicleNotDriverConfirmBody =>
+      'This passenger trip will be deleted from your history and cannot be recovered.';
+
+  @override
+  String get vehicleNotDriverDeleted => 'Trip discarded';
+
+  @override
+  String get commonDiscard => 'Discard';
+
+  @override
+  String get permGuideIntro =>
+      'For automatic recording to work while the app is closed, every permission below must be granted and location must be set to “Allow all the time”.';
+
+  @override
+  String permAutostartTitle(String manufacturer) {
+    return 'Manufacturer autostart ($manufacturer)';
+  }
+
+  @override
+  String get permAutostartDesc =>
+      'Some phone brands (Xiaomi, Oppo, Vivo, Realme, Huawei) aggressively kill background apps. Open system settings and enable “Autostart” for Motivox, then exempt Motivox from battery restrictions.';
 }

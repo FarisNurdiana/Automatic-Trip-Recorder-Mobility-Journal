@@ -35,6 +35,8 @@ class TripTrackingService : Service() {
         const val ACTION_STOP = "com.triplog.STOP_TRACKING"
         const val ACTION_SET_PROFILE = "com.triplog.SET_PROFILE"
         const val ACTION_UPDATE_NOTIFICATION = "com.triplog.UPDATE_NOTIFICATION"
+        const val ACTION_SCHEDULE_AUTO_STOP = "com.triplog.SCHEDULE_AUTO_STOP"
+        const val ACTION_CANCEL_AUTO_STOP = "com.triplog.CANCEL_AUTO_STOP"
         const val ACTION_NOTIF_PAUSE = "com.triplog.NOTIF_PAUSE"
         const val ACTION_NOTIF_RESUME = "com.triplog.NOTIF_RESUME"
         const val ACTION_NOTIF_STOP = "com.triplog.NOTIF_STOP"
@@ -47,12 +49,28 @@ class TripTrackingService : Service() {
         const val EXTRA_BODY = "body"
         const val EXTRA_PAUSED = "paused"
         const val EXTRA_QUESTION = "question"
+        const val EXTRA_AUTO_STARTED = "autoStarted"
 
         private const val CHANNEL_ID = "triplog_tracking"
         private const val NOTIFICATION_ID = 100
 
+        /**
+         * How long after the driver stops being "in vehicle" an auto-started
+         * background recording keeps running before shutting itself down.
+         * Only applies while the Flutter side is dead — once the app is
+         * opened, the Dart state machine owns the stop logic.
+         */
+        private const val AUTO_STOP_DELAY_MS = 8 * 60 * 1000L
+
+        private const val ALARM_COOLDOWN_MS = 30_000L
+        private const val ALARM_DURATION_MS = 10_000L
+
         @Volatile
         var isRunning = false
+
+        /** True when activity recognition (not Dart) started this recording. */
+        @Volatile
+        var autoStarted = false
 
         /** Wall-clock time tracking started; 0 when not tracking. */
         var startedAtMillis: Long = 0
@@ -65,12 +83,19 @@ class TripTrackingService : Service() {
     private var lastBody = ""
     private var lastPaused = false
     private var lastQuestion = false
+    private var lastAlarmAtMillis = 0L
+    private val autoStopHandler = android.os.Handler(Looper.getMainLooper())
+    private val autoStopRunnable = Runnable {
+        if (isRunning && autoStarted && EventStreams.locationSink == null) {
+            stopTracking()
+        }
+    }
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
             val battery = batteryLevel()
             for (location in result.locations) {
-                EventStreams.emitLocation(
+                val event =
                     mapOf(
                         "timestampMs" to location.time,
                         "latitude" to location.latitude,
@@ -86,9 +111,53 @@ class TripTrackingService : Service() {
                         "isMocked" to isMocked(location),
                         "batteryLevel" to battery,
                     )
-                )
+                if (EventStreams.locationSink == null) {
+                    // App closed: persist to disk (survives process death)
+                    // and run the over-speed alarm natively, since the Dart
+                    // side that normally does both is not alive.
+                    BackgroundTrackStore.append(this@TripTrackingService, event)
+                    maybeFireBackgroundSpeedAlarm(location)
+                }
+                EventStreams.emitLocation(event)
             }
         }
+    }
+
+    /**
+     * Over-speed warning for background-recorded trips. Mirrors the Dart
+     * implementation: reads the user's speed-limit setting, fires the loud
+     * alarm for 10 s, then stays quiet for a 30 s cooldown.
+     */
+    private fun maybeFireBackgroundSpeedAlarm(location: android.location.Location) {
+        if (!location.hasSpeed()) return
+        val limitKmh = readSpeedLimitKmh() ?: return
+        val speedKmh = location.speed * 3.6
+        if (speedKmh <= limitKmh) return
+        val now = System.currentTimeMillis()
+        if (now - lastAlarmAtMillis < ALARM_COOLDOWN_MS) return
+        lastAlarmAtMillis = now
+        SpeedAlarmPlayer.start(this, ALARM_DURATION_MS)
+    }
+
+    /**
+     * Reads flutter.speedLimitKmh from the shared_preferences plugin store.
+     * The Android plugin encodes doubles as a Base64-prefixed string
+     * ("This is the prefix for Double."), so every plausible representation
+     * is handled. Null when the warning is disabled.
+     */
+    private fun readSpeedLimitKmh(): Double? {
+        val raw = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            .all["flutter.speedLimitKmh"] ?: return null
+        val value = when (raw) {
+            is Double -> raw
+            is Float -> raw.toDouble()
+            is Long -> Double.fromBits(raw)
+            is String -> raw
+                .removePrefix("VGhpcyBpcyB0aGUgcHJlZml4IGZvciBEb3VibGUu")
+                .toDoubleOrNull()
+            else -> null
+        } ?: return null
+        return if (value > 0 && value < 1000) value else null
     }
 
     private fun isMocked(location: android.location.Location): Boolean =
@@ -107,13 +176,40 @@ class TripTrackingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
+        if (intent == null) {
+            // START_STICKY restart after a process kill: without an intent
+            // there is nothing to resume — the persisted background track
+            // (if any) will be imported when the app next opens.
+            stopSelf()
+            return START_NOT_STICKY
+        }
+        when (intent.action) {
             ACTION_START -> {
                 currentProfile = intent.getStringExtra(EXTRA_PROFILE) ?: "moving"
                 startForegroundWithNotification()
                 requestUpdates()
-                if (!isRunning) startedAtMillis = System.currentTimeMillis()
+                autoStopHandler.removeCallbacks(autoStopRunnable)
+                if (!isRunning) {
+                    startedAtMillis = System.currentTimeMillis()
+                    autoStarted = intent.getBooleanExtra(EXTRA_AUTO_STARTED, false)
+                    if (autoStarted) {
+                        BackgroundTrackStore.begin(this, startedAtMillis)
+                    } else {
+                        // Dart started this itself: it is alive and persists
+                        // points to its own database.
+                        BackgroundTrackStore.suspended = true
+                    }
+                }
                 isRunning = true
+            }
+            ACTION_SCHEDULE_AUTO_STOP -> {
+                if (isRunning && autoStarted && EventStreams.locationSink == null) {
+                    autoStopHandler.removeCallbacks(autoStopRunnable)
+                    autoStopHandler.postDelayed(autoStopRunnable, AUTO_STOP_DELAY_MS)
+                }
+            }
+            ACTION_CANCEL_AUTO_STOP -> {
+                autoStopHandler.removeCallbacks(autoStopRunnable)
             }
             ACTION_SET_PROFILE -> {
                 currentProfile = intent.getStringExtra(EXTRA_PROFILE) ?: currentProfile
@@ -166,7 +262,9 @@ class TripTrackingService : Service() {
 
     private fun stopTracking() {
         isRunning = false
+        autoStarted = false
         startedAtMillis = 0
+        autoStopHandler.removeCallbacks(autoStopRunnable)
         fusedClient.removeLocationUpdates(locationCallback)
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -238,7 +336,9 @@ class TripTrackingService : Service() {
 
     override fun onDestroy() {
         isRunning = false
+        autoStarted = false
         startedAtMillis = 0
+        autoStopHandler.removeCallbacks(autoStopRunnable)
         fusedClient.removeLocationUpdates(locationCallback)
         super.onDestroy()
     }

@@ -69,8 +69,18 @@ class SimulatedLocationTrackingService implements LocationTrackingService {
   /// Set by tests to simulate a native auto-started background recording.
   DateTime? backgroundStartedAt;
 
+  /// Set by tests to simulate the natively persisted background track.
+  List<String> backgroundTrackLines = [];
+
   @override
   Future<DateTime?> backgroundTrackingStartedAt() async => backgroundStartedAt;
+
+  @override
+  Future<List<String>> consumeBackgroundTrackLines() async {
+    final lines = backgroundTrackLines;
+    backgroundTrackLines = [];
+    return lines;
+  }
 
   void dispose() {
     _locations.close();

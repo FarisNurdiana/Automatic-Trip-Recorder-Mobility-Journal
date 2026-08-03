@@ -1999,6 +1999,162 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Perjalanan {date}'**
   String shareTripHeading(String date);
+
+  /// No description provided for @settingsDataSection.
+  ///
+  /// In id, this message translates to:
+  /// **'Data & aplikasi'**
+  String get settingsDataSection;
+
+  /// No description provided for @backupExport.
+  ///
+  /// In id, this message translates to:
+  /// **'Cadangkan riwayat'**
+  String get backupExport;
+
+  /// No description provided for @backupExportDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Simpan seluruh riwayat sebagai satu file cadangan (bisa ditaruh di Google Drive dll.)'**
+  String get backupExportDesc;
+
+  /// No description provided for @backupImport.
+  ///
+  /// In id, this message translates to:
+  /// **'Pulihkan dari cadangan'**
+  String get backupImport;
+
+  /// No description provided for @backupImportDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Gabungkan file cadangan ke riwayat di HP ini'**
+  String get backupImportDesc;
+
+  /// No description provided for @backupImportSuccess.
+  ///
+  /// In id, this message translates to:
+  /// **'{count} perjalanan dipulihkan dari cadangan'**
+  String backupImportSuccess(String count);
+
+  /// No description provided for @backupImportNone.
+  ///
+  /// In id, this message translates to:
+  /// **'Tidak ada perjalanan baru di file cadangan itu'**
+  String get backupImportNone;
+
+  /// No description provided for @backupInvalidFile.
+  ///
+  /// In id, this message translates to:
+  /// **'File yang dipilih bukan cadangan Motivox'**
+  String get backupInvalidFile;
+
+  /// No description provided for @backupError.
+  ///
+  /// In id, this message translates to:
+  /// **'Gagal memproses cadangan'**
+  String get backupError;
+
+  /// No description provided for @updateCheck.
+  ///
+  /// In id, this message translates to:
+  /// **'Periksa pembaruan'**
+  String get updateCheck;
+
+  /// No description provided for @updateCurrentVersion.
+  ///
+  /// In id, this message translates to:
+  /// **'Versi terpasang: {version}'**
+  String updateCurrentVersion(String version);
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In id, this message translates to:
+  /// **'Versi baru tersedia (build {build})'**
+  String updateAvailable(String build);
+
+  /// No description provided for @updateUpToDate.
+  ///
+  /// In id, this message translates to:
+  /// **'Motivox sudah versi terbaru'**
+  String get updateUpToDate;
+
+  /// No description provided for @updateCheckFailed.
+  ///
+  /// In id, this message translates to:
+  /// **'Tidak dapat memeriksa pembaruan. Periksa koneksi lalu coba lagi.'**
+  String get updateCheckFailed;
+
+  /// No description provided for @updateDownload.
+  ///
+  /// In id, this message translates to:
+  /// **'Unduh'**
+  String get updateDownload;
+
+  /// No description provided for @shareLog.
+  ///
+  /// In id, this message translates to:
+  /// **'Bagikan log aplikasi'**
+  String get shareLog;
+
+  /// No description provided for @shareLogDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Membantu diagnosis masalah; tidak berisi kata sandi atau token'**
+  String get shareLogDesc;
+
+  /// No description provided for @shareLogEmpty.
+  ///
+  /// In id, this message translates to:
+  /// **'Belum ada log untuk dibagikan'**
+  String get shareLogEmpty;
+
+  /// No description provided for @vehicleNotDriver.
+  ///
+  /// In id, this message translates to:
+  /// **'Bukan saya pengemudinya — buang perjalanan'**
+  String get vehicleNotDriver;
+
+  /// No description provided for @vehicleNotDriverConfirmTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Buang perjalanan ini?'**
+  String get vehicleNotDriverConfirmTitle;
+
+  /// No description provided for @vehicleNotDriverConfirmBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Perjalanan saat Anda menjadi penumpang akan dihapus dari riwayat dan tidak bisa dikembalikan.'**
+  String get vehicleNotDriverConfirmBody;
+
+  /// No description provided for @vehicleNotDriverDeleted.
+  ///
+  /// In id, this message translates to:
+  /// **'Perjalanan dibuang'**
+  String get vehicleNotDriverDeleted;
+
+  /// No description provided for @commonDiscard.
+  ///
+  /// In id, this message translates to:
+  /// **'Buang'**
+  String get commonDiscard;
+
+  /// No description provided for @permGuideIntro.
+  ///
+  /// In id, this message translates to:
+  /// **'Agar perekaman otomatis berjalan walau aplikasi tertutup, semua izin di bawah harus aktif dan izin lokasi disetel “Izinkan sepanjang waktu”.'**
+  String get permGuideIntro;
+
+  /// No description provided for @permAutostartTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Autostart merek HP ({manufacturer})'**
+  String permAutostartTitle(String manufacturer);
+
+  /// No description provided for @permAutostartDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Beberapa merek HP (Xiaomi, Oppo, Vivo, Realme, Huawei) menghentikan aplikasi latar belakang secara agresif. Buka pengaturan sistem dan aktifkan “Autostart” / “Mulai otomatis” untuk Motivox, lalu bebaskan Motivox dari pembatasan baterai.'**
+  String get permAutostartDesc;
 }
 
 class _AppLocalizationsDelegate

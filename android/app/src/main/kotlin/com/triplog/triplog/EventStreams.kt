@@ -43,6 +43,9 @@ object EventStreams {
         }
     private val activityBuffer = ArrayDeque<Map<String, Any?>>()
 
+    /** Main-thread only (called from MethodChannel handlers). */
+    fun clearLocationBuffer() = locationBuffer.clear()
+
     fun emitLocation(event: Map<String, Any?>) = mainHandler.post {
         locationSink?.success(event)
             ?: buffer(locationBuffer, event, MAX_LOCATION_BUFFER)

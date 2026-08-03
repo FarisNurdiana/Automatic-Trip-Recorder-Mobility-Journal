@@ -45,4 +45,9 @@ abstract interface class LocationTrackingService {
   /// closed), returns the moment it started; null otherwise. Lets the
   /// controller adopt the background recording on startup.
   Future<DateTime?> backgroundTrackingStartedAt();
+
+  /// Raw JSON lines of GPS points persisted natively while the app was
+  /// closed (see BackgroundTrackParser). Consuming clears the store; returns
+  /// an empty list when there is nothing pending.
+  Future<List<String>> consumeBackgroundTrackLines();
 }

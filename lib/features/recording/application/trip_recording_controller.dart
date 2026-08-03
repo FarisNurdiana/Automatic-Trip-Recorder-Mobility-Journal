@@ -9,6 +9,7 @@ import '../../../core/activity/activity_recognition_service.dart';
 import '../../../core/config/sensor_config.dart';
 import '../../../core/config/trip_detection_config.dart';
 import '../../../core/constants/enums.dart';
+import '../../../core/location/background_track.dart';
 import '../../../core/location/location_models.dart';
 import '../../../core/location/location_tracking_service.dart';
 import '../../../core/platform/speed_alarm.dart';
@@ -178,6 +179,9 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
 
   /// Last time the loud over-speed alarm fired, for the re-arm cooldown.
   DateTime? _lastSpeedAlarmAt;
+
+  /// Previous fix seen by the alarm check, for implied-speed fallback.
+  RecordedLocation? _lastAlarmProbe;
   static const _speedAlarmDuration = Duration(seconds: 10);
   static const _speedAlarmCooldown = Duration(seconds: 30);
 
@@ -234,23 +238,29 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
     await _startSensorsIfEnabled(trip.id);
   }
 
-  /// When activity recognition auto-started the native tracker while the
-  /// app was closed, no Dart trip exists yet — create one dated to the
-  /// native start time and attach to the stream. The native bridge buffered
-  /// every GPS point since the start, and subscribing drains that buffer
-  /// through [_onLocation], so nothing recorded in the background is lost.
+  /// Adopts whatever activity recognition recorded while the app was
+  /// closed. Two sources are combined:
+  ///  * the natively persisted track file (survives process death) — every
+  ///    completed segment becomes a finished trip in the history;
+  ///  * a still-running native tracker — continued live as the active trip,
+  ///    with its persisted points imported and later points arriving
+  ///    through the (buffered) event stream.
   Future<void> _adoptBackgroundTracking() async {
     if (state.activeTrip != null ||
         state.machineState != TripRecordingState.idle) {
       return;
     }
-    DateTime? startedAt;
+    DateTime? liveStartedAt;
+    var segments = <BackgroundTrackSegment>[];
     try {
-      startedAt = await locationService.backgroundTrackingStartedAt();
+      liveStartedAt = await locationService.backgroundTrackingStartedAt();
+      segments = BackgroundTrackParser.parse(
+        await locationService.consumeBackgroundTrackLines(),
+      );
     } catch (e) {
-      _log.warning('backgroundTrackingStartedAt failed', e);
+      _log.warning('reading background track failed', e);
     }
-    if (startedAt == null) return;
+    if (liveStartedAt == null && segments.isEmpty) return;
     if (userIdProvider().isEmpty) {
       // Nobody to attribute the trip to: shut the orphan service down
       // instead of draining the battery.
@@ -259,9 +269,105 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
       } catch (_) {}
       return;
     }
-    _log.info('adopting background tracking started at $startedAt');
-    await _applyTransitions(stateMachine.manualStart(startedAt));
+
+    // The last segment belongs to the still-running recording (matched by
+    // start time); everything before it is a completed background trip.
+    BackgroundTrackSegment? liveSegment;
+    if (liveStartedAt != null &&
+        segments.isNotEmpty &&
+        segments.last.startedAt.millisecondsSinceEpoch ==
+            liveStartedAt.millisecondsSinceEpoch) {
+      liveSegment = segments.removeLast();
+    }
+    for (final segment in segments) {
+      await _importFinishedSegment(segment);
+    }
+    if (liveStartedAt == null) return;
+
+    _log.info('adopting background tracking started at $liveStartedAt');
+    await _applyTransitions(stateMachine.manualStart(liveStartedAt));
+    final trip = state.activeTrip;
+    if (trip != null && liveSegment != null && liveSegment.points.isNotEmpty) {
+      for (final point in liveSegment.points) {
+        await _appendImportedPoint(trip.id, point);
+      }
+      await _restoreLiveStatsFromDb(trip);
+    }
     state = state.copyWith(recoveredTrip: true);
+  }
+
+  /// Stores one completed background segment as a finished trip. Segments
+  /// with no usable GPS are dropped entirely instead of leaving empty trips
+  /// in the history.
+  Future<void> _importFinishedSegment(BackgroundTrackSegment segment) async {
+    if (segment.points.length < 2) return;
+    try {
+      final trip = await repository.createTrip(
+        userId: userIdProvider(),
+        startedAt: segment.startedAt,
+        metadata: metadataProvider?.call(),
+        mountPosition:
+            mountPositionProvider?.call() ?? PhoneMountPosition.unknown,
+      );
+      for (final point in segment.points) {
+        await _appendImportedPoint(trip.id, point);
+      }
+      final summary = await repository.finishTrip(
+        trip.id,
+        segment.points.last.recordedAt,
+        finishReason: 'background-import',
+        finishedAutomatically: false,
+        lenient: true,
+      );
+      if (summary == null) {
+        await repository.deleteTrip(trip.id);
+      } else {
+        _log.info(
+          'imported background trip ${trip.id} '
+          '(${segment.points.length} points)',
+        );
+      }
+    } catch (e) {
+      _log.severe('importing background segment failed', e);
+    }
+  }
+
+  /// Appends a point recorded in the background, applying the same accuracy
+  /// gate live recording uses.
+  Future<void> _appendImportedPoint(
+    String tripId,
+    RecordedLocation point,
+  ) async {
+    final accuracyOk =
+        point.horizontalAccuracy == null ||
+        point.horizontalAccuracy! <= config.maxHorizontalAccuracyMeters;
+    if (!accuracyOk) return;
+    try {
+      await repository.appendPoint(tripId, point);
+    } catch (e) {
+      _log.warning('storing imported point failed', e);
+    }
+  }
+
+  /// Recomputes live distance/elapsed from the stored points (same math as
+  /// trip recovery) after a bulk import into the active trip.
+  Future<void> _restoreLiveStatsFromDb(Trip trip) async {
+    final points = await repository.pointsForTrip(trip.id);
+    if (points.isEmpty) return;
+    _lastStoredPoint = points.last;
+    var distance = 0.0;
+    for (var i = 1; i < points.length; i++) {
+      distance += GeoUtils.haversineMeters(
+        points[i - 1].latitude,
+        points[i - 1].longitude,
+        points[i].latitude,
+        points[i].longitude,
+      );
+    }
+    state = state.copyWith(
+      liveDistanceMeters: distance,
+      liveElapsed: _clock().difference(trip.startedAt),
+    );
   }
 
   // ---------------------------------------------------------------------
@@ -381,16 +487,39 @@ class TripRecordingController extends StateNotifier<RecordingUiState> {
   /// Fires the loud 10-second alarm + vibration when the driver exceeds the
   /// configured speed limit during an active trip. A cooldown keeps it from
   /// re-triggering continuously while the speed stays above the limit.
+  ///
+  /// Cellular fixes often carry no speed value, so the implied speed
+  /// (displacement over time between consecutive fixes) fills in — capped
+  /// at the realistic maximum so a GPS jump can't cause a false alarm.
   void _maybeFireSpeedAlarm(RecordedLocation location) {
+    final previous = _lastAlarmProbe;
+    _lastAlarmProbe = location;
     final alarm = speedAlarm;
     final limit = speedLimitKmhProvider?.call();
-    final speed = location.speedKmh;
-    if (alarm == null || limit == null || limit <= 0 || speed == null) return;
+    if (alarm == null || limit == null || limit <= 0) return;
     if (state.activeTrip == null ||
         state.machineState != TripRecordingState.recording) {
       return;
     }
-    if (speed <= limit) return;
+    var speed = location.speedKmh;
+    if (speed == null && previous != null) {
+      final dt =
+          location.recordedAt.difference(previous.recordedAt).inMilliseconds /
+          1000.0;
+      if (dt > 0) {
+        final implied = GeoUtils.msToKmh(
+          GeoUtils.haversineMeters(
+                previous.latitude,
+                previous.longitude,
+                location.latitude,
+                location.longitude,
+              ) /
+              dt,
+        );
+        if (implied <= config.maxRealisticSpeedKmh) speed = implied;
+      }
+    }
+    if (speed == null || speed <= limit) return;
     final now = _clock();
     if (_lastSpeedAlarmAt != null &&
         now.difference(_lastSpeedAlarmAt!) < _speedAlarmCooldown) {

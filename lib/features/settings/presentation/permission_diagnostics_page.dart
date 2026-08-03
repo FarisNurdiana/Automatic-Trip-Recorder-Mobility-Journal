@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,6 +30,35 @@ class PermissionDiagnosticsPage extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              // Why all of this matters: without "allow all the time" and
+              // the exemptions below, background auto-start silently fails.
+              Card(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.tips_and_updates_outlined,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          l10n.permGuideIntro,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
               _PermissionRow(
                 title: l10n.permLocation,
                 description: l10n.permLocationDesc,
@@ -99,6 +131,25 @@ class PermissionDiagnosticsPage extends ConsumerWidget {
                   await refresh();
                 },
               ),
+              if (!kIsWeb && Platform.isAndroid) ...[
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.rocket_launch_outlined),
+                    title: Text(
+                      l10n.permAutostartTitle(
+                        ref
+                                .watch(deviceMetadataProvider)
+                                .deviceModel
+                                ?.split(' ')
+                                .first ??
+                            'Android',
+                      ),
+                    ),
+                    subtitle: Text(l10n.permAutostartDesc),
+                    isThreeLine: true,
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               OutlinedButton.icon(
                 onPressed: service.openSettings,

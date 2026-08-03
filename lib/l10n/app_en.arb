@@ -325,7 +325,9 @@
   "historyTripsCount": "{count} trips",
   "@historyTripsCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "poiButton": "Find nearby fuel & repair shops",
@@ -340,8 +342,12 @@
   "tripFromTo": "{from} → {to}",
   "@tripFromTo": {
     "placeholders": {
-      "from": {"type": "String"},
-      "to": {"type": "String"}
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
     }
   },
   "poiError": "Could not fetch nearby places. Check your connection.",
@@ -351,7 +357,9 @@
   "homeGreetingNamed": "Hi, {name} 👋",
   "@homeGreetingNamed": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "homeGreetingAnon": "Hi 👋",
@@ -367,19 +375,25 @@
   "serviceIntervalEvery": "Every {km} km",
   "@serviceIntervalEvery": {
     "placeholders": {
-      "km": {"type": "String"}
+      "km": {
+        "type": "String"
+      }
     }
   },
   "serviceDueTitle": "Time to service your {vehicle}",
   "@serviceDueTitle": {
     "placeholders": {
-      "vehicle": {"type": "String"}
+      "vehicle": {
+        "type": "String"
+      }
     }
   },
   "serviceDueBody": "About {km} km recorded since the last service.",
   "@serviceDueBody": {
     "placeholders": {
-      "km": {"type": "int"}
+      "km": {
+        "type": "int"
+      }
     }
   },
   "serviceMarkDone": "Serviced",
@@ -399,7 +413,63 @@
   "shareTripHeading": "Trip on {date}",
   "@shareTripHeading": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
-  }
+  },
+  "settingsDataSection": "Data & app",
+  "backupExport": "Back up history",
+  "backupExportDesc": "Save your entire history as a single backup file (store it on Google Drive etc.)",
+  "backupImport": "Restore from backup",
+  "backupImportDesc": "Merge a backup file into this phone's history",
+  "backupImportSuccess": "{count} trips restored from the backup",
+  "@backupImportSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "backupImportNone": "No new trips in that backup file",
+  "backupInvalidFile": "The selected file is not a Motivox backup",
+  "backupError": "Failed to process the backup",
+  "updateCheck": "Check for updates",
+  "updateCurrentVersion": "Installed version: {version}",
+  "@updateCurrentVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateAvailable": "New version available (build {build})",
+  "@updateAvailable": {
+    "placeholders": {
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "updateUpToDate": "Motivox is up to date",
+  "updateCheckFailed": "Could not check for updates. Check your connection and try again.",
+  "updateDownload": "Download",
+  "shareLog": "Share app log",
+  "shareLogDesc": "Helps diagnose problems; contains no passwords or tokens",
+  "shareLogEmpty": "No log to share yet",
+  "vehicleNotDriver": "I wasn't the driver — discard trip",
+  "vehicleNotDriverConfirmTitle": "Discard this trip?",
+  "vehicleNotDriverConfirmBody": "This passenger trip will be deleted from your history and cannot be recovered.",
+  "vehicleNotDriverDeleted": "Trip discarded",
+  "commonDiscard": "Discard",
+  "permGuideIntro": "For automatic recording to work while the app is closed, every permission below must be granted and location must be set to “Allow all the time”.",
+  "permAutostartTitle": "Manufacturer autostart ({manufacturer})",
+  "@permAutostartTitle": {
+    "placeholders": {
+      "manufacturer": {
+        "type": "String"
+      }
+    }
+  },
+  "permAutostartDesc": "Some phone brands (Xiaomi, Oppo, Vivo, Realme, Huawei) aggressively kill background apps. Open system settings and enable “Autostart” for Motivox, then exempt Motivox from battery restrictions."
 }

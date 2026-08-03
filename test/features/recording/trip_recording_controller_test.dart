@@ -239,6 +239,19 @@ void main() {
       expect(alarm.startCount, 1);
     });
 
+    test('uses implied speed when the fix reports no speed', () async {
+      speedLimit = 60;
+      await controller.init();
+      await controller.startManual();
+      await pump();
+      // ~111 m in 4 s => ~100 km/h implied, but no reported speed at all
+      // (typical of cellular fixes).
+      location.emit(loc(secondsFromStart: 0, lat: -6.2000));
+      location.emit(loc(secondsFromStart: 4, lat: -6.2010));
+      await pump();
+      expect(alarm.startCount, 1);
+    });
+
     test('never fires without an active trip or configured limit', () async {
       await controller.init();
       await controller.startManual();
@@ -272,6 +285,49 @@ void main() {
       expect(controller.state.recoveredTrip, isTrue);
       expect(location.started, isTrue);
     });
+
+    test('init imports persisted points into the adopted live trip', () async {
+      location.backgroundStartedAt = t0;
+      location.backgroundTrackLines = [
+        '{"type":"start","startedAtMillis":${t0.millisecondsSinceEpoch}}',
+        for (var i = 0; i < 6; i++)
+          '{"timestampMs":${t0.add(Duration(seconds: 10 * i)).millisecondsSinceEpoch},'
+              '"latitude":${-6.2 + 0.001 * i},"longitude":106.8,'
+              '"horizontalAccuracy":8.0,"speed":11.0,"source":"fused"}',
+      ];
+      await controller.init();
+      await pump();
+      expect(controller.state.machineState, TripRecordingState.recording);
+      final points = await repo.pointsForTrip(controller.state.activeTrip!.id);
+      expect(points, hasLength(6));
+      expect(controller.state.liveDistanceMeters, greaterThan(400));
+    });
+
+    test(
+      'init turns completed background segments into finished trips',
+      () async {
+        // Service no longer running: the whole file is history.
+        location.backgroundStartedAt = null;
+        location.backgroundTrackLines = [
+          '{"type":"start","startedAtMillis":${t0.millisecondsSinceEpoch}}',
+          for (var i = 0; i < 12; i++)
+            '{"timestampMs":${t0.add(Duration(seconds: 10 * i)).millisecondsSinceEpoch},'
+                '"latitude":${-6.2 + 0.001 * i},"longitude":106.8,'
+                '"horizontalAccuracy":8.0,"speed":11.0,"source":"fused"}',
+        ];
+        await controller.init();
+        await pump();
+        expect(controller.state.machineState, TripRecordingState.idle);
+        expect(controller.state.activeTrip, isNull);
+        final trips = await repo.watchTrips('user-1').first;
+        expect(trips, hasLength(1));
+        expect(trips.single.status, TripRecordingState.finished.name);
+        expect(
+          trips.single.startedAt.millisecondsSinceEpoch,
+          t0.millisecondsSinceEpoch,
+        );
+      },
+    );
 
     test('init without background tracking stays idle', () async {
       await controller.init();

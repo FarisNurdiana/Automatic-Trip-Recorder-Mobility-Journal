@@ -325,7 +325,9 @@
   "historyTripsCount": "{count} perjalanan",
   "@historyTripsCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "poiButton": "Cari SPBU & bengkel terdekat",
@@ -340,8 +342,12 @@
   "tripFromTo": "{from} → {to}",
   "@tripFromTo": {
     "placeholders": {
-      "from": {"type": "String"},
-      "to": {"type": "String"}
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
     }
   },
   "poiError": "Gagal mencari lokasi sekitar. Periksa koneksi internet.",
@@ -351,7 +357,9 @@
   "homeGreetingNamed": "Halo, {name} 👋",
   "@homeGreetingNamed": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "homeGreetingAnon": "Halo 👋",
@@ -367,19 +375,25 @@
   "serviceIntervalEvery": "Setiap {km} km",
   "@serviceIntervalEvery": {
     "placeholders": {
-      "km": {"type": "String"}
+      "km": {
+        "type": "String"
+      }
     }
   },
   "serviceDueTitle": "Waktunya servis {vehicle}",
   "@serviceDueTitle": {
     "placeholders": {
-      "vehicle": {"type": "String"}
+      "vehicle": {
+        "type": "String"
+      }
     }
   },
   "serviceDueBody": "Sudah ±{km} km tercatat sejak servis terakhir.",
   "@serviceDueBody": {
     "placeholders": {
-      "km": {"type": "int"}
+      "km": {
+        "type": "int"
+      }
     }
   },
   "serviceMarkDone": "Sudah servis",
@@ -399,7 +413,63 @@
   "shareTripHeading": "Perjalanan {date}",
   "@shareTripHeading": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
-  }
+  },
+  "settingsDataSection": "Data & aplikasi",
+  "backupExport": "Cadangkan riwayat",
+  "backupExportDesc": "Simpan seluruh riwayat sebagai satu file cadangan (bisa ditaruh di Google Drive dll.)",
+  "backupImport": "Pulihkan dari cadangan",
+  "backupImportDesc": "Gabungkan file cadangan ke riwayat di HP ini",
+  "backupImportSuccess": "{count} perjalanan dipulihkan dari cadangan",
+  "@backupImportSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "backupImportNone": "Tidak ada perjalanan baru di file cadangan itu",
+  "backupInvalidFile": "File yang dipilih bukan cadangan Motivox",
+  "backupError": "Gagal memproses cadangan",
+  "updateCheck": "Periksa pembaruan",
+  "updateCurrentVersion": "Versi terpasang: {version}",
+  "@updateCurrentVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateAvailable": "Versi baru tersedia (build {build})",
+  "@updateAvailable": {
+    "placeholders": {
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "updateUpToDate": "Motivox sudah versi terbaru",
+  "updateCheckFailed": "Tidak dapat memeriksa pembaruan. Periksa koneksi lalu coba lagi.",
+  "updateDownload": "Unduh",
+  "shareLog": "Bagikan log aplikasi",
+  "shareLogDesc": "Membantu diagnosis masalah; tidak berisi kata sandi atau token",
+  "shareLogEmpty": "Belum ada log untuk dibagikan",
+  "vehicleNotDriver": "Bukan saya pengemudinya — buang perjalanan",
+  "vehicleNotDriverConfirmTitle": "Buang perjalanan ini?",
+  "vehicleNotDriverConfirmBody": "Perjalanan saat Anda menjadi penumpang akan dihapus dari riwayat dan tidak bisa dikembalikan.",
+  "vehicleNotDriverDeleted": "Perjalanan dibuang",
+  "commonDiscard": "Buang",
+  "permGuideIntro": "Agar perekaman otomatis berjalan walau aplikasi tertutup, semua izin di bawah harus aktif dan izin lokasi disetel “Izinkan sepanjang waktu”.",
+  "permAutostartTitle": "Autostart merek HP ({manufacturer})",
+  "@permAutostartTitle": {
+    "placeholders": {
+      "manufacturer": {
+        "type": "String"
+      }
+    }
+  },
+  "permAutostartDesc": "Beberapa merek HP (Xiaomi, Oppo, Vivo, Realme, Huawei) menghentikan aplikasi latar belakang secara agresif. Buka pengaturan sistem dan aktifkan “Autostart” / “Mulai otomatis” untuk Motivox, lalu bebaskan Motivox dari pembatasan baterai."
 }
