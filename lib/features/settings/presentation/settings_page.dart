@@ -96,7 +96,7 @@ class SettingsPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final userId = ref.read(authControllerProvider).user?.id ?? '';
     try {
-      final picked = await FilePicker.pickFiles();
+      final picked = await FilePicker.platform.pickFiles();
       final path = picked?.files.single.path;
       if (path == null) return;
       final result = await ref
