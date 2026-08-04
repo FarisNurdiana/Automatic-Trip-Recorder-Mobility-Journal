@@ -1144,4 +1144,38 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get settingsRoadSpeedLimitDesc =>
       'Saat merekam, batas resmi jalan yang sedang dilalui diambil dari OpenStreetMap dan dipakai alarm (posisi dikirim ke server OSM). Batas manual di atas menjadi cadangan.';
+
+  @override
+  String get riderStyleTitle => 'Karakter animasi perjalanan';
+
+  @override
+  String get riderStyleDesc =>
+      'Pengendara chibi yang tampil saat memutar animasi rute';
+
+  @override
+  String get riderStyleNormal => 'Normal';
+
+  @override
+  String get riderStyleCute => 'Lucu';
+
+  @override
+  String get riderStyleFierce => 'Sangar';
+
+  @override
+  String get congestionSpotsTitle => 'Titik macet';
+
+  @override
+  String congestionSpotEntry(String duration, String place) {
+    return 'Macet ±$duration di sekitar $place';
+  }
+
+  @override
+  String get congestionSpotsNote =>
+      'Perkiraan dari pola kecepatan; ruas oranye di peta menunjukkan lokasinya.';
+
+  @override
+  String get tripStartPoint => 'Titik berangkat';
+
+  @override
+  String get tripEndPoint => 'Titik tiba';
 }

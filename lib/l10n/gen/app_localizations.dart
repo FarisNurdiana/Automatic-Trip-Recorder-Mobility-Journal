@@ -2167,6 +2167,66 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Saat merekam, batas resmi jalan yang sedang dilalui diambil dari OpenStreetMap dan dipakai alarm (posisi dikirim ke server OSM). Batas manual di atas menjadi cadangan.'**
   String get settingsRoadSpeedLimitDesc;
+
+  /// No description provided for @riderStyleTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Karakter animasi perjalanan'**
+  String get riderStyleTitle;
+
+  /// No description provided for @riderStyleDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Pengendara chibi yang tampil saat memutar animasi rute'**
+  String get riderStyleDesc;
+
+  /// No description provided for @riderStyleNormal.
+  ///
+  /// In id, this message translates to:
+  /// **'Normal'**
+  String get riderStyleNormal;
+
+  /// No description provided for @riderStyleCute.
+  ///
+  /// In id, this message translates to:
+  /// **'Lucu'**
+  String get riderStyleCute;
+
+  /// No description provided for @riderStyleFierce.
+  ///
+  /// In id, this message translates to:
+  /// **'Sangar'**
+  String get riderStyleFierce;
+
+  /// No description provided for @congestionSpotsTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Titik macet'**
+  String get congestionSpotsTitle;
+
+  /// No description provided for @congestionSpotEntry.
+  ///
+  /// In id, this message translates to:
+  /// **'Macet ±{duration} di sekitar {place}'**
+  String congestionSpotEntry(String duration, String place);
+
+  /// No description provided for @congestionSpotsNote.
+  ///
+  /// In id, this message translates to:
+  /// **'Perkiraan dari pola kecepatan; ruas oranye di peta menunjukkan lokasinya.'**
+  String get congestionSpotsNote;
+
+  /// No description provided for @tripStartPoint.
+  ///
+  /// In id, this message translates to:
+  /// **'Titik berangkat'**
+  String get tripStartPoint;
+
+  /// No description provided for @tripEndPoint.
+  ///
+  /// In id, this message translates to:
+  /// **'Titik tiba'**
+  String get tripEndPoint;
 }
 
 class _AppLocalizationsDelegate

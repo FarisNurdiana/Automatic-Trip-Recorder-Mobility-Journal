@@ -327,6 +327,31 @@ class SettingsPage extends ConsumerWidget {
               onSave: controller.setSpeedLimit,
             ),
           ),
+          ListTile(
+            leading: const Icon(Icons.face_retouching_natural),
+            title: Text(l10n.riderStyleTitle),
+            subtitle: Text(l10n.riderStyleDesc),
+            trailing: DropdownButton<RiderStyle>(
+              value: settings.riderStyle,
+              onChanged: (v) {
+                if (v != null) controller.setRiderStyle(v);
+              },
+              items: [
+                DropdownMenuItem(
+                  value: RiderStyle.normal,
+                  child: Text('🛵 ${l10n.riderStyleNormal}'),
+                ),
+                DropdownMenuItem(
+                  value: RiderStyle.cute,
+                  child: Text('🐥 ${l10n.riderStyleCute}'),
+                ),
+                DropdownMenuItem(
+                  value: RiderStyle.fierce,
+                  child: Text('😈 ${l10n.riderStyleFierce}'),
+                ),
+              ],
+            ),
+          ),
           SwitchListTile(
             secondary: const Icon(Icons.map_outlined),
             title: Text(l10n.settingsRoadSpeedLimit),

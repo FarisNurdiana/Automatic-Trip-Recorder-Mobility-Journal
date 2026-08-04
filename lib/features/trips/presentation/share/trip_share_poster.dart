@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart' hide Path;
 import '../../../../core/utils/formatters.dart';
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../shared/widgets/brand_logo.dart';
+import '../../../../shared/widgets/motivox_wordmark.dart';
 import '../trip_detail_page.dart';
 import '../../domain/share_privacy.dart';
 
@@ -51,15 +52,7 @@ class TripSharePoster extends StatelessWidget {
             children: [
               const BrandLogo(size: 34),
               const SizedBox(width: 10),
-              const Text(
-                'MOTIVOX',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
-                  letterSpacing: 4,
-                ),
-              ),
+              const MotivoxWordmark(size: 18, color: Colors.white),
             ],
           ),
           const SizedBox(height: 18),

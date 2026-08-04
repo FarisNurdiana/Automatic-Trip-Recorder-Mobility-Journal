@@ -73,3 +73,9 @@ flutter:
     - assets/branding/
     - .env
     - assets/simulator/
+  fonts:
+    # Brand display font for the MOTIVOX wordmark (SIL OFL, see
+    # assets/fonts/OFL.txt).
+    - family: RacingSansOne
+      fonts:
+        - asset: assets/fonts/RacingSansOne-Regular.ttf

@@ -1140,4 +1140,38 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsRoadSpeedLimitDesc =>
       'While recording, the legal limit of the road you\'re on is fetched from OpenStreetMap and used by the alarm (your position is sent to the OSM server). The manual limit above is the fallback.';
+
+  @override
+  String get riderStyleTitle => 'Trip animation character';
+
+  @override
+  String get riderStyleDesc =>
+      'The chibi rider shown when playing the route animation';
+
+  @override
+  String get riderStyleNormal => 'Normal';
+
+  @override
+  String get riderStyleCute => 'Cute';
+
+  @override
+  String get riderStyleFierce => 'Fierce';
+
+  @override
+  String get congestionSpotsTitle => 'Jam spots';
+
+  @override
+  String congestionSpotEntry(String duration, String place) {
+    return 'Stuck ±$duration around $place';
+  }
+
+  @override
+  String get congestionSpotsNote =>
+      'Estimated from the speed pattern; the orange stretches on the map show where.';
+
+  @override
+  String get tripStartPoint => 'Start point';
+
+  @override
+  String get tripEndPoint => 'End point';
 }

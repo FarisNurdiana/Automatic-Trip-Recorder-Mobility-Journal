@@ -473,5 +473,25 @@
   },
   "permAutostartDesc": "Beberapa merek HP (Xiaomi, Oppo, Vivo, Realme, Huawei) menghentikan aplikasi latar belakang secara agresif. Buka pengaturan sistem dan aktifkan “Autostart” / “Mulai otomatis” untuk Motivox, lalu bebaskan Motivox dari pembatasan baterai.",
   "settingsRoadSpeedLimit": "Batas kecepatan dari peta (OSM)",
-  "settingsRoadSpeedLimitDesc": "Saat merekam, batas resmi jalan yang sedang dilalui diambil dari OpenStreetMap dan dipakai alarm (posisi dikirim ke server OSM). Batas manual di atas menjadi cadangan."
+  "settingsRoadSpeedLimitDesc": "Saat merekam, batas resmi jalan yang sedang dilalui diambil dari OpenStreetMap dan dipakai alarm (posisi dikirim ke server OSM). Batas manual di atas menjadi cadangan.",
+  "riderStyleTitle": "Karakter animasi perjalanan",
+  "riderStyleDesc": "Pengendara chibi yang tampil saat memutar animasi rute",
+  "riderStyleNormal": "Normal",
+  "riderStyleCute": "Lucu",
+  "riderStyleFierce": "Sangar",
+  "congestionSpotsTitle": "Titik macet",
+  "congestionSpotEntry": "Macet ±{duration} di sekitar {place}",
+  "@congestionSpotEntry": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "congestionSpotsNote": "Perkiraan dari pola kecepatan; ruas oranye di peta menunjukkan lokasinya.",
+  "tripStartPoint": "Titik berangkat",
+  "tripEndPoint": "Titik tiba"
 }

@@ -473,5 +473,25 @@
   },
   "permAutostartDesc": "Some phone brands (Xiaomi, Oppo, Vivo, Realme, Huawei) aggressively kill background apps. Open system settings and enable “Autostart” for Motivox, then exempt Motivox from battery restrictions.",
   "settingsRoadSpeedLimit": "Speed limit from map (OSM)",
-  "settingsRoadSpeedLimitDesc": "While recording, the legal limit of the road you're on is fetched from OpenStreetMap and used by the alarm (your position is sent to the OSM server). The manual limit above is the fallback."
+  "settingsRoadSpeedLimitDesc": "While recording, the legal limit of the road you're on is fetched from OpenStreetMap and used by the alarm (your position is sent to the OSM server). The manual limit above is the fallback.",
+  "riderStyleTitle": "Trip animation character",
+  "riderStyleDesc": "The chibi rider shown when playing the route animation",
+  "riderStyleNormal": "Normal",
+  "riderStyleCute": "Cute",
+  "riderStyleFierce": "Fierce",
+  "congestionSpotsTitle": "Jam spots",
+  "congestionSpotEntry": "Stuck ±{duration} around {place}",
+  "@congestionSpotEntry": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "congestionSpotsNote": "Estimated from the speed pattern; the orange stretches on the map show where.",
+  "tripStartPoint": "Start point",
+  "tripEndPoint": "End point"
 }

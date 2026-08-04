@@ -5,13 +5,14 @@ import 'package:latlong2/latlong.dart' hide Path;
 
 import '../../../../core/utils/formatters.dart';
 import '../../../../l10n/gen/app_localizations.dart';
-import '../../../../shared/widgets/brand_logo.dart';
+import '../../../../shared/widgets/motivox_wordmark.dart';
 import '../trip_detail_page.dart';
 import 'trip_share_poster.dart' show RoutePosterPainter;
 
 /// The translucent stat block used by the photo-overlay and sticker exports:
-/// right-aligned white labels/values with soft shadows, a small route
-/// outline, and the RUTEKU wordmark — the style of Strava's photo shares.
+/// right-aligned white labels/values with soft shadows, the route drawn in
+/// the brand aqua (the stats stay white, like Strava's colored track), and
+/// the MOTIVOX wordmark — the style of Strava's photo shares.
 class TripStatsOverlay extends StatelessWidget {
   const TripStatsOverlay({
     super.key,
@@ -71,16 +72,17 @@ class TripStatsOverlay extends StatelessWidget {
             child: CustomPaint(
               painter: RoutePosterPainter(
                 points,
-                strokeColor: Colors.white,
+                // Brand aqua sets the track apart from the white stats.
+                strokeColor: const Color(0xFF00E5CC),
                 showEndDots: false,
                 shadowed: true,
               ),
             ),
           ),
         ],
-        const SizedBox(height: 10),
-        // The brand mark by itself — no chip, no wordmark text.
-        const BrandLogo(size: 44),
+        const SizedBox(height: 12),
+        // App name in the brand display font.
+        const MotivoxWordmark(size: 19, light: true),
       ],
     );
   }

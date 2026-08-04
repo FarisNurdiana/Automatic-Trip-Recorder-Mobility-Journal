@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../core/constants/enums.dart';
 import '../../../../core/storage/app_database.dart';
 import '../../../../core/utils/route_playback.dart';
+import '../../../../shared/widgets/rider_avatar.dart';
 import 'map_tiles.dart';
 
 /// Shared trip map used by the detail page and the full-screen map page.
@@ -26,6 +28,8 @@ class TripMap extends StatelessWidget {
     this.extraControls = const [],
     this.lightTiles = false,
     this.playbackFrame,
+    this.riderStyle = RiderStyle.normal,
+    this.congestedSegments = const [],
   });
 
   final MapController controller;
@@ -47,6 +51,13 @@ class TripMap extends StatelessWidget {
   /// color, the rest dimmed, and a moving vehicle marker at the frame's
   /// position. Direction arrows are hidden while playing.
   final PlaybackFrame? playbackFrame;
+
+  /// Chibi rider character shown as the playback marker.
+  final RiderStyle riderStyle;
+
+  /// Stretches of the route that were congested (crawling traffic), drawn
+  /// in warning orange over the route line.
+  final List<List<LatLng>> congestedSegments;
 
   void fitRoute() {
     if (points.length < 2) return;
@@ -154,6 +165,15 @@ class TripMap extends StatelessWidget {
                     strokeWidth: 5.5,
                     color: scheme.primary,
                   ),
+                // Congested stretches on top, in warning orange.
+                if (!playing)
+                  for (final segment in congestedSegments)
+                    if (segment.length >= 2)
+                      Polyline(
+                        points: segment,
+                        strokeWidth: 5.5,
+                        color: Colors.deepOrange.shade600,
+                      ),
               ],
             ),
             if (!playing) MarkerLayer(markers: _directionMarkers(scheme)),
@@ -200,29 +220,16 @@ class TripMap extends StatelessWidget {
                     height: 30,
                     child: _dotMarker(Colors.red.shade600, Icons.flag),
                   ),
-                // Moving vehicle marker during playback.
+                // Chibi rider marker during playback.
                 if (playing)
                   Marker(
                     point: playbackFrame!.position,
-                    width: 36,
-                    height: 36,
-                    child: Transform.rotate(
-                      angle: playbackFrame!.bearingRadians,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: scheme.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2.5),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black45, blurRadius: 6),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.navigation,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                      ),
+                    width: 60,
+                    height: 60,
+                    child: RiderAvatar(
+                      style: riderStyle,
+                      size: 56,
+                      bearingRadians: playbackFrame!.bearingRadians,
                     ),
                   ),
               ],

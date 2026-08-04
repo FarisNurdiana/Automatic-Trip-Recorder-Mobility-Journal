@@ -9,6 +9,7 @@ import '../../../core/storage/app_database.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../shared/widgets/brand_logo.dart';
+import '../../../shared/widgets/motivox_wordmark.dart';
 import '../../../shared/widgets/status_widgets.dart';
 import '../../recording/presentation/state_labels.dart';
 import '../../trips/presentation/widgets/vehicle_ui.dart';
@@ -66,10 +67,11 @@ class HomePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Row(
-          children: [
-            const BrandLogo(size: 28),
-            const SizedBox(width: 8),
-            Text(l10n.appTitle),
+          children: const [
+            BrandLogo(size: 28),
+            SizedBox(width: 8),
+            // Brand wordmark in the display font instead of plain text.
+            MotivoxWordmark(size: 20),
           ],
         ),
         actions: [

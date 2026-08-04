@@ -127,3 +127,13 @@ enum PhoneMountPosition {
   static PhoneMountPosition fromName(String? name) =>
       PhoneMountPosition.values.asNameMap()[name] ?? PhoneMountPosition.unknown;
 }
+
+/// Character style for the trip playback animation (chibi rider marker).
+enum RiderStyle {
+  normal,
+  cute,
+  fierce;
+
+  static RiderStyle fromName(String? name) =>
+      RiderStyle.values.asNameMap()[name] ?? RiderStyle.normal;
+}

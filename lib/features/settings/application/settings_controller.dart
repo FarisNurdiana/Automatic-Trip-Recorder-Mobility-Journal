@@ -48,6 +48,7 @@ class SettingsState {
     this.keepScreenOn = true,
     this.speedLimitKmh,
     this.roadSpeedLimitEnabled = true,
+    this.riderStyle = RiderStyle.normal,
     this.serviceProfile = const ServiceProfile(),
   });
 
@@ -76,6 +77,9 @@ class SettingsState {
   /// recording (sends the position to the OpenStreetMap Overpass server).
   final bool roadSpeedLimitEnabled;
 
+  /// Chibi rider character used by the trip playback animation.
+  final RiderStyle riderStyle;
+
   /// Service reminder configuration per vehicle type.
   final ServiceProfile serviceProfile;
 
@@ -93,6 +97,7 @@ class SettingsState {
     double? speedLimitKmh,
     bool clearSpeedLimit = false,
     bool? roadSpeedLimitEnabled,
+    RiderStyle? riderStyle,
     ServiceProfile? serviceProfile,
   }) => SettingsState(
     autoDetectionEnabled: autoDetectionEnabled ?? this.autoDetectionEnabled,
@@ -108,6 +113,7 @@ class SettingsState {
         ? null
         : (speedLimitKmh ?? this.speedLimitKmh),
     roadSpeedLimitEnabled: roadSpeedLimitEnabled ?? this.roadSpeedLimitEnabled,
+    riderStyle: riderStyle ?? this.riderStyle,
     serviceProfile: serviceProfile ?? this.serviceProfile,
   );
 }
@@ -145,6 +151,7 @@ class SettingsController extends StateNotifier<SettingsState> {
       keepScreenOn: prefs.getBool('keepScreenOn') ?? true,
       speedLimitKmh: prefs.getDouble('speedLimitKmh'),
       roadSpeedLimitEnabled: prefs.getBool('roadSpeedLimitEnabled') ?? true,
+      riderStyle: RiderStyle.fromName(prefs.getString('riderStyle')),
       serviceProfile: ServiceProfile(
         intervalKmMotorcycle: prefs.getDouble('serviceIntervalKmMotorcycle'),
         intervalKmCar: prefs.getDouble('serviceIntervalKmCar'),
@@ -162,6 +169,11 @@ class SettingsController extends StateNotifier<SettingsState> {
       await _prefs.setDouble('speedLimitKmh', value);
       state = state.copyWith(speedLimitKmh: value);
     }
+  }
+
+  Future<void> setRiderStyle(RiderStyle value) async {
+    await _prefs.setString('riderStyle', value.name);
+    state = state.copyWith(riderStyle: value);
   }
 
   Future<void> setRoadSpeedLimitEnabled(bool value) async {

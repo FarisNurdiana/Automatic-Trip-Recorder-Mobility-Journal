@@ -17,6 +17,7 @@ import '../../../core/utils/polyline_simplifier.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../../shared/widgets/status_widgets.dart';
 import '../domain/congestion_estimator.dart';
+import 'widgets/congestion_spots_card.dart';
 import '../domain/gps_point_filter.dart';
 import 'share/trip_share_sheet.dart';
 import 'widgets/trip_map.dart';
@@ -223,8 +224,12 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
       vehicleType: vehicle,
       profile: ref.watch(settingsControllerProvider).fuelProfile,
     );
-    // Crawling time (3–15 km/h): a rule-based congestion indication.
+    // Crawling time (3–15 km/h): a rule-based congestion indication, plus
+    // the individual jam stretches so the UI can say where they were.
     final congestion = const CongestionEstimator().estimate(data.rawPoints);
+    final congestedSegments = const CongestionEstimator().segments(
+      data.rawPoints,
+    );
 
     return ListView(
       children: [
@@ -239,6 +244,13 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
                       controller: _mapController,
                       points: points,
                       stops: data.stopRows,
+                      congestedSegments: [
+                        for (final s in congestedSegments)
+                          [
+                            for (final p in s.points)
+                              LatLng(p.latitude, p.longitude),
+                          ],
+                      ],
                     ),
                     Positioned(
                       right: 12,
@@ -432,17 +444,53 @@ class _TripDetailPageState extends ConsumerState<TripDetailPage> {
                   ),
                 ),
               ],
+              if (congestedSegments.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                CongestionSpotsCard(segments: congestedSegments),
+              ],
               const SizedBox(height: 12),
-              // Where the trip went: "area A → area B" once the reverse
-              // geocoder has filled the labels.
-              if (trip.startAddress != null && trip.endAddress != null) ...[
+              // Where the trip started and ended, with the street-level
+              // labels the reverse geocoder filled in.
+              if (trip.startAddress != null || trip.endAddress != null) ...[
                 Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.place_outlined),
-                    title: Text(
-                      l10n.tripFromTo(trip.startAddress!, trip.endAddress!),
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        dense: true,
+                        leading: Icon(
+                          Icons.trip_origin,
+                          color: Colors.green.shade600,
+                          size: 20,
+                        ),
+                        title: Text(
+                          trip.startAddress ?? l10n.commonLoading,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        subtitle: Text(
+                          '${l10n.tripStartPoint} • '
+                          '${Formatters.time(trip.startedAt, locale: locale)}',
+                        ),
+                      ),
+                      const Divider(height: 1, indent: 52),
+                      ListTile(
+                        dense: true,
+                        leading: Icon(
+                          Icons.flag,
+                          color: Colors.red.shade600,
+                          size: 20,
+                        ),
+                        title: Text(
+                          trip.endAddress ?? l10n.commonLoading,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        subtitle: trip.endedAt == null
+                            ? Text(l10n.tripEndPoint)
+                            : Text(
+                                '${l10n.tripEndPoint} • '
+                                '${Formatters.time(trip.endedAt!, locale: locale)}',
+                              ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 8),

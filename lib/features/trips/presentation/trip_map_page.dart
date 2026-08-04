@@ -9,7 +9,9 @@ import '../../../core/storage/app_database.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/route_playback.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../../shared/widgets/rider_avatar.dart';
 import '../../../shared/widgets/status_widgets.dart';
+import '../domain/congestion_estimator.dart';
 import 'trip_detail_page.dart';
 import 'widgets/trip_map.dart';
 
@@ -254,10 +256,77 @@ class _TripMapPageState extends ConsumerState<TripMapPage>
     ),
   );
 
+  /// Quick chibi-character picker: cute / normal / fierce, persisted in
+  /// settings so playback everywhere uses the chosen rider.
+  Future<void> _pickRiderStyle() async {
+    final l10n = AppLocalizations.of(context);
+    final current = ref.read(settingsControllerProvider).riderStyle;
+    final chosen = await showModalBottomSheet<RiderStyle>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.riderStyleTitle,
+                style: Theme.of(ctx).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  for (final style in RiderStyle.values)
+                    InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => Navigator.pop(ctx, style),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            width: 2,
+                            color: style == current
+                                ? Theme.of(ctx).colorScheme.primary
+                                : Colors.transparent,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            RiderAvatar(style: style, size: 64, animate: false),
+                            const SizedBox(height: 8),
+                            Text(switch (style) {
+                              RiderStyle.normal => l10n.riderStyleNormal,
+                              RiderStyle.cute => l10n.riderStyleCute,
+                              RiderStyle.fierce => l10n.riderStyleFierce,
+                            }),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (chosen != null) {
+      await ref.read(settingsControllerProvider.notifier).setRiderStyle(chosen);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final detail = ref.watch(tripDetailProvider(widget.tripId));
+    final riderStyle = ref.watch(
+      settingsControllerProvider.select((s) => s.riderStyle),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -278,6 +347,14 @@ class _TripMapPageState extends ConsumerState<TripMapPage>
             return EmptyStateView(message: l10n.tripNoPoints, icon: Icons.map);
           }
           final playing = _playback != null;
+          final congested = const CongestionEstimator()
+              .segments(data.rawPoints)
+              .map(
+                (s) => [
+                  for (final p in s.points) LatLng(p.latitude, p.longitude),
+                ],
+              )
+              .toList();
           return AnimatedBuilder(
             animation: _curved,
             builder: (context, _) => TripMap(
@@ -286,6 +363,8 @@ class _TripMapPageState extends ConsumerState<TripMapPage>
               stops: data.stopRows,
               onStopTap: _showStopSheet,
               playbackFrame: playing ? _playback!.at(_curved.value) : null,
+              riderStyle: riderStyle,
+              congestedSegments: congested,
               extraControls: [
                 // Play / stop the A→B trip animation.
                 _roundButton(
@@ -293,6 +372,12 @@ class _TripMapPageState extends ConsumerState<TripMapPage>
                   tooltip: l10n.mapPlayAnimation,
                   filled: true,
                   onTap: () => _togglePlayback(data.displayPoints),
+                ),
+                // Pick the chibi rider character for the animation.
+                _roundButton(
+                  icon: Icons.face_retouching_natural,
+                  tooltip: l10n.riderStyleTitle,
+                  onTap: _pickRiderStyle,
                 ),
                 // Recenter: jump back to the route start.
                 _roundButton(
