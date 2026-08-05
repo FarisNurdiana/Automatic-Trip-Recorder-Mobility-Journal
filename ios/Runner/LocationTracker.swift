@@ -75,6 +75,10 @@ final class LocationTracker: NSObject, CLLocationManagerDelegate {
             if #available(iOS 15.0, *) {
                 isMocked = location.sourceInformation?.isSimulatedBySoftware
             }
+            var headingAccuracy: Double? = nil
+            if #available(iOS 13.4, *) {
+                headingAccuracy = location.courseAccuracy >= 0 ? location.courseAccuracy : nil
+            }
             emit([
                 "timestampMs": Int(location.timestamp.timeIntervalSince1970 * 1000),
                 "latitude": location.coordinate.latitude,
@@ -85,7 +89,7 @@ final class LocationTracker: NSObject, CLLocationManagerDelegate {
                 "speed": location.speed >= 0 ? location.speed : nil,
                 "speedAccuracy": location.speedAccuracy >= 0 ? location.speedAccuracy : nil,
                 "heading": location.course >= 0 ? location.course : nil,
-                "headingAccuracy": location.courseAccuracy >= 0 ? location.courseAccuracy : nil,
+                "headingAccuracy": headingAccuracy,
                 "source": "core_location",
                 "isMocked": isMocked,
                 "batteryLevel": battery,
