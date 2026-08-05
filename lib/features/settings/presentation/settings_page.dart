@@ -14,6 +14,7 @@ import '../../../app/providers.dart';
 import '../../../core/constants/enums.dart';
 import '../../../core/errors/app_logger.dart';
 import '../../../l10n/gen/app_localizations.dart';
+import '../../../shared/widgets/rider_avatar.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -337,18 +338,26 @@ class SettingsPage extends ConsumerWidget {
                 if (v != null) controller.setRiderStyle(v);
               },
               items: [
-                DropdownMenuItem(
-                  value: RiderStyle.normal,
-                  child: Text('🛵 ${l10n.riderStyleNormal}'),
-                ),
-                DropdownMenuItem(
-                  value: RiderStyle.cute,
-                  child: Text('🐥 ${l10n.riderStyleCute}'),
-                ),
-                DropdownMenuItem(
-                  value: RiderStyle.fierce,
-                  child: Text('😈 ${l10n.riderStyleFierce}'),
-                ),
+                for (final style in RiderStyle.values)
+                  DropdownMenuItem(
+                    value: style,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          RiderAvatar.assetFor(style),
+                          width: 26,
+                          height: 26,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(switch (style) {
+                          RiderStyle.normal => l10n.riderStyleNormal,
+                          RiderStyle.cute => l10n.riderStyleCute,
+                          RiderStyle.fierce => l10n.riderStyleFierce,
+                        }),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
