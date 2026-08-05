@@ -224,11 +224,11 @@ class TripMap extends StatelessWidget {
                 if (playing)
                   Marker(
                     point: playbackFrame!.position,
-                    width: 60,
-                    height: 60,
+                    width: 68,
+                    height: 68,
                     child: RiderAvatar(
                       style: riderStyle,
-                      size: 56,
+                      size: 66,
                       bearingRadians: playbackFrame!.bearingRadians,
                     ),
                   ),
