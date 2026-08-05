@@ -114,6 +114,13 @@ jobs:
       - name: Prepare environment file
         run: cp .env.example .env
 
+      # The project ships a custom Podfile (permission_handler macros);
+      # mixing it with Flutter's Swift Package Manager integration makes
+      # Xcode fail with "sandbox is not in sync with the Podfile.lock".
+      # Force the pure CocoaPods path.
+      - name: Use CocoaPods integration
+        run: flutter config --no-enable-swift-package-manager
+
       - name: Install dependencies
         run: flutter pub get
 
