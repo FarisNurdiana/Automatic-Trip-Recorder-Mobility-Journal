@@ -1,4 +1,4 @@
-name: Android CI
+name: Build APK & IPA
 
 on:
   push:
@@ -84,10 +84,61 @@ jobs:
           body: |
             APK Motivox terbaru (build release, ${{ github.run_number }}), dibangun otomatis dari commit ${{ github.sha }}.
 
-            Cara pakai:
+            Cara pakai (Android):
             1. Unduh `app-release.apk` di bawah.
             2. Instal di HP (atau tarik ke layar emulator Android). Instal langsung di atas versi lama — riwayat tetap aman.
+
+            iOS (`motivox-ios-unsigned.ipa`): IPA tanpa tanda tangan — pasang lewat Sideloadly/AltStore dengan Apple ID Anda sendiri (masa berlaku 7 hari per pemasangan tanpa akun developer berbayar).
           prerelease: true
           files: |
             build/app/outputs/flutter-apk/app-release.apk
             version.json
+
+  # iOS build without code signing: proves the app compiles for iOS and
+  # produces an unsigned IPA that testers can install via sideloading
+  # (Sideloadly / AltStore sign it with their own Apple ID). Store/TestFlight
+  # distribution additionally needs an Apple Developer account.
+  build-ios:
+    name: Build iOS (unsigned IPA)
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Prepare environment file
+        run: cp .env.example .env
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qry motivox-ios-unsigned.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: motivox-ios-unsigned-ipa
+          path: motivox-ios-unsigned.ipa
+          retention-days: 14
+
+      # Attach the IPA to the same rolling release next to the APK. The
+      # release body/name stay owned by the Android job.
+      - name: Publish IPA to release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: debug-latest
+          prerelease: true
+          files: motivox-ios-unsigned.ipa
