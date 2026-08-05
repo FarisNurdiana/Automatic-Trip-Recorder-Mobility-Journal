@@ -49,6 +49,7 @@ class SettingsState {
     this.speedLimitKmh,
     this.roadSpeedLimitEnabled = true,
     this.riderStyle = RiderStyle.normal,
+    this.mapStyle = MapStyle.osm,
     this.serviceProfile = const ServiceProfile(),
   });
 
@@ -80,6 +81,9 @@ class SettingsState {
   /// Chibi rider character used by the trip playback animation.
   final RiderStyle riderStyle;
 
+  /// Basemap style for every map in the app (OSM default: richest labels).
+  final MapStyle mapStyle;
+
   /// Service reminder configuration per vehicle type.
   final ServiceProfile serviceProfile;
 
@@ -98,6 +102,7 @@ class SettingsState {
     bool clearSpeedLimit = false,
     bool? roadSpeedLimitEnabled,
     RiderStyle? riderStyle,
+    MapStyle? mapStyle,
     ServiceProfile? serviceProfile,
   }) => SettingsState(
     autoDetectionEnabled: autoDetectionEnabled ?? this.autoDetectionEnabled,
@@ -114,6 +119,7 @@ class SettingsState {
         : (speedLimitKmh ?? this.speedLimitKmh),
     roadSpeedLimitEnabled: roadSpeedLimitEnabled ?? this.roadSpeedLimitEnabled,
     riderStyle: riderStyle ?? this.riderStyle,
+    mapStyle: mapStyle ?? this.mapStyle,
     serviceProfile: serviceProfile ?? this.serviceProfile,
   );
 }
@@ -152,6 +158,7 @@ class SettingsController extends StateNotifier<SettingsState> {
       speedLimitKmh: prefs.getDouble('speedLimitKmh'),
       roadSpeedLimitEnabled: prefs.getBool('roadSpeedLimitEnabled') ?? true,
       riderStyle: RiderStyle.fromName(prefs.getString('riderStyle')),
+      mapStyle: MapStyle.fromName(prefs.getString('mapStyle')),
       serviceProfile: ServiceProfile(
         intervalKmMotorcycle: prefs.getDouble('serviceIntervalKmMotorcycle'),
         intervalKmCar: prefs.getDouble('serviceIntervalKmCar'),
@@ -174,6 +181,11 @@ class SettingsController extends StateNotifier<SettingsState> {
   Future<void> setRiderStyle(RiderStyle value) async {
     await _prefs.setString('riderStyle', value.name);
     state = state.copyWith(riderStyle: value);
+  }
+
+  Future<void> setMapStyle(MapStyle value) async {
+    await _prefs.setString('mapStyle', value.name);
+    state = state.copyWith(mapStyle: value);
   }
 
   Future<void> setRoadSpeedLimitEnabled(bool value) async {

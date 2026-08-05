@@ -137,3 +137,18 @@ enum RiderStyle {
   static RiderStyle fromName(String? name) =>
       RiderStyle.values.asNameMap()[name] ?? RiderStyle.normal;
 }
+
+/// Basemap style, switchable like Google Maps' layer picker.
+enum MapStyle {
+  /// CARTO Voyager/Dark Matter — the clean brand look.
+  motivox,
+
+  /// Standard OpenStreetMap — richest place detail (warung, shops, banks).
+  osm,
+
+  /// Esri World Imagery with a label overlay.
+  satellite;
+
+  static MapStyle fromName(String? name) =>
+      MapStyle.values.asNameMap()[name] ?? MapStyle.osm;
+}

@@ -1174,4 +1174,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tripEndPoint => 'End point';
+
+  @override
+  String get mapStyleTitle => 'Map style';
+
+  @override
+  String get mapStyleOsm => 'Detailed (OpenStreetMap)';
+
+  @override
+  String get mapStyleOsmDesc =>
+      'Street names, shops, banks, mosques and other places — like Google Maps';
+
+  @override
+  String get mapStyleMotivox => 'Motivox';
+
+  @override
+  String get mapStyleMotivoxDesc =>
+      'The clean Motivox look, focused on your route';
+
+  @override
+  String get mapStyleSatellite => 'Satellite';
+
+  @override
+  String get mapStyleSatelliteDesc =>
+      'Satellite imagery with street-name labels';
 }

@@ -2,11 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../app/providers.dart';
 import '../../../../core/constants/enums.dart';
 import '../../../../core/storage/app_database.dart';
 import '../../../../core/utils/route_playback.dart';
+import '../../../../shared/widgets/map_style_button.dart';
 import '../../../../shared/widgets/rider_avatar.dart';
 import 'map_tiles.dart';
 
@@ -16,7 +19,7 @@ import 'map_tiles.dart';
 /// database), start (green) / end (red) / stop (amber) markers, direction
 /// arrows along the route, zoom controls, fit-route, and a dark-mode tile
 /// treatment. OSM attribution is always visible per the tile license.
-class TripMap extends StatelessWidget {
+class TripMap extends ConsumerWidget {
   const TripMap({
     super.key,
     required this.controller,
@@ -116,11 +119,16 @@ class TripMap extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final isDark =
         !lightTiles && Theme.of(context).brightness == Brightness.dark;
     final playing = playbackFrame != null;
+    // Share exports always render the clean light brand map; everywhere
+    // else the user-selected basemap applies.
+    final mapStyle = lightTiles
+        ? MapStyle.motivox
+        : ref.watch(settingsControllerProvider.select((s) => s.mapStyle));
 
     return Stack(
       children: [
@@ -142,7 +150,7 @@ class TripMap extends StatelessWidget {
             ),
           ),
           children: [
-            appTileLayer(context, forceLight: lightTiles),
+            ...appTileLayers(context, style: mapStyle, forceLight: lightTiles),
             PolylineLayer(
               polylines: [
                 // Casing below the route line keeps it visible on any tile.
@@ -234,7 +242,7 @@ class TripMap extends StatelessWidget {
                   ),
               ],
             ),
-            mapAttribution,
+            mapAttributionFor(mapStyle),
           ],
         ),
         if (showControls)
@@ -261,6 +269,9 @@ class TripMap extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 _MapButton(icon: Icons.fit_screen, onTap: fitRoute),
+                const SizedBox(height: 8),
+                // Basemap picker (Motivox / OSM detail / satellite).
+                const MapStyleButton(),
                 for (final control in extraControls) ...[
                   const SizedBox(height: 8),
                   control,

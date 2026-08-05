@@ -493,5 +493,12 @@
   },
   "congestionSpotsNote": "Perkiraan dari pola kecepatan; ruas oranye di peta menunjukkan lokasinya.",
   "tripStartPoint": "Titik berangkat",
-  "tripEndPoint": "Titik tiba"
+  "tripEndPoint": "Titik tiba",
+  "mapStyleTitle": "Model peta",
+  "mapStyleOsm": "Detail (OpenStreetMap)",
+  "mapStyleOsmDesc": "Nama jalan, warung, kios, bank, masjid, dan tempat lain — seperti Google Maps",
+  "mapStyleMotivox": "Motivox",
+  "mapStyleMotivoxDesc": "Tampilan bersih khas Motivox, fokus ke rute",
+  "mapStyleSatellite": "Satelit",
+  "mapStyleSatelliteDesc": "Citra satelit dengan label nama jalan"
 }

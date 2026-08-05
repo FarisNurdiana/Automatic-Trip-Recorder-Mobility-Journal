@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 
+import '../../../../app/providers.dart';
 import '../../../../core/poi/nearby_poi_service.dart';
+import '../../../../shared/widgets/map_style_button.dart';
 import '../../../trips/presentation/widgets/map_tiles.dart';
 
 /// Realtime map for the driving-assistant view: the route recorded so far,
 /// a live position dot that the camera can follow, and optional nearby POI
 /// markers (fuel stations / repair shops).
-class LiveTripMap extends StatefulWidget {
+class LiveTripMap extends ConsumerStatefulWidget {
   const LiveTripMap({
     super.key,
     required this.controller,
@@ -17,6 +20,7 @@ class LiveTripMap extends StatefulWidget {
     this.pois = const [],
     this.follow = true,
     this.onPoiTap,
+    this.showStyleButton = true,
   });
 
   final MapController controller;
@@ -28,11 +32,14 @@ class LiveTripMap extends StatefulWidget {
   final bool follow;
   final void Function(NearbyPoi poi)? onPoiTap;
 
+  /// Shows the basemap picker button in the corner.
+  final bool showStyleButton;
+
   @override
-  State<LiveTripMap> createState() => _LiveTripMapState();
+  ConsumerState<LiveTripMap> createState() => _LiveTripMapState();
 }
 
-class _LiveTripMapState extends State<LiveTripMap> {
+class _LiveTripMapState extends ConsumerState<LiveTripMap> {
   @override
   void didUpdateWidget(covariant LiveTripMap oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -52,11 +59,15 @@ class _LiveTripMapState extends State<LiveTripMap> {
         widget.current ??
         (widget.points.isNotEmpty ? widget.points.last : const LatLng(0, 0));
 
-    return FlutterMap(
+    final mapStyle = ref.watch(
+      settingsControllerProvider.select((s) => s.mapStyle),
+    );
+
+    final map = FlutterMap(
       mapController: widget.controller,
       options: MapOptions(initialCenter: initial, initialZoom: 16),
       children: [
-        appTileLayer(context),
+        ...appTileLayers(context, style: mapStyle),
         if (widget.points.length >= 2)
           PolylineLayer(
             polylines: [
@@ -126,7 +137,14 @@ class _LiveTripMapState extends State<LiveTripMap> {
               ),
           ],
         ),
-        mapAttribution,
+        mapAttributionFor(mapStyle),
+      ],
+    );
+    if (!widget.showStyleButton) return map;
+    return Stack(
+      children: [
+        map,
+        const Positioned(left: 10, bottom: 26, child: MapStyleButton()),
       ],
     );
   }

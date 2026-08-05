@@ -1178,4 +1178,27 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get tripEndPoint => 'Titik tiba';
+
+  @override
+  String get mapStyleTitle => 'Model peta';
+
+  @override
+  String get mapStyleOsm => 'Detail (OpenStreetMap)';
+
+  @override
+  String get mapStyleOsmDesc =>
+      'Nama jalan, warung, kios, bank, masjid, dan tempat lain — seperti Google Maps';
+
+  @override
+  String get mapStyleMotivox => 'Motivox';
+
+  @override
+  String get mapStyleMotivoxDesc =>
+      'Tampilan bersih khas Motivox, fokus ke rute';
+
+  @override
+  String get mapStyleSatellite => 'Satelit';
+
+  @override
+  String get mapStyleSatelliteDesc => 'Citra satelit dengan label nama jalan';
 }

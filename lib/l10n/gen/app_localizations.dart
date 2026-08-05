@@ -2227,6 +2227,48 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Titik tiba'**
   String get tripEndPoint;
+
+  /// No description provided for @mapStyleTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Model peta'**
+  String get mapStyleTitle;
+
+  /// No description provided for @mapStyleOsm.
+  ///
+  /// In id, this message translates to:
+  /// **'Detail (OpenStreetMap)'**
+  String get mapStyleOsm;
+
+  /// No description provided for @mapStyleOsmDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Nama jalan, warung, kios, bank, masjid, dan tempat lain — seperti Google Maps'**
+  String get mapStyleOsmDesc;
+
+  /// No description provided for @mapStyleMotivox.
+  ///
+  /// In id, this message translates to:
+  /// **'Motivox'**
+  String get mapStyleMotivox;
+
+  /// No description provided for @mapStyleMotivoxDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Tampilan bersih khas Motivox, fokus ke rute'**
+  String get mapStyleMotivoxDesc;
+
+  /// No description provided for @mapStyleSatellite.
+  ///
+  /// In id, this message translates to:
+  /// **'Satelit'**
+  String get mapStyleSatellite;
+
+  /// No description provided for @mapStyleSatelliteDesc.
+  ///
+  /// In id, this message translates to:
+  /// **'Citra satelit dengan label nama jalan'**
+  String get mapStyleSatelliteDesc;
 }
 
 class _AppLocalizationsDelegate

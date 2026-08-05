@@ -411,6 +411,30 @@ class SettingsPage extends ConsumerWidget {
           ),
           const Divider(),
           ListTile(
+            leading: const Icon(Icons.layers_outlined),
+            title: Text(l10n.mapStyleTitle),
+            trailing: DropdownButton<MapStyle>(
+              value: settings.mapStyle,
+              onChanged: (v) {
+                if (v != null) controller.setMapStyle(v);
+              },
+              items: [
+                DropdownMenuItem(
+                  value: MapStyle.osm,
+                  child: Text(l10n.mapStyleOsm),
+                ),
+                DropdownMenuItem(
+                  value: MapStyle.motivox,
+                  child: Text(l10n.mapStyleMotivox),
+                ),
+                DropdownMenuItem(
+                  value: MapStyle.satellite,
+                  child: Text(l10n.mapStyleSatellite),
+                ),
+              ],
+            ),
+          ),
+          ListTile(
             title: Text(l10n.settingsTheme),
             trailing: DropdownButton<ThemeMode>(
               value: settings.themeMode,

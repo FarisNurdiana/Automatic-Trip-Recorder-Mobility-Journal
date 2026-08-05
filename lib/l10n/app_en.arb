@@ -493,5 +493,12 @@
   },
   "congestionSpotsNote": "Estimated from the speed pattern; the orange stretches on the map show where.",
   "tripStartPoint": "Start point",
-  "tripEndPoint": "End point"
+  "tripEndPoint": "End point",
+  "mapStyleTitle": "Map style",
+  "mapStyleOsm": "Detailed (OpenStreetMap)",
+  "mapStyleOsmDesc": "Street names, shops, banks, mosques and other places — like Google Maps",
+  "mapStyleMotivox": "Motivox",
+  "mapStyleMotivoxDesc": "The clean Motivox look, focused on your route",
+  "mapStyleSatellite": "Satellite",
+  "mapStyleSatelliteDesc": "Satellite imagery with street-name labels"
 }
